@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 
 namespace PESYONG.Presentation.ViewModels;
-
 public partial class HomeViewModel : ObservableObject
 {
     [ObservableProperty]

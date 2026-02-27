@@ -3,14 +3,14 @@ using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Enums;
-using PESYONG.Service.DTOs;
+using PESYONG.ApplicationLogic.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PESYONG.Service.Services;
+namespace PESYONG.ApplicationLogic.Services;
 
 public class CateringService
 {

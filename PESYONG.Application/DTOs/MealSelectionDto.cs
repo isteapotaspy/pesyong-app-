@@ -5,8 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PESYONG.Service.DTOs;
+
+// <summary>
+// Make sure to add your summaries here.
+// </summary>
+
+
 // DTO for selecting items in the UI
+namespace PESYONG.ApplicationLogic.DTOs;
+
 public partial class MealSelectionDto : ObservableObject
 {
     public int Id { get; init; }

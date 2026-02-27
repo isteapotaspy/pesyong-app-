@@ -19,5 +19,8 @@
     <ProjectReference Include="..\PESYONG.Domain\PESYONG.Domain.csproj" />
     <ProjectReference Include="..\PESYONG.Infrastructure\PESYONG.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Rules\" />
+  </ItemGroup>
   
 </Project>

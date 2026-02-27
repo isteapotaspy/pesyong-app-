@@ -5,6 +5,7 @@ using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Enums;
 using System;
 
+namespace PESYONG.Presentation.ViewModels;
 public partial class CartViewModel : ObservableObject
 {
     // Uses your Domain Model from audit.txt
