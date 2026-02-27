@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
-using PESYONG.Domain.Entities.Meals.MealProduct;
-using PESYONG.Domain.Entities.Orders;
+using PESYONG.ApplicationLogic.DTOs;
+using PESYONG.ApplicationLogic.Services;
 using PESYONG.Presentation.Views;
 using PESYONG.Service.DTOs;
 using PESYONG.Service.Services;
