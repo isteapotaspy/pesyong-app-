@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PESYONG.Presentation (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "PESYONG.Presentation (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
