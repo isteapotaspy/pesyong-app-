@@ -4,7 +4,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="PESYONG.Application/PESYONG.Service.csproj" />
+  <Project Path="PESYONG.Application/PESYONG.ApplicationLogic.csproj" />
   <Project Path="PESYONG.Domain/PESYONG.Domain.csproj" />
   <Project Path="PESYONG.Infrastructure/PESYONG.Infrastructure.csproj" />
   <Project Path="PESYONG.Presentation/PESYONG.Presentation.csproj" Id="49ecab0e-66ab-4f35-9cac-200bde669077">
@@ -13,4 +13,5 @@
     <Platform Solution="*|x86" Project="x86" />
     <Deploy />
   </Project>
+  <Project Path="PESYONG.Service/PESYONG.Service.csproj" Id="f0d96f29-a8fd-4261-9142-3de923f1dd26" />
 </Solution>
