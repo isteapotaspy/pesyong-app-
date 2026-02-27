@@ -18,20 +18,17 @@ using Windows.Foundation.Collections;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace PESYONG.Presentation.Views
-{
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
-    /// 
+namespace PESYONG.Presentation.Views.Customer;
 
-    public sealed partial class HomePage : Page
+/// <summary>
+/// An empty page that can be used on its own or navigated to within a Frame.
+/// </summary>
+public sealed partial class PackagesPage : Page
+{
+    public PackagesViewModel ViewModel { get; }
+    public PackagesPage()
     {
-        public HomeViewModel ViewModel { get; }
-        public HomePage()
-        {
-            this.ViewModel = App.Current.Services.GetRequiredService<HomeViewModel>();
-            this.InitializeComponent();
-        }
+        this.ViewModel = App.Current.Services.GetRequiredService<PackagesViewModel>();
+        this.InitializeComponent();
     }
 }

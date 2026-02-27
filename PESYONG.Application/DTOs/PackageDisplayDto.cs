@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace PESYONG.Application.DTOs;
 
+/// <remarks>
+/// Add this to another folder in /DTOs named "Display".
+/// </remarks>
+
 public class PackageDisplayDto
 {
     public int Id { get; set; }

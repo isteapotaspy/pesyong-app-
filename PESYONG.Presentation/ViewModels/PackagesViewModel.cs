@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Controls;
 using PESYONG.ApplicationLogic.DTOs;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Presentation.Views;
+using PESYONG.Presentation.Views.Customer;
 
 namespace PESYONG.Presentation.ViewModels;
 public partial class PackagesViewModel : ObservableObject

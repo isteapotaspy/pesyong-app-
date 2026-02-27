@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-// <summary>
-// Make sure to add your summaries here.
-// </summary>
+/// <remarks>
+/// Add this to another folder in /DTOs named "Display".
+/// </remarks>
 
 
 // DTO for selecting items in the UI
