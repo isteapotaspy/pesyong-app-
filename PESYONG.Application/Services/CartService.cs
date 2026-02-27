@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace PESYONG.Service.Services;
+namespace PESYONG.ApplicationLogic.Services;
 
 public class CartService
 {

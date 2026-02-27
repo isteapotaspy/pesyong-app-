@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
-using PESYONG.Service.DTOs;
+using PESYONG.ApplicationLogic.DTOs;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PESYONG.Service.Mapping;
+namespace PESYONG.ApplicationLogic.Mapping;
 public class CateringMappingProfile : Profile
 {
     public CateringMappingProfile()

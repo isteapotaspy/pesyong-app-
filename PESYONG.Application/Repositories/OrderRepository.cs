@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PESYONG.Application.Repositories;
+namespace PESYONG.ApplicationLogic.Repositories;
 public class OrderRepository
 {
     private readonly AppDbContext _context;

@@ -1,18 +1,15 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using PESYONG.ApplicationLogic.DTOs;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Presentation.Views;
-using PESYONG.Service.DTOs;
-using PESYONG.Service.Services;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace PESYONG.Presentation.ViewModels;
-
 public partial class PackagesViewModel : ObservableObject
 {
     private readonly CateringService _service;

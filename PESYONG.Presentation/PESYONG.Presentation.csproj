@@ -43,8 +43,46 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.0-preview1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PESYONG.Application\PESYONG.Service.csproj" />
+    <ProjectReference Include="..\PESYONG.Application\PESYONG.ApplicationLogic.csproj" />
     <ProjectReference Include="..\PESYONG.Domain\PESYONG.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\ReceiptsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\UsersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\OrdersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\DeliveryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\MealProductsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\SettingsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Admin\AuditsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\MealsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Shyane.xaml">
@@ -72,7 +110,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Views\Admin\" />
+    <Page Update="Views\Admin\_Layout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>

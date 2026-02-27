@@ -5,7 +5,6 @@ using PESYONG.Domain.Enums; // Required for DeliveryStatus
 using System.Linq;
 
 namespace PESYONG.Presentation.ViewModels;
-
 public partial class CheckoutViewModel : ObservableObject
 {
     [ObservableProperty]
