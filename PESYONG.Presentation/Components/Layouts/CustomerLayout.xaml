@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="PESYONG.Presentation.Components.Layouts.CustomerLayout"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:PESYONG.Presentation.Components.Layouts"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="#FFFDF5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#FF6600" Padding="20,10">
+            <StackPanel Orientation="Horizontal">
+                <SymbolIcon Symbol="OutlineStar" Foreground="White" Margin="0,0,10,0"/>
+                <StackPanel>
+                    <TextBlock Text="Orange Catering" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Delicious Filipino Food" FontSize="12" Foreground="White" Opacity="0.8"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Navigation -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Padding="10">
+                <Button Content="Catering Packages" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
+                <Button Content="Short Orders" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
+                <Button Content="Kakanin" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
+                <Button Content="My Cart" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content Area -->
+        <Frame x:Name="MainContentFrame" Grid.Row="2"/>
+    </Grid>
+</UserControl>

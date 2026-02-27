@@ -19,14 +19,11 @@ using Windows.Foundation.Collections;
 namespace PESYONG.Presentation.Views.Admin;
 
 /// <summary>
-/// This is the overall layout component for the admin.
-/// This contains the sidebar and the page switching logic.
+/// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-/// 
-
-public sealed partial class _Layout : Window
+public sealed partial class DashboardPage : Page
 {
-    public _Layout()
+    public DashboardPage()
     {
         InitializeComponent();
     }

@@ -38,6 +38,7 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.TitleBar" Version="0.1.251217-build.2433" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.0-preview1" />
@@ -45,6 +46,11 @@
   <ItemGroup>
     <ProjectReference Include="..\PESYONG.Application\PESYONG.ApplicationLogic.csproj" />
     <ProjectReference Include="..\PESYONG.Domain\PESYONG.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\DashboardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Admin\ReceiptsPage.xaml">
@@ -110,7 +116,17 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\Admin\_Layout.xaml">
+    <Page Update="Views\Admin\_AdminLayout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Shared\Login.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Customer\_CustomerLayout.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

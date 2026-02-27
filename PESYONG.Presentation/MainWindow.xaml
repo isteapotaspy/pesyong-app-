@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Window
     x:Class="PESYONG.Presentation.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,33 +14,5 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid Background="#FFFDF5">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <Border Grid.Row="0" Background="#FF6600" Padding="20,10">
-            <StackPanel Orientation="Horizontal">
-                <SymbolIcon Symbol="OutlineStar" Foreground="White" Margin="0,0,10,0"/>
-                <StackPanel>
-                    <TextBlock Text="Orange Catering" FontSize="24" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Delicious Filipino Food" FontSize="12" Foreground="White" Opacity="0.8"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
-        <Border Grid.Row="1" Background="White" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Padding="10">
-                <Button Content="Catering Packages" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
-                <Button Content="Short Orders" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
-                <Button Content="Kakanin" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
-                <Button Content="My Cart" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
-            </StackPanel>
-        </Border>
-
-        <Frame x:Name="ContentFrame" Grid.Row="2"/>
-    </Grid>
+    <ContentControl x:Name="LayoutContentControl"/>
 </Window>

@@ -6,7 +6,6 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
-using PESYONG.Domain.Entities.Orders;
 using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -19,34 +18,18 @@ using Windows.Foundation.Collections;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace PESYONG.Presentation.Views;
-
+namespace PESYONG.Presentation.Views.Customer;
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class CartPage : Page
+/// 
+
+public sealed partial class HomePage : Page
 {
-    public CartViewModel ViewModel { get; }
-    public CartPage()
+    public HomeViewModel ViewModel { get; }
+    public HomePage()
     {
-        this.ViewModel = App.Current.Services.GetRequiredService<CartViewModel>();
-
-
+        this.ViewModel = App.Current.Services.GetRequiredService<HomeViewModel>();
         this.InitializeComponent();
-    }
-
-    /// <summary>
-    /// Optional: Navigation logic to load the user's specific cart 
-    /// when they navigate to this page.
-    /// </summary>
-    protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
-    {
-        base.OnNavigatedTo(e);
-
-        // If passing the Order or User as a parameter
-        if (e.Parameter is Order existingOrder)
-        {
-            ViewModel.CurrentOrder = existingOrder;
-        }
     }
 }

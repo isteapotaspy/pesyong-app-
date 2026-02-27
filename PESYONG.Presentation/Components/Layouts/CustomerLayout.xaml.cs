@@ -10,26 +10,29 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using PESYONG.Presentation.Interfaces;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace PESYONG.Presentation.Views.Admin;
+namespace PESYONG.Presentation.Components.Layouts;
 
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-
-/// <remarks>
-/// IDEA: Add a "flagging" feature for suspicious logs
-/// </remarks>
-
-public sealed partial class AuditsPage : Page
+public sealed partial class CustomerLayout : UserControl, ILayout
 {
-    public AuditsPage()
+    public CustomerLayout()
     {
-        InitializeComponent();
+        this.InitializeComponent();
+    }
+
+    public Frame ContentFrame => MainContentFrame;
+
+    public void NavigateToPage(Type pageType)
+    {
+        ContentFrame.Navigate(pageType);
     }
 }
