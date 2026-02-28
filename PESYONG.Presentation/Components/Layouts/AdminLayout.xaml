@@ -14,14 +14,21 @@
                     Height="Auto"
                     IsPaneOpen="False"
                     PaneDisplayMode="Auto"
-                    IsTabStop="False">
+                    IsTabStop="False"
+                    ItemInvoked="NavigationViewItem_Invoked">
         <NavigationView.MenuItems>
-            <NavigationViewItem Content="Dashboard" Icon="Home" ToolTipService.ToolTip="Dashboard" Tag="DashboardPage"/>
+            <NavigationViewItem Content="Dashboard" 
+                                Icon="Home" ToolTipService.ToolTip="Dashboard" 
+                                Tag="PESYONG.Presentation.Views.Admin.DashboardPage"/>
             
             <NavigationViewItem Content="Meals" Icon="Contact" ToolTipService.ToolTip="Account" Tag="SamplePage2">
                 <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Individual Meals" Icon="Mail" ToolTipService.ToolTip="Mail" Tag="SamplePage3"/>
-                    <NavigationViewItem Content="Meal Packages" Icon="Calendar" ToolTipService.ToolTip="Calendar" Tag="SamplePage4"/>
+                <NavigationViewItem Content="Individual Meals" 
+                                        Icon="Mail" ToolTipService.ToolTip="Individual Meals" 
+                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage"/>
+                <NavigationViewItem Content="Meal Packages" 
+                                        Icon="Calendar" ToolTipService.ToolTip="Calendar" 
+                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPackagePage"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
             

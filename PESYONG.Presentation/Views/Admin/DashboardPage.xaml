@@ -9,6 +9,8 @@
     mc:Ignorable="d">
 
     <Grid MaxHeight="100">
+
+        <TextBlock>Yung iba diyan nakakuha nga ng mataas na grado pero hindi naman marunong makipagkapwa tao. That's the real life REDACTED</TextBlock>
         <TextBlock>Wowez watapampa xd</TextBlock>
     </Grid>
-</Page>
+</Page

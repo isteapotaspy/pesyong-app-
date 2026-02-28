@@ -15,6 +15,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\SampleMeal.png" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Views\CheckoutPage.xaml" />
     <None Remove="Views\HomePage.xaml" />
     <None Remove="Views\Shyane.xaml" />
@@ -116,12 +119,13 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Themes\" />
     <Folder Include="Views\Admin\Logistics\" />
     <Folder Include="Views\Admin\Administration\" />
     <Folder Include="Views\Admin\Transactions\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\Admin\Meals\MealPackage.xaml">
+    <Page Update="Views\Admin\Meals\MealPackagePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
