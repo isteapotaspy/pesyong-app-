@@ -22,7 +22,7 @@ namespace PESYONG.ApplicationLogic.Services;
 /// </summary>
 
 /// <remarks>
-/// TASK: Implement JpegImageToByteArray task below.
+/// [Completed, not tested yet] TASK: Implement JpegImageToByteArray task below. 
 /// </remarks>
 
 public static class ImageConverterService
