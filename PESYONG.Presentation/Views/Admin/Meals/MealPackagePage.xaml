@@ -8,7 +8,51 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <DataTemplate x:Key="AdminMealPackageTemplate" x:DataType="local:MealPackagePage">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!--
+                <Image Source="{x:Bind ImageSource}" Width="24" Height="24" Stretch="UniformToFill"/>
+                <TextBlock Grid.Column="1"
+                     Text="{x:Bind MealName}"
+                     x:Phase="1"
+                     Style="{ThemeResource BaseTextBlockStyle}"
+                     Margin="12,6,0,0"/>
+                <TextBlock  Grid.Column="1"
+                     Grid.Row="1"
+                     Text="{x:Bind DeliveryType}"
+                     x:Phase="2"
+                     Style="{ThemeResource BodyTextBlockStyle}"
+                     Margin="12,0,0,6"/> -->
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
     <Grid>
-        <TextBox Header="The ISKIBIDIS are overtaking the WORLD"/>
+        <TabView MaxWidth="360"
+                 CanReorderTabs="False" 
+                 IsAddTabButtonVisible="False">
+            <TabView.TabItems>
+                <TabViewItem Header="Catering Packages"
+                             IsClosable="False">
+                    
+                </TabViewItem>
+                <TabViewItem Header="User Packages"
+                             IsClosable="False">
+                    
+                </TabViewItem>
+            </TabView.TabItems>
+        </TabView>
+        
+        
     </Grid>
 </Page>

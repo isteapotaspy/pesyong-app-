@@ -8,6 +8,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <!-- 
+        USE NAVIGATION ITEM 
+        Refer to AdminLayout.xaml
+    -->
+    
     <Grid Background="#FFFDF5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,7 +21,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <Border Grid.Row="0" Background="#FF6600" Padding="20,10">
             <StackPanel Orientation="Horizontal">
                 <SymbolIcon Symbol="OutlineStar" Foreground="White" Margin="0,0,10,0"/>
@@ -27,7 +31,6 @@
             </StackPanel>
         </Border>
 
-        <!-- Navigation -->
         <Border Grid.Row="1" Background="White" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Padding="10">
                 <Button Content="Catering Packages" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
@@ -37,7 +40,6 @@
             </StackPanel>
         </Border>
 
-        <!-- Content Area -->
         <Frame x:Name="MainContentFrame" Grid.Row="2"/>
     </Grid>
 </UserControl>

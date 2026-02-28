@@ -11,7 +11,11 @@ public sealed partial class AdminLayout : UserControl, ILayout
 {
     public AdminLayout()
     {
-        this.InitializeComponent();
+        InitializeComponent();
+        if (AdminLayoutNavView.SettingsItem is NavigationViewItem settingsItem)
+        {
+            settingsItem.Tag = "PESYONG.Presentation.Views.Admin.SettingsPage";
+        }
     }
 
     public Frame ContentFrame => MainContentFrame;
@@ -22,17 +26,17 @@ public sealed partial class AdminLayout : UserControl, ILayout
 
     private void NavigationViewItem_Invoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
-        var pageType = Type.GetType(args.InvokedItemContainer.Tag.ToString());
-        try
+        var tag = args.InvokedItemContainer?.Tag?.ToString();
+
+        // Handle Settings item separately
+        if (args.InvokedItemContainer == sender.SettingsItem)
         {
-            if (pageType != null)
-            {
-                NavigateToPage(pageType);
-            }
+            NavigateToPage(typeof(PESYONG.Presentation.Views.Admin.SettingsPage));
         }
-        catch (Exception ex)
+        else if (!string.IsNullOrEmpty(tag))
         {
-            Console.WriteLine(ex.ToString());
+            var pageType = Type.GetType(tag);
+            NavigateToPage(pageType);
         }
     }
 }
