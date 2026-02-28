@@ -28,7 +28,7 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         // This will determine what layout your user goes.
-        SetLayoutBasedOnUserRole(isAdmin: false);
+        SetLayoutBasedOnUserRole(isAdmin: true);
     }
 
     public void SetLayoutBasedOnUserRole(bool isAdmin)
@@ -45,15 +45,15 @@ public sealed partial class MainWindow : Window
         // Authorization logic is defined here.
         if (isAdmin)
         {
-            var adminLayout = new PESYONG.Presentation.Components.Layouts.AdminLayout();
+            var adminLayout = new Components.Layouts.AdminLayout();
             LayoutContentControl.Content = adminLayout;
             _currentLayout = adminLayout;
 
-            adminLayout.NavigateToPage(typeof(Views.Admin.DashboardPage));
+            adminLayout.NavigateToPage(typeof(Views.Admin.Meals.MealPage));
         }
         else
         {
-            var customerLayout = new PESYONG.Presentation.Components.Layouts.CustomerLayout();
+            var customerLayout = new Components.Layouts.CustomerLayout();
             LayoutContentControl.Content = customerLayout;
             _currentLayout = customerLayout;
 

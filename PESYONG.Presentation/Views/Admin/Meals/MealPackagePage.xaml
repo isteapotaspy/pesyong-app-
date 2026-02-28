@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page
-    x:Class="PESYONG.Presentation.Views.Admin.ReceiptsPage"
+    x:Class="PESYONG.Presentation.Views.Admin.Meals.MealPackagePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PESYONG.Presentation.Views.Admin"
+    xmlns:local="using:PESYONG.Presentation.Views.Admin.Meals"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
     <Grid>
-
+        <TextBox Header="The ISKIBIDIS are overtaking the WORLD"/>
     </Grid>
 </Page>

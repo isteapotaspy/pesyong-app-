@@ -6,94 +6,62 @@
     xmlns:local="using:PESYONG.Presentation.Components.Layouts"
     xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d">
 
-    <Grid>
-        <Grid RowSpacing="12">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="164" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+    <NavigationView x:Name="nvSample8" 
+                    Grid.Row="0" 
+                    Height="Auto"
+                    IsPaneOpen="False"
+                    PaneDisplayMode="Auto"
+                    IsTabStop="False"
+                    ItemInvoked="NavigationViewItem_Invoked">
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="Dashboard" 
+                                Icon="Home" ToolTipService.ToolTip="Dashboard" 
+                                Tag="PESYONG.Presentation.Views.Admin.DashboardPage"/>
+            
+            <NavigationViewItem Content="Meals" Icon="Contact" ToolTipService.ToolTip="Account" Tag="SamplePage2">
+                <NavigationViewItem.MenuItems>
+                <NavigationViewItem Content="Individual Meals" 
+                                        Icon="Mail" ToolTipService.ToolTip="Individual Meals" 
+                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage"/>
+                <NavigationViewItem Content="Meal Packages" 
+                                        Icon="Calendar" ToolTipService.ToolTip="Calendar" 
+                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPackagePage"/>
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
+            
+            <NavigationViewItem Content="Logistics" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem Content="Events" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                    <NavigationViewItem Content="Deliveries" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
 
-            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Style="{StaticResource CaptionTextBlockStyle}"
-                       Text="A classic TitleBar (DisplayMode = Standard)" />
-            <Grid Grid.Row="1"
-                  BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
-                  BorderThickness="1"
-                  CornerRadius="{StaticResource OverlayCornerRadius}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <controls:TitleBar Title="{x:Bind TitleText, Mode=OneWay}"
-                                   AutoConfigureCustomTitleBar="False"
-                                   IsBackButtonVisible="{x:Bind ShowBackButtonSetting, Mode=OneWay}"
-                                   IsPaneButtonVisible="{x:Bind ShowPaneButtonSetting, Mode=OneWay}"
-                                   Subtitle="{x:Bind SubtitleText, Mode=OneWay}">
-                    <controls:TitleBar.Icon>
-                        <BitmapIcon ShowAsMonochrome="False"
-                                    UriSource="ms-appx:///Assets/AppTitleBarIcon.png" />
-                    </controls:TitleBar.Icon>
-                </controls:TitleBar>
-                <StackPanel Grid.Column="1"
-                            Margin="36,0,24,0"
-                            Orientation="Horizontal"
-                            Spacing="36">
-                    <FontIcon FontSize="10"
-                              Glyph="&#xE921;" />
-                    <FontIcon FontSize="10"
-                              Glyph="&#xE922;" />
-                    <FontIcon FontSize="10"
-                              Glyph="&#xE8BB;" />
-                </StackPanel>
-            </Grid>
+            <NavigationViewItem Content="Transactions" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem Content="Orders" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                    <NavigationViewItem Content="Receipts" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
 
-            <TextBlock Grid.Row="3"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Style="{StaticResource CaptionTextBlockStyle}"
-                       Text="A TitleBar with interactive content (DisplayMode = Tall)" />
-            <Grid Grid.Row="4"
-                  BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
-                  BorderThickness="1"
-                  CornerRadius="{StaticResource OverlayCornerRadius}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <controls:TitleBar Title="{x:Bind TitleText, Mode=OneWay}"
-                                   AutoConfigureCustomTitleBar="False"
-                                   DisplayMode="Tall"
-                                   IsBackButtonVisible="{x:Bind ShowBackButtonSetting, Mode=OneWay}"
-                                   IsPaneButtonVisible="{x:Bind ShowPaneButtonSetting, Mode=OneWay}"
-                                   Subtitle="{x:Bind SubtitleText, Mode=OneWay}">
-                    <controls:TitleBar.Icon>
-                        <BitmapIcon ShowAsMonochrome="False"
-                                    UriSource="ms-appx:///Assets/icon.png" />
-                    </controls:TitleBar.Icon>
-                    <controls:TitleBar.Content>
-                        <AutoSuggestBox PlaceholderText="Search" />
-                    </controls:TitleBar.Content>
+            <NavigationViewItem Content="Administration" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem Content="Customers" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                    <NavigationViewItem Content="Operators" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                    <NavigationViewItem Content="Audits" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
 
-                </controls:TitleBar>
-                <StackPanel Grid.Column="1"
-                            Margin="36,0,24,0"
-                            Orientation="Horizontal"
-                            Spacing="36">
-                    <FontIcon FontSize="10"
-                              Glyph="&#xE921;" />
-                    <FontIcon FontSize="10"
-                              Glyph="&#xE922;" />
-                    <FontIcon FontSize="10"
-                              Glyph="&#xE8BB;" />
-                </StackPanel>
-            </Grid>
-        </Grid>
+        </NavigationView.MenuItems>
 
-        <Frame x:Name="MainContentFrame" />
-    </Grid>
+        <NavigationView.AutoSuggestBox>
+            <AutoSuggestBox QueryIcon="Find" AutomationProperties.Name="Search" />
+        </NavigationView.AutoSuggestBox>
+
+        <Frame x:Name="MainContentFrame" 
+               Grid.Column="1"               
+               VerticalAlignment="Stretch"/>
+    </NavigationView>
 </UserControl>

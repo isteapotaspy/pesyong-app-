@@ -3,7 +3,7 @@
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 	<LangVersion>preview</LangVersion>
-    <RootNamespace>PESYONG.Application</RootNamespace>
+    <RootNamespace>PESYONG.ApplicationLogic</RootNamespace>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
     <WinUISDKReferences>false</WinUISDKReferences>
@@ -20,6 +20,8 @@
     <ProjectReference Include="..\PESYONG.Infrastructure\PESYONG.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="DTOs\Meals\MealPackage\" />
+    <Folder Include="Validators\" />
     <Folder Include="Rules\" />
   </ItemGroup>
   
