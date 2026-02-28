@@ -14,5 +14,9 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <ContentControl x:Name="LayoutContentControl"/>
+    <Grid>
+        <ContentControl x:Name="LayoutContentControl" 
+                        HorizontalContentAlignment="Stretch" 
+                        VerticalContentAlignment="Stretch"/>
+    </Grid>
 </Window>
