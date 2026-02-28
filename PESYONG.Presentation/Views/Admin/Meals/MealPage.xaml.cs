@@ -16,14 +16,16 @@ using Windows.Foundation.Collections;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace PESYONG.Presentation.Views.Admin;
+namespace PESYONG.Presentation.Views.Admin.Meals;
 
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class OrdersPage : Page
+public sealed partial class MealPage : Page
 {
-    public OrdersPage()
+    
+
+    public MealPage()
     {
         InitializeComponent();
     }

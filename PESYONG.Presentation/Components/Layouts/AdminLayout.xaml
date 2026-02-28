@@ -13,25 +13,40 @@
                     Grid.Row="0" 
                     Height="Auto"
                     IsPaneOpen="False"
-                    PaneDisplayMode="Left"
+                    PaneDisplayMode="Auto"
                     IsTabStop="False">
         <NavigationView.MenuItems>
             <NavigationViewItem Content="Dashboard" Icon="Home" ToolTipService.ToolTip="Dashboard" Tag="DashboardPage"/>
             
-            <NavigationViewItem Content="Foods" Icon="Contact" ToolTipService.ToolTip="Account" Tag="SamplePage2">
+            <NavigationViewItem Content="Meals" Icon="Contact" ToolTipService.ToolTip="Account" Tag="SamplePage2">
                 <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Meal" Icon="Mail" ToolTipService.ToolTip="Mail" Tag="SamplePage3"/>
-                    <NavigationViewItem Content="Packages" Icon="Calendar" ToolTipService.ToolTip="Calendar" Tag="SamplePage4"/>
-                    <NavigationViewItem Content="User Bundles" Icon="Calendar" ToolTipService.ToolTip="Calendar" Tag="SamplePage4"/>
+                    <NavigationViewItem Content="Individual Meals" Icon="Mail" ToolTipService.ToolTip="Mail" Tag="SamplePage3"/>
+                    <NavigationViewItem Content="Meal Packages" Icon="Calendar" ToolTipService.ToolTip="Calendar" Tag="SamplePage4"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
             
-            <NavigationViewItem Content="Document options" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+            <NavigationViewItem Content="Logistics" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
                 <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Create new" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
-                    <NavigationViewItem Content="Upload file" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                    <NavigationViewItem Content="Events" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                    <NavigationViewItem Content="Deliveries" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
+
+            <NavigationViewItem Content="Transactions" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem Content="Orders" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                    <NavigationViewItem Content="Receipts" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
+
+            <NavigationViewItem Content="Administration" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem Content="Customers" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                    <NavigationViewItem Content="Operators" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                    <NavigationViewItem Content="Audits" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
+
         </NavigationView.MenuItems>
 
         <NavigationView.AutoSuggestBox>

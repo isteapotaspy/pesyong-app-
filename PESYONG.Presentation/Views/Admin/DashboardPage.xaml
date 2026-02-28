@@ -9,6 +9,6 @@
     mc:Ignorable="d">
 
     <Grid MaxHeight="100">
-        <CheckBox />
+        <TextBlock>Wowez watapampa xd</TextBlock>
     </Grid>
 </Page>
