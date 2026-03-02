@@ -10,7 +10,7 @@ using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Domain.Enums;
 
-namespace PESYONG.ApplicationLogic.DTOs.Meals.Meal;
+namespace PESYONG.ApplicationLogic.DTOs;
 
 /// <summary>
 /// This is used when you're admin reading each meal in ListView.
@@ -21,19 +21,18 @@ namespace PESYONG.ApplicationLogic.DTOs.Meals.Meal;
 /// TASK: Implement the fucking image converter here PUHLEAZE omggggggg
 /// </remarks>
 
-public class ReadMealCustomerDto
+public class MealDto
 {
-    public int MealID { get; set; }
-    public int OperatorID { get; set; }
+    public int? MealID { get; set; }
+    public int? OperatorID { get; set; }
     public string MealName { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal MealPrice { get; set; }
     public int StockQuantity { get; set; }
     public int MinOrderQuantity { get; set; }
-    public List<MealTag> MealTags { get; set; }
+    public List<MealTagType> MealTags { get; set; }
     public DeliveryType DeliveryType { get; set; }
-    public byte[] BitmapImageBlob { get; set; } = null;
-
+    public byte[]? BitmapImageBlob { get; set; } = null;
 
 
     public DateTime CreationDate { get; set; } = DateTime.UtcNow;

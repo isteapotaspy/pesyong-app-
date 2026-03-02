@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq;
+using AutoMapper;
 using PESYONG.ApplicationLogic.DTOs;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
@@ -9,10 +10,14 @@ public class CateringMappingProfile : Profile
     public CateringMappingProfile()
     {
         // Map from your Domain Entity to the UI DTO
-        CreateMap<Meal, MealSelectionDto>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.MealID))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.MealName))
-            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.MealPrice));
+        //CreateMap<Meal, MealSelectionDto>()
+        //    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.MealID))
+        //    .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.MealName))
+        //    .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.MealPrice));
+
+        CreateMap<Meal, MealDto>()
+            .ForMember(dest => dest.MealTags, opt => opt.MapFrom(src => src.MealTags.ToList()))
+            .ReverseMap();
 
         // Map from MealProduct to the Package DTO
         CreateMap<MealProduct, PackageDisplayDto>()

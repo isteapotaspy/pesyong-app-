@@ -22,6 +22,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using PESYONG.Presentation.ViewModels.Admin;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -49,15 +50,18 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddAutoMapper(typeof(CateringMappingProfile));
         services.AddSingleton<CateringService>();
 
+
         // Register ViewModel
         services.AddTransient<PackagesViewModel>();
         services.AddTransient<CheckoutViewModel>();
         services.AddTransient<HomeViewModel>();
+        services.AddTransient<AdminMealPackageViewModel>();
         //services.AddDbContext<AppDbContext>(options =>
         //options.UseSqlite("Data Source=pesyong.db"));
 
         services.AddScoped<OrderRepository>();
         services.AddScoped<OrderRepository>();
+        services.AddScoped<MealRepository>();
         Services = services.BuildServiceProvider();
     }
 

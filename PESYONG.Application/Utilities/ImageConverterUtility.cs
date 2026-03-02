@@ -5,9 +5,10 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.Graphics.Imaging;
+using Windows.Storage;
 using Windows.Storage.Streams;
 
-namespace PESYONG.ApplicationLogic.Services;
+namespace PESYONG.ApplicationLogic.Utilities;
 
 /// <summary>
 /// This service ensures seamless transaction between the backend and the frontend image transmission.
@@ -20,7 +21,7 @@ namespace PESYONG.ApplicationLogic.Services;
 /// [Completed, not tested yet] TASK: Implement JpegImageToByteArray task below. 
 /// </remarks>
 
-public static class ImageConverterService
+public static class ImageConverterUtility
 {
     public static async Task<BitmapImage> ByteArrayToBitmapImageAsync(byte[] byteArray)
     {
@@ -42,6 +43,23 @@ public static class ImageConverterService
         {
             Debug.WriteLine($"Error converting byte array to image: {ex.Message}");
             return null;
+        }
+    }
+
+    public static async Task<byte[]> PngToByteArrayAsync(StorageFile pngFile)
+    {
+        using (var stream = await pngFile.OpenReadAsync())
+        {
+            var decoder = await BitmapDecoder.CreateAsync(stream);
+            var bitmap = new WriteableBitmap((int)decoder.PixelWidth, (int)decoder.PixelHeight);
+
+            await bitmap.SetSourceAsync(stream);
+
+            using (var memoryStream = new MemoryStream())
+            {
+                bitmap.PixelBuffer.AsStream().CopyTo(memoryStream);
+                return memoryStream.ToArray();
+            }
         }
     }
 
