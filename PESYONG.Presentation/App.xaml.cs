@@ -49,6 +49,8 @@ public partial class App : Microsoft.UI.Xaml.Application
         var services = new ServiceCollection();
         services.AddAutoMapper(typeof(CateringMappingProfile));
 
+        services.AddDbContext<AppDbContext>();
+
         // Register repository accessors
         services.AddScoped<MealRepository>();
         services.AddSingleton<OrderRepository>();
