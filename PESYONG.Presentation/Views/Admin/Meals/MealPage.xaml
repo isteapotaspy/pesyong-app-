@@ -63,32 +63,30 @@
 
         <StackPanel Grid.Column="1">
             <StackPanel Orientation="Horizontal">
-                <!--
-                <Image Source="{x:Bind ImageSource}" Width="72" Height="72" Stretch="UniformToFillx"/>
-                -->
                 <StackPanel Margin="12,0,0,0">
-                    <TextBlock Text="{x:Bind _viewModel.SelectedMeal.MealID}" FontWeight="SemiBold"/>
-                    <TextBox Header="Meal Name" Text="{x:Bind _viewModel.SelectedMeal.MealName, Mode=TwoWay}"/>
+                    <TextBlock Text="{x:Bind _viewModel.SelectedMeal.MealID, FallbackValue=''}" FontWeight="SemiBold"/>
+                    <TextBox Header="Meal Name" Text="{x:Bind _viewModel.SelectedMeal.MealName, Mode=TwoWay, FallbackValue=''}"/>
                 </StackPanel>
             </StackPanel>
 
-            <TextBox Header="Description" Text="{x:Bind _viewModel.SelectedMeal.Description, Mode=TwoWay}" 
+            
+            <TextBox Header="Description" Text="{x:Bind _viewModel.SelectedMeal.Description, Mode=TwoWay, FallbackValue=''}" 
              AcceptsReturn="True" TextWrapping="Wrap" Height="60"/>
 
-            <TextBox Header="Price" Text="{x:Bind _viewModel.SelectedMeal.FormattedPrice, Mode=OneWay}" IsReadOnly="True"/>
-            <NumberBox Header="Stock Quantity" Value="{x:Bind _viewModel.SelectedMeal.StockQuantity, Mode=TwoWay}"/>
+            <TextBox Header="Price" Text="{x:Bind _viewModel.SelectedMeal.FormattedPrice, Mode=OneWay, FallbackValue=''}" IsReadOnly="True"/>
+            <NumberBox Header="Stock Quantity" Value="{x:Bind _viewModel.SelectedMeal.StockQuantity, Mode=TwoWay, FallbackValue=0}"/>
 
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="{x:Bind _viewModel.SelectedMeal.StockStatus}" Foreground="{x:Bind _viewModel.SelectedMeal.AvailabilityColor}"/>
-                <TextBlock Text="{x:Bind _viewModel.SelectedMeal.MinMaxOrderText}" FontStyle="Italic"/>
-                <TextBlock Text="Low Stock!" Foreground="Red" 
-                   Visibility="{x:Bind _viewModel.SelectedMeal.LowStockWarningVisibility}"/>
+            <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind _viewModel.SelectedMeal, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                <TextBlock Text="{x:Bind _viewModel.SelectedMeal.StockStatus, FallbackValue=''}" 
+                           Foreground="{x:Bind _viewModel.SelectedMeal.AvailabilityColor}"/>
+                <TextBlock Text="{x:Bind _viewModel.SelectedMeal.MinMaxOrderText, FallbackValue=''}" 
+                           FontStyle="Italic"/>
+                <TextBlock Text="Low Stock!" 
+                           Foreground="Red" 
+                           Visibility="{x:Bind _viewModel.SelectedMeal.LowStockWarningVisibility, FallbackValue=Collapsed}"/>
             </StackPanel>
 
-            <!-- <ComboBox Header="Delivery Type" SelectedItem="{x:Bind SelectedMeal.DeliveryType, Mode=TwoWay}"
-              ItemsSource="{x:Bind DeliveryTypes}"/> -->
-
-            <TextBlock Text="{x:Bind _viewModel.SelectedMeal.RelativeCreationTime}" FontSize="10" Foreground="Gray"/>
+            <TextBlock Text="{x:Bind _viewModel.SelectedMeal.RelativeCreationTime, FallbackValue=''}" FontSize="10" Foreground="Gray"/>
             <Button x:Name="UpdateMealItemButton" Content="Update Meal Item"  />
         </StackPanel>
 

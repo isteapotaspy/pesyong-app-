@@ -16,8 +16,6 @@ using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
 using PESYONG.Presentation.ViewModels.Admin;
 using Windows.Storage;
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace PESYONG.Presentation.Views.Admin.Meals;
 
@@ -27,15 +25,39 @@ namespace PESYONG.Presentation.Views.Admin.Meals;
 
 public sealed partial class MealPage : Page 
 {
-    private event PropertyChangedEventHandler PropertyChanged;
-    private readonly AdminMealListViewModel _viewModel = new AdminMealListViewModel();
+    private AdminMealListViewModel _viewModel;
 
     public MealPage()
     {
         InitializeComponent();
-        DataContext = _viewModel;
+    }
 
-        Loaded += async (s, e) => await _viewModel.InitializeExistingMealsAsync();
+    public MealPage(AdminMealListViewModel viewModel) : this()
+    {
+        _viewModel = viewModel;
+
+        if (_viewModel != null)
+        {
+            _ = _viewModel.InitializeExistingMealsAsync();
+        }
+    }
+
+    private async void OnPageLoaded(object sender, RoutedEventArgs e)
+    {
+        await _viewModel.InitializeExistingMealsAsync();
+    }
+
+    public void AddItems()
+    { 
+        Meal sampleMeal1 = new Meal
+        { 
+            MealID = 0,
+            OperatorID = 123,
+            MealName = "Spaghetti Carbonara",
+            Description = "Classic Italian pasta with creamy sauce and bacon",
+
+        }
+        _viewModel.SelectedMeal.Add
     }
 
     private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -50,7 +72,7 @@ public sealed partial class MealPage : Page
     {
         if (_viewModel?.SelectedMeal != null)
         {
-            _viewModel.SaveMeal();
+            _viewModel.UpdateSelectedMealCommand.Execute(_viewModel.SelectedMeal);
         }
     }
 }

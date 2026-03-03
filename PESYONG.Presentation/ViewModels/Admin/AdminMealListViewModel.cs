@@ -5,17 +5,25 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Presentation.Views.Admin.Meals;
 
 namespace PESYONG.Presentation.ViewModels.Admin;
 
-public class AdminMealListViewModel : ObservableCollection<MealViewModel>
+public partial class AdminMealListViewModel : ObservableCollection<MealViewModel>, INotifyPropertyChanged
 {
     public ObservableCollection<MealViewModel> Meals { get; } = new();
-    // reference to the repository (or API if you have an actual backend)
     private readonly MealRepository _mealRepository;
+    public MealRepository MealRepository => _mealRepository;
+
+    public AdminMealListViewModel(MealRepository mealRepository)
+    {
+        _mealRepository = mealRepository ?? throw new ArgumentNullException(nameof(mealRepository), "MealRepository must be registered in DI container");
+    }
 
     private MealViewModel? _selectedMeal;
     public MealViewModel? SelectedMeal
@@ -33,41 +41,49 @@ public class AdminMealListViewModel : ObservableCollection<MealViewModel>
 
     public async Task InitializeExistingMealsAsync()
     {
-        List<Meal> _dbMeals = await _mealRepository.GetAllMealsAsync();
-
-        foreach (Meal meal in _dbMeals)
+        try
         {
-            Meals.Add(new MealViewModel(meal, this));
+            if (_mealRepository == null)
+            {
+                Console.WriteLine("Error: MealRepository is null. Ensure it's registered in the DI container.");
+                return;
+            }
+
+            List<Meal> _dbMeals = await _mealRepository.GetAllMealsAsync();
+
+            if (_dbMeals.Any())
+            {
+                foreach (Meal meal in _dbMeals)
+                {
+                    Meals.Add(new MealViewModel(meal, this));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading meals: {ex.Message}");
         }
     }
 
-    private void CreateMeal()
+    private void CreateMeal(MealViewModel MealVM)
     {
-        // Basically clear the VM, populate with data.
-
-        // This is WRONG. It's two way bound with population. you can just fill it in, then feed it to the server then debounce it.
-
-
-        //var emptyMeal = new Meal
-        //{
-        //    MealName = "",
-        //    Description = ""
-        //};
-
-        //var newMealVm = new MealViewModel(emptyMeal, this);
-        //Meals.Add(newMealVm);
-        //SelectedMeal = newMealVm; 
+        Meals.Add(MealVM);
+        SelectedMeal = MealVM;
     }
 
-    public void SaveMeal()
+    [RelayCommand]
+    private async Task UpdateSelectedMeal()
     {
-        Meal _newMeal = new Meal();
-        Meals.Add(new MealViewModel(_newMeal, this));
+        if (SelectedMeal?.HasChanges == true)
+        {
+            Meal mealToUpdate = SelectedMeal.GetMeal();
+            await _mealRepository.UpdateMealAsync(mealToUpdate);
+            SelectedMeal.HasChanges = false;
+        }
     }
 
     public async Task DeleteMeal(MealViewModel mealVm)
     {
-        // Technical debt, unhandled deletion, not logged
         if (mealVm.MealID != null)
         {
             Meals.Remove(mealVm);

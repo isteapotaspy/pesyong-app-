@@ -11,9 +11,7 @@
     <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
     <Platform Solution="*|x86" Project="x86" />
-    <Deploy Solution="*|ARM64" />
-    <Deploy Solution="*|x86" />
-    <Deploy Solution="Release|x64" />
+    <Deploy />
   </Project>
   <Project Path="PESYONG.Service/PESYONG.Service.csproj" Id="f0d96f29-a8fd-4261-9142-3de923f1dd26" />
 </Solution>

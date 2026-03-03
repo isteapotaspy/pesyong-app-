@@ -26,10 +26,16 @@ public partial class MealViewModel : ObservableObject
 {
     // reference to the model
     private Meal _meal = new();
+    public Meal GetMeal() => _meal;
     // reference to the repository (or API if you have an actual backend)
     private readonly MealRepository _mealRepository;
     // page specific shits
-    private bool _hasChanges = true;
+    private bool _hasChanges = false;
+    public bool HasChanges
+    {
+        get => _hasChanges;
+        set => SetProperty(ref _hasChanges, value);
+    }
 
     public int? MealID { get => _meal.MealID; } 
     public int? OperatorID { get => _meal.OperatorID; }    
@@ -243,16 +249,6 @@ public partial class MealViewModel : ObservableObject
         } // add error handling
     }
 
-    [RelayCommand]
-    private async Task UpdateCommand()
-    {
-        if (_hasChanges)
-        {
-            await _mealRepository.UpdateMealAsync(_meal);
-            _hasChanges = false;
-        } // add error handling
-    }
-
     // PARENT DEPENDENCY INJECTION
     // Implemented if you have a parent VM element (like an Observable List).
     // It allows for the individual item element to modify itself and relay that event to its parent.
@@ -260,11 +256,12 @@ public partial class MealViewModel : ObservableObject
     // then if you delete from that list (a.k.a. it's parent) then that also means you've deleted the 
     // actual item also FOR REALS.
 
-    private readonly AdminMealListViewModel _parent = new();
+    private readonly AdminMealListViewModel _parent;
     // add a case later where you grab the OperatorID so that it can be logged
     // remove this in the parent as well for syncing
     public RelayCommand DeleteCommand => new RelayCommand(() => _parent.DeleteMeal(this));
-    public RelayCommand SaveCommand => new RelayCommand(() => _parent.SaveMeal(_meal));
+    public RelayCommand RequestUpdateCommand => new RelayCommand(() =>
+                                        _parent.UpdateSelectedMealCommand.Execute(null));
 
     // INITIAL DATA LOADING (via constructor injection)
     // This is what feeds the actual data to your VM
@@ -272,6 +269,7 @@ public partial class MealViewModel : ObservableObject
     {
         _meal = meal ?? new Meal();
         _parent = parent;
+        _mealRepository = _parent.MealRepository;
         _hasChanges = false;
 
         _mealName = _meal.MealName ?? string.Empty;
@@ -284,5 +282,5 @@ public partial class MealViewModel : ObservableObject
         _creationDate = _meal.CreationDate;
     }
 
-    // Implement your own interface here twin, or just READ/get{} the data
+    // Implement your own interface here twin, or just READ/bbbbbbbbbbbbbbbbbbbbbbbbbget{} the data
 }

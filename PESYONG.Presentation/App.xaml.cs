@@ -48,20 +48,22 @@ public partial class App : Microsoft.UI.Xaml.Application
 
         var services = new ServiceCollection();
         services.AddAutoMapper(typeof(CateringMappingProfile));
-        services.AddSingleton<CateringService>();
 
+        // Register repository accessors
+        services.AddScoped<MealRepository>();
+        services.AddSingleton<OrderRepository>();
+        services.AddSingleton<OrderRepository>();
+        services.AddSingleton<CateringService>();
 
         // Register ViewModel
         services.AddTransient<PackagesViewModel>();
         services.AddTransient<CheckoutViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<AdminMealPackageViewModel>();
-        //services.AddDbContext<AppDbContext>(options =>
-        //options.UseSqlite("Data Source=pesyong.db"));
+        services.AddTransient<MealViewModel>();
+        services.AddTransient<AdminMealListViewModel>();
 
-        services.AddScoped<OrderRepository>();
-        services.AddScoped<OrderRepository>();
-        services.AddScoped<MealRepository>();
+
         Services = services.BuildServiceProvider();
     }
 
