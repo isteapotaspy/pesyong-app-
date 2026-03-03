@@ -14,5 +14,7 @@ namespace PESYONG.Domain.Enums
         Ingredient = 4,      // Chicken, Seafood, etc.
         MealTime = 5,        // Breakfast, Lunch, Dinner
         Special = 6          // Spicy, Kid-Friendly, etc.
+
+
     }
 }

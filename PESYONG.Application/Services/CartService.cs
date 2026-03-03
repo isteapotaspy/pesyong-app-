@@ -27,7 +27,6 @@ public class CartService
         // Find existing cart or create new
         _activeOrder = user.UserOrders.FirstOrDefault(o => o.DeliveryStatus == DeliveryStatus.OnCart)
                        ?? new Order { RecipientID = user.Id, DeliveryStatus = DeliveryStatus.OnCart };
-
     }
 
     public Order InitializeCart(AppUser user)

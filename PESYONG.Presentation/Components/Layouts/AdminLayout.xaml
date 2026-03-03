@@ -9,7 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d">
 
-    <NavigationView x:Name="nvSample8" 
+    <NavigationView x:Name="AdminLayoutNavView" 
                     Grid.Row="0" 
                     Height="Auto"
                     IsPaneOpen="False"
@@ -21,7 +21,7 @@
                                 Icon="Home" ToolTipService.ToolTip="Dashboard" 
                                 Tag="PESYONG.Presentation.Views.Admin.DashboardPage"/>
             
-            <NavigationViewItem Content="Meals" Icon="Contact" ToolTipService.ToolTip="Account" Tag="SamplePage2">
+            <NavigationViewItem Content="Meals" Icon="Contact" ToolTipService.ToolTip="Account">
                 <NavigationViewItem.MenuItems>
                 <NavigationViewItem Content="Individual Meals" 
                                         Icon="Mail" ToolTipService.ToolTip="Individual Meals" 
@@ -48,12 +48,10 @@
 
             <NavigationViewItem Content="Administration" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
                 <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Customers" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
-                    <NavigationViewItem Content="Operators" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                    <NavigationViewItem Content="Accounts" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
                     <NavigationViewItem Content="Audits" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
-
         </NavigationView.MenuItems>
 
         <NavigationView.AutoSuggestBox>

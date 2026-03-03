@@ -49,7 +49,7 @@ public sealed partial class MainWindow : Window
             LayoutContentControl.Content = adminLayout;
             _currentLayout = adminLayout;
 
-            adminLayout.NavigateToPage(typeof(Views.Admin.Meals.MealPage));
+            adminLayout.NavigateToPage(typeof(Views.Admin.DashboardPage));
         }
         else
         {

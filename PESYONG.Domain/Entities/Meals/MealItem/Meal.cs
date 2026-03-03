@@ -27,18 +27,13 @@ public class Meal
     [Key]
     public int MealID { get; set; }
 
-    // This will be removed later on.
-    public int RecipientID { get; set; }
-    [ForeignKey(nameof(RecipientID))]
-    private readonly AppUser? Recipient;
-
     // The recipientid will be replaced by OperatorID.
     public int OperatorID { get; set; }
     [ForeignKey(nameof(OperatorID))]
     private readonly AppUser? Operator;
 
     //removed mealtagjunction
-    public ICollection<MealTag> MealTags { get; set; } = new List<MealTag>();
+    public ICollection<MealTagType> MealTags { get; set; } = new List<MealTagType>();
 
     // Attributes
     [Required(ErrorMessage = "Meal.MealName is required.")]
@@ -94,6 +89,6 @@ public class Meal
 
     // Optional attributes (for now)
     // This needs more validation
-    public byte[] BitmapImageBlob { get; set; }
+    public string ImageSourceString { get; set; } = string.Empty;
 }
 

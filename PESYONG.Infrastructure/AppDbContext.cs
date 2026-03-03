@@ -1,22 +1,34 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.UI.Xaml.Controls;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Orders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.UI;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace PESYONG.Infrastructure;
+
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //{
+    //    if (!optionsBuilder.IsConfigured)
+    //    {
+    //        // Replace with your actual SQL Server connection string
+    //        //optionsBuilder.UseSqlServer("Server=SQL(localdb);Database=AppDB;User Id=your_user;Password=your_password;");
+    //        optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect " +
+    //            "Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
+    //    }        
+    //}
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            _ = optionsBuilder.UseInMemoryDatabase("TestDatabase");
+        }
+        base.OnConfiguring(optionsBuilder);
+    }
+
 
     // Your existing Domain Models
     public DbSet<Meal> Meals => Set<Meal>();
@@ -26,7 +38,7 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Ensure your Decimal prices don't lose precision in SQL
+        // Ensure your Decimal prices don't lose precision
         modelBuilder.Entity<Meal>()
             .Property(m => m.MealPrice)
             .HasPrecision(18, 2);

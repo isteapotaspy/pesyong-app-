@@ -18,8 +18,10 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                </Grid.ColumnDefinitions> 
+                <!--
                 <Image Source="{x:Bind ImageSource}" Width="24" Height="24" Stretch="UniformToFill"/>
+                -->
                 <TextBlock Grid.Column="1"
                      Text="{x:Bind MealName}"
                      x:Phase="1"
@@ -44,16 +46,14 @@
         <Grid Grid.Column="0" MaxWidth="360">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <!-- Takes all available space -->
                 <RowDefinition Height="Auto"/>
-                <!-- Fits button content -->
             </Grid.RowDefinitions>
             
             
             <ListView 
                 Grid.Row="0"
                 SelectionMode="Single" 
-                ItemsSource="{x:Bind Meals}"
+                ItemsSource="{x:Bind _viewModel.Meals}"
                 ItemTemplate="{StaticResource AdminMealListViewTemplate}"
                 SelectionChanged="ListView_SelectionChanged"
                 Background="SaddleBrown"/>
@@ -61,28 +61,34 @@
             <Button Grid.Row="1" Style="{StaticResource AccentButtonStyle}" Content="Add another meal"/>
         </Grid>
 
-        <StackPanel Grid.Column="1" >
-
-
+        <StackPanel Grid.Column="1">
             <StackPanel Orientation="Horizontal">
-                <Image Source="{x:Bind SelectedMeal.ImageSource}" Width="72" Height="72" Stretch="UniformToFill"/>
-                <StackPanel>
-                    <TextBox Grid.Row="1" Header="Meal ID" 
-                         Text="{x:Bind SelectedMeal.MealID, Mode=TwoWay}" />
-                    <TextBox Grid.Row="2" Header="Meal Name" 
-                         Text="{x:Bind SelectedMeal.MealName, Mode=TwoWay}" />
+                <StackPanel Margin="12,0,0,0">
+                    <TextBlock Text="{x:Bind _viewModel.SelectedMeal.MealID, FallbackValue=''}" FontWeight="SemiBold"/>
+                    <TextBox Header="Meal Name" Text="{x:Bind _viewModel.SelectedMeal.MealName, Mode=TwoWay, FallbackValue=''}"/>
                 </StackPanel>
             </StackPanel>
 
-            <TextBox Grid.Row="2" Header="Description" 
-                    Text="{x:Bind SelectedMeal.Description, Mode=TwoWay}" />
-            <TextBox Grid.Row="2" Header="Pricing" 
-                    Text="{x:Bind SelectedMeal.MealPrice, Mode=TwoWay}" />
+            
+            <TextBox Header="Description" Text="{x:Bind _viewModel.SelectedMeal.Description, Mode=TwoWay, FallbackValue=''}" 
+             AcceptsReturn="True" TextWrapping="Wrap" Height="60"/>
 
-            <StackPanel Orientation="Vertical">
-                <ComboBox IsEditable="True" ItemsSource="{x:Bind SelectedMeal.StockQuantity}" Header="Stock Quantity" />
-                <TextBlock SelectionHighlightColor="Green">Put selected meal status here</TextBlock>
+            <TextBox Header="Price" Text="{x:Bind _viewModel.SelectedMeal.FormattedPrice, Mode=OneWay, FallbackValue=''}" IsReadOnly="True"/>
+            <NumberBox Header="Stock Quantity" Value="{x:Bind _viewModel.SelectedMeal.StockQuantity, Mode=TwoWay, FallbackValue=0}"/>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" Visibility="{x:Bind _viewModel.SelectedMeal, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                <TextBlock Text="{x:Bind _viewModel.SelectedMeal.StockStatus, FallbackValue=''}" 
+                           Foreground="{x:Bind _viewModel.SelectedMeal.AvailabilityColor}"/>
+                <TextBlock Text="{x:Bind _viewModel.SelectedMeal.MinMaxOrderText, FallbackValue=''}" 
+                           FontStyle="Italic"/>
+                <TextBlock Text="Low Stock!" 
+                           Foreground="Red" 
+                           Visibility="{x:Bind _viewModel.SelectedMeal.LowStockWarningVisibility, FallbackValue=Collapsed}"/>
             </StackPanel>
+
+            <TextBlock Text="{x:Bind _viewModel.SelectedMeal.RelativeCreationTime, FallbackValue=''}" FontSize="10" Foreground="Gray"/>
+            <Button x:Name="UpdateMealItemButton" Content="Update Meal Item"  />
         </StackPanel>
+
     </Grid>
 </Page>
