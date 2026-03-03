@@ -19,7 +19,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Views\CheckoutPage.xaml" />
+    <None Remove="Views\Customer\CateringPackagesPage.xaml" />
+    <None Remove="Views\Customer\HelpPage.xaml" />
+    <None Remove="Views\Customer\KakaninPage.xaml" />
+    <None Remove="Views\Customer\OrderHistoryPage.xaml" />
+    <None Remove="Views\Customer\ShortOrdersPage.xaml" />
     <None Remove="Views\HomePage.xaml" />
+    <None Remove="Views\Shared\ProfilePage.xaml" />
     <None Remove="Views\Shyane.xaml" />
   </ItemGroup>
 
@@ -127,6 +133,36 @@
     <Folder Include="Views\Admin\Transactions\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\Shared\ProfilePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Customer\CateringPackagesPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Customer\HelpPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Customer\OrderHistoryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Customer\KakaninPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Customer\ShortOrdersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="Views\Admin\Meals\MealPackagePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -157,6 +193,5 @@
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LayoutDir>C:\Users\Boss\Desktop</LayoutDir>
   </PropertyGroup>
 </Project>

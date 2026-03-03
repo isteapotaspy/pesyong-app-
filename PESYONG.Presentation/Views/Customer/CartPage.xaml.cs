@@ -29,8 +29,6 @@ public sealed partial class CartPage : Page
     public CartViewModel ViewModel { get; }
     public CartPage()
     {
-        this.ViewModel = App.Current.Services.GetRequiredService<CartViewModel>();
-
 
         this.InitializeComponent();
     }

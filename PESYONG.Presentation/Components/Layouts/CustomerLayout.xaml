@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <UserControl
     x:Class="PESYONG.Presentation.Components.Layouts.CustomerLayout"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -8,38 +7,145 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <!-- 
-        USE NAVIGATION ITEM 
-        Refer to AdminLayout.xaml
-    -->
-    
+    <UserControl.Resources>
+        <!-- Define colors -->
+        <Color x:Key="CustomOrange">#FF6600</Color>
+        <Color x:Key="CustomOrangeLight">#FF8533</Color>
+        <Color x:Key="CustomOrangeDark">#CC5200</Color>
+
+        <!-- Override NavigationView item styles -->
+        <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="{StaticResource CustomOrange}"/>
+        <SolidColorBrush x:Key="NavigationViewItemForegroundSelected" Color="DarkBlue"/>
+        <SolidColorBrush x:Key="NavigationViewItemForegroundSelectedTop" Color="DarkBlue"/>
+        <SolidColorBrush x:Key="NavigationViewItemIconSelectedForeground" Color="DarkBlue"/>
+
+        <!-- Hover State -->
+        <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="{StaticResource CustomOrangeLight}"/>
+        <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOver" Color="DarkBlue"/>
+        <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOverTop" Color="{StaticResource CustomOrangeLight}"/>
+        <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOverTop" Color="DarkBlue"/>
+        <SolidColorBrush x:Key="NavigationViewItemIconPointerOverForeground" Color="DarkBlue"/>
+        <SolidColorBrush x:Key="NavigationViewItemIconPointerOverForegroundTop" Color="DarkBlue"/>
+
+        <!-- Pressed State -->
+        <SolidColorBrush x:Key="NavigationViewItemBackgroundPressed" Color="{StaticResource CustomOrangeDark}"/>
+        <SolidColorBrush x:Key="NavigationViewItemForegroundPressed" Color="DarkRed"/>
+
+        <!-- Default State -->
+        <SolidColorBrush x:Key="NavigationViewItemForeground" Color="#333333"/>
+        <SolidColorBrush x:Key="NavigationViewItemForegroundTop" Color="#333333"/>
+        <SolidColorBrush x:Key="NavigationViewItemIconForeground" Color="#666666"/>
+
+        <!-- Selection Indicator (invisible) -->
+        <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="DarkBlue"/>
+
+        <!-- Top Pane Background -->
+        <SolidColorBrush x:Key="NavigationViewTopPaneBackground" Color="LightBlue"/>
+
+        <!-- Border -->
+        <SolidColorBrush x:Key="NavigationViewTopPaneBorderBrush" Color="LightBlue"/>
+    </UserControl.Resources>
+
     <Grid Background="#FFFDF5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Header -->
         <Border Grid.Row="0" Background="#FF6600" Padding="20,10">
-            <StackPanel Orientation="Horizontal">
-                <SymbolIcon Symbol="OutlineStar" Foreground="White" Margin="0,0,10,0"/>
-                <StackPanel>
-                    <TextBlock Text="Orange Catering" FontSize="24" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Delicious Filipino Food" FontSize="12" Foreground="White" Opacity="0.8"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Brand -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Image Source="/Assets/peshong.png" 
+                        Width="40" 
+                        Height="40" 
+                        Margin="0,0,10,0"
+                        Stretch="Uniform"/>
+                    <StackPanel>
+                        <TextBlock Text="PESYONG" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Catering App" FontSize="12" Foreground="White" Opacity="0.8"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+
+                <!-- AutoSuggestBox -->
+                <AutoSuggestBox Grid.Column="1"
+                       Width="400"
+                       Height="35"
+                       PlaceholderText="Search for dishes, orders..."
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       QueryIcon="Find"/>
+
+                <!-- Customer Profile -->
+                <Button Grid.Column="2" 
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="ProfileButton_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <SymbolIcon Symbol="Contact" Foreground="White" Margin="0,0,5,0"/>
+                        <TextBlock Text="My Account" Foreground="White"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
         </Border>
 
-        <Border Grid.Row="1" Background="White" BorderBrush="#EEEEEE" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Padding="10">
-                <Button Content="Catering Packages" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
-                <Button Content="Short Orders" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
-                <Button Content="Kakanin" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
-                <Button Content="My Cart" Style="{StaticResource TextBlockButtonStyle}" Margin="10,0"/>
-            </StackPanel>
-        </Border>
+        <!-- NavigationView -->
+        <NavigationView Grid.Row="1"
+                        x:Name="MainNavigationView"
+                        PaneDisplayMode="Top"
+                        IsSettingsVisible="False"
+                        IsBackButtonVisible="Collapsed"
+                        IsPaneToggleButtonVisible="False"
+                        SelectionChanged="MainNavigationView_SelectionChanged"
+                        Background="White">
 
-        <Frame x:Name="MainContentFrame" Grid.Row="2"/>
+            <!-- Main Menu Items -->
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Catering Packages" Tag="CateringPackagesPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7B8;" FontFamily="Segoe MDL2 Assets"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Short Orders" Tag="ShortOrdersPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEA37;" FontFamily="Segoe MDL2 Assets"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Kakanin" Tag="KakaninPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEE94;" FontFamily="Segoe MDL2 Assets"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <!-- Footer Menu Items -->
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Content="My Cart" Tag="CartPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7BF;" FontFamily="Segoe MDL2 Assets"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Order History" Tag="OrderHistoryPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE81C;" FontFamily="Segoe MDL2 Assets"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Help" Tag="HelpPage">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE11B;" FontFamily="Segoe MDL2 Assets"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <!-- Content Frame -->
+            <Frame x:Name="MainNavigationViewFrame"/>
+        </NavigationView>
     </Grid>
 </UserControl>

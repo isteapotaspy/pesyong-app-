@@ -28,7 +28,7 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         // This will determine what layout your user goes.
-        SetLayoutBasedOnUserRole(isAdmin: true);
+        SetLayoutBasedOnUserRole(isAdmin: false);
     }
 
     public void SetLayoutBasedOnUserRole(bool isAdmin)

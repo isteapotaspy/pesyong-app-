@@ -8,11 +8,13 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
+using PESYONG.ApplicationLogic.Mapping;
 using PESYONG.ApplicationLogic.Repositories;
+using PESYONG.ApplicationLogic.Services;
+using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Infrastructure;
 using PESYONG.Presentation.ViewModels;
-using PESYONG.ApplicationLogic.Mapping;
-using PESYONG.ApplicationLogic.Services;
+using PESYONG.Presentation.ViewModels.Admin;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +24,6 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using PESYONG.Presentation.ViewModels.Admin;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -36,6 +37,10 @@ public partial class App : Microsoft.UI.Xaml.Application
 {
     public Window MainWindow { get; private set; }
     public IServiceProvider Services { get; }
+
+    private static App _instance;
+    public static App Instance => _instance ??= (App)Current;
+    public AppUser CurrentUser { get; set; }
 
 
     /// <summary>
@@ -75,6 +80,7 @@ public partial class App : Microsoft.UI.Xaml.Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        _instance = this;
         MainWindow = new MainWindow();
         MainWindow.Activate();
     }
