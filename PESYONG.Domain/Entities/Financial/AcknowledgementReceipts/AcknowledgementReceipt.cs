@@ -1,23 +1,11 @@
-﻿using PESYONG.Domain.Entities.Financial.Promos;
+﻿// In AcknowledgementReceipt.cs - fix the PaymentDate property
+using PESYONG.Domain.Entities.Financial.Promos;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Domain.Enums;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PESYONG.Domain.Entities.Financial.AcknowledgementReceipts;
-
-/// <summary>
-/// This is NOT a final receipt. This just recognizes that an order is checked out,
-/// and an order is on the way or reserved already. 
-/// 
-/// TECH DEBT: Transition this Rich Domain Model into an Anemic Model later on.
-/// </summary>
 
 public class AcknowledgementReceipt
 {
@@ -44,7 +32,8 @@ public class AcknowledgementReceipt
     [Required]
     public DateTime IssueDate { get; set; }
 
-    public DateTime? PaymentDate { get; private set; }
+    // FIXED: Changed from private set to public set
+    public DateTime? PaymentDate { get; set; }
 
     [Required]
     [StringLength(50)]
@@ -60,46 +49,5 @@ public class AcknowledgementReceipt
     public decimal GrandTotal { get; set; }
     public string Currency { get; set; } = "PHP";
 
-    /*
-    [Column(TypeName = "nvarchar(MAX)")]
-    [StringLength(100)]
-    public string Notes { get; private set; } = string.Empty;
-
-    [Required]
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal Subtotal { get; private set; }
-
-    [Required]
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal DiscountAmount { get; private set; }
-
-    [Required]
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal TaxAmount { get; private set; }
-
-    [Required]
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal ShippingCost { get; private set; }
-
-    [Required]
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal GrandTotal { get; private set; }
-
-    [NotMapped]
-    public decimal TaxableAmount => Subtotal - DiscountAmount;
-
-    [Required]
-    [StringLength(50)]
-    public string PaymentMethod { get; private set; } = string.Empty;
-
-    [StringLength(100)]
-    public string PaymentTransactionID { get; private set; } = string.Empty;
-
-    [Required]
-    [StringLength(3)]
-    public string Currency { get; private set; } = "PHP";
-    */
-
     public AcknowledgementReceipt() { }
-
 }
