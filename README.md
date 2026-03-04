@@ -1,8 +1,9 @@
+
 # PESYONG
 
 PESYONG is a desktop catering and ordering application built with WinUI 3 and .NET. It provides order management, menu/package browsing, cart and checkout flows, and basic administrative utilities. The solution is organized with a clean separation between UI, application logic, domain entities, and infrastructure.
 
-> Status: Active development (branch `feat/customer`). Target frameworks include .NET 8 and .NET 10 for parts of the solution.
+> Status: Active development (branch `main`). Target frameworks include .NET 8 and .NET 10 for parts of the solution.
 
 ## Table of Contents
 - [Features](#features)
@@ -54,7 +55,7 @@ Clone the repository and switch to the active branch:
 ```bash
 git clone https://github.com/isteapotaspy/pesyong-app-.git
 cd pesyong-app-
-git checkout feat/customer
+git checkout main
 ```
 
 ### Configuration
@@ -98,7 +99,7 @@ dotnet run --project PESYONG.Presentation
 If you encounter a navigation crash, capture the exception message and stack trace from the debugger output and open an issue or ask for help with the exact error text.
 
 ## Contributing
-- Fork the repository, create a feature branch, and submit pull requests against `feat/customer` or the repository's main branches.
+- Fork the repository, create a feature branch, and submit pull requests against `main` or the repository's other branches.
 - Follow the existing code style and naming conventions. Keep changes focused and add unit tests when applicable.
 
 ## License
