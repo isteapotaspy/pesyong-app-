@@ -99,7 +99,7 @@ dotnet run --project PESYONG.Presentation
 If you encounter a navigation crash, capture the exception message and stack trace from the debugger output and open an issue or ask for help with the exact error text.
 
 ## Contributing
-- Fork the repository, create a feature branch, and submit pull requests against `feat/customer` or the repository's main branches.
+- Fork the repository, create a feature branch, and submit pull requests against `main` or the repository's other branches.
 - Follow the existing code style and naming conventions. Keep changes focused and add unit tests when applicable.
 
 ## License
