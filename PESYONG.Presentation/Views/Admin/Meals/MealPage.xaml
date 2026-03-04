@@ -105,12 +105,6 @@
 
                 <!-- Fallback when no meal is selected -->
                 <StackPanel x:Name="MainPanel" Visibility="Visible">
-
-                    <!-- Conditional visibility based on SelectedMeal -->
-                    <StackPanel.Resources>
-                        <x:Boolean x:Key="HasSelectedMeal">True</x:Boolean>
-                    </StackPanel.Resources>
-
                     <!-- Meal Image with Fallback -->
                     <Grid >
                         <Grid.ColumnDefinitions>
@@ -193,7 +187,7 @@
                                 Meal Details
                         </TextBlock>
                         <!-- Meal Name -->
-                        <TextBox Header="Meal Name" 
+                        <TextBox Header="Meal Title" 
                                          Text="{Binding MealName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Margin="0,6,0,0"
                                          PlaceholderText="Enter meal name"
@@ -291,7 +285,9 @@
                                   SelectionChanged="DeliveryTypeComboBox_SelectionChanged">
                             <ComboBoxItem Content="Standard Delivery"/>
                             <ComboBoxItem Content="Express Delivery"/>
-                            <ComboBoxItem Content="Self Pickup"/>
+                            <ComboBoxItem Content="Same Day Delivery"/>
+                            <ComboBoxItem Content="Overnight Delivery"/>
+                            <ComboBoxItem Content="Pickup"/>
                         </ComboBox>
                         
                         <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
@@ -300,7 +296,7 @@
                         </TextBlock>
                         <!-- Mealtags -->
                         <StackPanel Orientation="Vertical" Spacing="16">
-                            
+                            <TextBlock>Add a tokenizing textbar here to automatically generate and bind meal tags, then add auto searching</TextBlock>
                         </StackPanel>
                     </StackPanel>
 

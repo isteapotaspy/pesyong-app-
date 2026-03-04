@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="PESYONG.Presentation.Views.Admin.Logistics.DeliveryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PESYONG.Presentation.Views.Admin.Logistics"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <DataTemplate x:Key="DeliveryPageListViewTemplate" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Image Width="24" Height="24" Stretch="UniformToFill"/>
+                <!--
+                <TextBlock Grid.Column="1"
+                     Text="{x:Bind MealName}"
+                     x:Phase="1"
+                     Style="{ThemeResource BaseTextBlockStyle}"
+                     Margin="12,6,0,0"/>
+                <TextBlock  Grid.Column="1"
+                     Grid.Row="1"
+                     Text="{x:Bind DeliveryType}"
+                     x:Phase="2"
+                     Style="{ThemeResource BodyTextBlockStyle}"
+                     Margin="12,0,0,6"/>
+                -->
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <ScrollViewer>
+        <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Make this reactive. Big screen 48 padding, smol screen 48 padding -->
+        <Grid Grid.Column="0" 
+             HorizontalAlignment="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ListView Grid.Row="0"
+               SelectionMode="Single" 
+               Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
+               Margin="12,36,0,12"
+               CornerRadius="6"/>
+
+            <StackPanel Grid.Row="1" 
+                       Orientation="Horizontal"
+                       Margin="12,0,0,24"
+                       Spacing="12">
+                <Grid x:Name="Output" 
+                     HorizontalAlignment="Left" 
+                     VerticalAlignment="Top" >
+                    <Button 
+                           x:Name="QueryPopupToggleButton"
+                           Content="Filter meal list" 
+                           Style="{StaticResource AccentButtonStyle}"
+                           Click="ShowQueryPopupButton_Clicked"/>
+                    <Popup x:Name="QueryPopup" 
+                          VerticalOffset="-170" 
+                          HorizontalOffset="0" 
+                          IsLightDismissEnabled="True">
+                        <Border Padding="20" 
+                               CornerRadius="{StaticResource OverlayCornerRadius}" 
+                               Width="200" Height="160" BorderThickness="1" 
+                               BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                               Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                                <TextBlock Text="Simple Popup" FontSize="16" HorizontalAlignment="Center" />
+                                <Button Content="Close" Click="CloseQueryPopupButton_Clicked" />
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+                <Button 
+                   Style="{StaticResource AccentButtonStyle}" 
+                   Content="Refresh delivery page."/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Column="1" Padding="24,24,24,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <StackPanel Grid.Row="0">
+                <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                           Margin="0,6,0,0">
+                           Delivery Details
+                </TextBlock>
+                <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                    This field is the logistical/delivery detail when order is placed in the system.
+                </TextBlock>
+
+                <TextBox Header="Delivery ID"
+                         Margin="0,6,0,0" />
+                <TextBox Header="Order ID" 
+                         Margin="0,6,0,0"/>
+                <CalendarDatePicker 
+                    Header="Creation Date" 
+                    Height="60"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Margin="0,12,0,0">
+                <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                           Margin="0,6,0,0">
+                           Logistics Profile
+                </TextBlock>
+                <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                    This field 
+                </TextBlock>
+
+
+                <TextBox Header="Delivery Personnel ID"
+                         Margin="0,6,0,0"/>
+
+                <TextBox Header="Carrier Name"
+                         Margin="0,6,0,0"/>
+                
+                <TextBox Header="Special Instructions"
+                         Margin="0,6,0,0"
+                         Height="60"/>
+
+                <TextBox Header="Delivery Notes"
+                         Margin="0,6,0,0" 
+                         Height="60"/>
+                
+                <!-- Add image pickers here -->
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Margin="0,12,0,0">
+                <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                           Margin="0,6,0,0">
+                           Update Progress
+                </TextBlock>
+                
+                <TextBox Header="Tracking Number" Margin="0,12,0,0"/>
+
+                <StackPanel Orientation="Horizontal">
+                    <ComboBox Header="Delivery Status">
+                        <ComboBoxItem>On Cart</ComboBoxItem>
+                        <ComboBoxItem>Pending</ComboBoxItem>
+                        <ComboBoxItem>Scheduled</ComboBoxItem>
+                        <ComboBoxItem>Preparing</ComboBoxItem>
+                        <ComboBoxItem>Ready for Pickup</ComboBoxItem>
+                        <ComboBoxItem>Out For Delivery</ComboBoxItem>
+                        <ComboBoxItem>In Transit</ComboBoxItem>
+                        <ComboBoxItem>Arrived</ComboBoxItem>
+                        <ComboBoxItem>Attempted</ComboBoxItem>
+                        <ComboBoxItem>Delivered</ComboBoxItem>
+                        <ComboBoxItem>Cancelled</ComboBoxItem>
+                        <ComboBoxItem>Returned</ComboBoxItem>
+                    </ComboBox>
+                    <Button Content="Update delivery status"
+                            Margin="12,28,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+
+
+            <StackPanel Grid.Row="3" Margin="0,12,0,0">
+                <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                           Margin="0,6,0,0">
+                           Delivery History
+                </TextBlock>
+                
+                <!-- Add a list here-->
+            </StackPanel>
+
+            <StackPanel Grid.Row="4" Margin="0,12,0,0">
+                <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                           Margin="0,6,0,0">
+                           Order Result
+                </TextBlock>
+
+                <TextBlock>Put here if it actually suceedeed or not</TextBlock>
+                <TextBox Header="Recieved by" Margin="0,6,0,0"/>
+                <TextBox Header="Recieved at" Margin="0,6,0,0" Height="60"/>
+
+            </StackPanel>            
+        </Grid>
+    </Grid>
+    </ScrollViewer>
+</Page>
