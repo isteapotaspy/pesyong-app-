@@ -11,7 +11,7 @@ using PESYONG.Domain.Entities.Meals.MealItem;
 namespace PESYONG.Domain.Entities.Meals.MealProduct;
 
 /// <summary>
-/// This is a junction entity owned by MealProduct.
+/// This is a junction entity owned by MealProduct.a
 /// Represents a product item included in a meal, specifying the 
 /// associated meal, quantity, and any special requests.
 /// </summary>
