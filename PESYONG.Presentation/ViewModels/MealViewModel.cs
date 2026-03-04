@@ -156,8 +156,8 @@ public partial class MealViewModel : ObservableValidator
         } 
     }
 
-    private List<MealTagType> _mealTags = new List<MealTagType>();
-    public List<MealTagType> MealTags
+    private List<string> _mealTags = new List<string>();
+    public List<string> MealTags
     {
         get => _mealTags;
         set
@@ -299,7 +299,7 @@ public partial class MealViewModel : ObservableValidator
         _description = _meal.Description ?? string.Empty;
         _mealPrice = _meal.MealPrice;
         _stockQuantity = _meal.StockQuantity;
-        _mealTags = (List<MealTagType>)_meal.MealTags;
+        _mealTags = (List<string>)_meal.MealTags;
         _deliveryType = _meal.DeliveryType;
         _imageSourceString = _meal.ImageSourceString;
         _creationDate = _meal.CreationDate;

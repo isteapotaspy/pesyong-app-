@@ -40,13 +40,12 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition MaxWidth="600" MinWidth="360"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Make this reactive. Big screen 48 padding, smol screen 48 padding -->
         <Grid Grid.Column="0" 
-              HorizontalAlignment="Left"
-              Margin="48,0,48,0">
+              HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto" />
@@ -59,8 +58,7 @@
                 SelectionChanged="ListView_SelectionChanged"
                 Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
                 Margin="12,36,0,12"
-                CornerRadius="6"
-                MaxWidth="360" MinWidth="480"/>
+                CornerRadius="6"/>
 
             <StackPanel Grid.Row="1" 
                         Orientation="Horizontal"
@@ -69,14 +67,16 @@
                 <Grid x:Name="Output" 
                       HorizontalAlignment="Left" 
                       VerticalAlignment="Top" >
-                    <ToggleButton 
+                    <Button 
                             x:Name="QueryPopupToggleButton"
                             Content="Filter meal list" 
-                            Click="ShowQueryPopupButton_Clicked" />
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="ShowQueryPopupButton_Clicked"/>
                     <Popup x:Name="QueryPopup" 
                            VerticalOffset="-170" 
                            HorizontalOffset="0" 
-                           IsLightDismissEnabled="True">
+                           IsLightDismissEnabled="True"
+                           >
                         <Border Padding="20" 
                                 CornerRadius="{StaticResource OverlayCornerRadius}" 
                                 Width="200" Height="160" BorderThickness="1" 
@@ -96,9 +96,10 @@
             </StackPanel>
         </Grid>
 
-        <ScrollViewer Grid.Column="1">
+        <ScrollViewer Grid.Column="1"
+                      Padding="12,12,12,12"
+                      Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
             <StackPanel Orientation="Vertical" 
-                        Spacing="12" Padding="16"
                         x:Name="MealFormsPanel"
                         DataContext="{Binding SelectedMeal}">
 
@@ -111,7 +112,7 @@
                     </StackPanel.Resources>
 
                     <!-- Meal Image with Fallback -->
-                    <Grid>
+                    <Grid >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" MaxWidth="150"></ColumnDefinition>
                             <ColumnDefinition Width="*"></ColumnDefinition>
@@ -149,27 +150,45 @@
                                 Catering Meal
                             </TextBlock>
 
-                            <StackPanel Orientation="Vertical">
-                                <!-- Meal ID -->
-                                <TextBox Header="Meal ID" 
-                                     Text="{Binding MealID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,6,0,0"
-                                     PlaceholderText=""/>
+                            <!-- Meal ID & Creator Deets -->
+                            <StackPanel Orientation="Vertical" 
+                                        Margin="0,6,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
 
-                                <!-- Creator ID -->
-                                <TextBox Header="Creator ID"
-                                     Text="{Binding OperatorID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,6,0,0"
-                                     PlaceholderText=""
-                                     TextChanged="TextBox_TextChanged"/>
+                                    <TextBox Grid.Column="0"
+                                            Header="Meal ID" 
+                                            Text="{Binding MealID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Margin="0,0,3,0"
+                                             PlaceholderText=""/>                                        
+                                    <TextBox Grid.Column="1"
+                                             Header="Creator ID"
+                                             Text="{Binding OperatorID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             PlaceholderText=""
+                                             Margin="3,0,0,0"
+                                             Height="60"
+                                             TextChanged="TextBox_TextChanged"/>                                    
+                                </Grid>
+                                <StackPanel Grid.Column="1"
+                                            Margin="0,12,0,0">
+                                    <CalendarDatePicker 
+                                            Date="{Binding CreationDate}"
+                                            Header="Creation Date" 
+                                            Height="60"/>
+                                    <TextBlock Text="{Binding RelativeCreationTime, FallbackValue='Recently created'}" 
+                                               FontSize="12" 
+                                               Foreground="Gray" 
+                                               FontStyle="Italic"/>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
                     </Grid>
 
-
-
                     <StackPanel Orientation="Vertical"
-                                Margin="0,24,0,0">
+                                Margin="0,6,0,0">
                         <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}">
                                 Meal Details
                         </TextBlock>
@@ -224,26 +243,28 @@
                         <StackPanel Orientation="Horizontal" Spacing="16">
 
                             <NumberBox Header="Stock Quantity" 
-                               Value="{Binding StockQuantity, Mode=TwoWay}"
-                               Margin="0,6,0,0"
-                               Width="120"
-                               SpinButtonPlacementMode="Inline"
-                               SmallChange="1"
-                               LargeChange="10"
-                               Minimum="0"
-                               ValidationMode="InvalidInputOverwritten"
-                               ValueChanged="NumberBox_ValueChanged"/>
+                                       Value="{Binding StockQuantity, Mode=TwoWay}"
+                                       MinWidth="36"
+                                       Margin="0,6,0,0"
+                                       Width="120"
+                                       SpinButtonPlacementMode="Inline"
+                                       SmallChange="1"
+                                       LargeChange="10"
+                                       Minimum="0"
+                                       ValidationMode="InvalidInputOverwritten"
+                                       ValueChanged="NumberBox_ValueChanged"/>
 
                             <NumberBox Header="Min Order" 
-                               Value="{Binding MinOrderQuantity, Mode=TwoWay}"
-                               Margin="0,6,0,0"
-                               Width="120"
-                               SpinButtonPlacementMode="Inline"
-                               SmallChange="1"
-                               LargeChange="5"
-                               Minimum="1"
-                               ValidationMode="InvalidInputOverwritten"
-                               ValueChanged="NumberBox_ValueChanged"/>
+                                       Value="{Binding MinOrderQuantity, Mode=TwoWay}"
+                                       MinWidth="36"
+                                       Margin="0,6,0,0"
+                                       Width="120"
+                                       SpinButtonPlacementMode="Inline"
+                                       SmallChange="1"
+                                       LargeChange="5"
+                                       Minimum="1"
+                                       ValidationMode="InvalidInputOverwritten"
+                                       ValueChanged="NumberBox_ValueChanged"/>
 
                         </StackPanel>
 
@@ -264,10 +285,10 @@
 
                         <!-- Delivery Type -->
                         <ComboBox Header="Delivery Type" 
-                          SelectedIndex="0"
-                          Margin="0,12,0,0"
-                          Loaded="DeliveryTypeComboBox_Loaded"
-                          SelectionChanged="DeliveryTypeComboBox_SelectionChanged">
+                                  SelectedIndex="0"
+                                  Margin="0,12,0,0"
+                                  Loaded="DeliveryTypeComboBox_Loaded"
+                                  SelectionChanged="DeliveryTypeComboBox_SelectionChanged">
                             <ComboBoxItem Content="Standard Delivery"/>
                             <ComboBoxItem Content="Express Delivery"/>
                             <ComboBoxItem Content="Self Pickup"/>
@@ -279,27 +300,8 @@
                         </TextBlock>
                         <!-- Mealtags -->
                         <StackPanel Orientation="Vertical" Spacing="16">
+                            
                         </StackPanel>
-
-                        <!-- Creation Info -->
-                        <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
-                                   Margin="0,24,0,0">
-                                    Edit Details
-                        </TextBlock>
-                        <Grid>                         
-                            <StackPanel>
-                                <CalendarDatePicker 
-                                        Date="{Binding CreationDate}"
-                                        Header="Creation Date" />
-                                <TextBlock Text="{Binding RelativeCreationTime, FallbackValue='Recently created'}" 
-                                        FontSize="12" 
-                                        Foreground="Gray" 
-                                        FontStyle="Italic"/>
-                            </StackPanel>
-                            <StackPanel>
-                                
-                            </StackPanel>                            
-                        </Grid>
                     </StackPanel>
 
                     <!-- Action Buttons -->
@@ -318,12 +320,6 @@
                     </StackPanel>
 
                 </StackPanel>
-
-                <!--                 
-                <TextBlock x:Name="NoSelectionMessage" Text="Select a meal to edit" 
-                   Visibility="Collapsed" FontSize="16" HorizontalAlignment="Center" 
-                   VerticalAlignment="Center" Margin="0,100,0,0"/>
-                -->
             </StackPanel>
         </ScrollViewer>
     </Grid>

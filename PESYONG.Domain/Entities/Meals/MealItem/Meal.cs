@@ -33,7 +33,8 @@ public class Meal
     private readonly AppUser? Operator;
 
     //removed mealtagjunction
-    public ICollection<MealTagType> MealTags { get; set; } = new List<MealTagType>();
+    public ICollection<string> MealTags { get; set; } = new List<string>();
+    //public ICollection<MealTagType> MealTags { get; set; } = new List<MealTagType>();
 
     // Attributes
     [Required(ErrorMessage = "Meal.MealName is required.")]

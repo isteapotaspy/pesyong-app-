@@ -23,7 +23,7 @@
             
             <NavigationViewItem Content="Meals" Icon="Contact" ToolTipService.ToolTip="Account">
                 <NavigationViewItem.MenuItems>
-                <NavigationViewItem Content="Individual Meals" 
+                <NavigationViewItem Content="Catering Meals" 
                                         Icon="Mail" ToolTipService.ToolTip="Individual Meals" 
                                         Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage"/>
                 <NavigationViewItem Content="Meal Packages" 

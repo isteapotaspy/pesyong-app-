@@ -45,6 +45,7 @@ public sealed partial class MealPage : Page
         {
             _ = _viewModel.InitializeExistingMealsAsync();
         }
+
     }
 
     private async void MealPage_Loaded(object sender, RoutedEventArgs e)
@@ -214,13 +215,10 @@ public sealed partial class MealPage : Page
     private void ShowQueryPopupButton_Clicked(object sender, RoutedEventArgs e)
     {
         if (!QueryPopup.IsOpen) { QueryPopup.IsOpen = true; }
-
     }
 
     private void CloseQueryPopupButton_Clicked(object sender, RoutedEventArgs e)
     {
-        // set the query popup toggle button as false
         if (QueryPopup.IsOpen) { QueryPopup.IsOpen = false; }
     }
-
 }

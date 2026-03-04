@@ -52,7 +52,7 @@ public partial class AdminMealListViewModel : ObservableObject
         Description = "Find out the LGBT Food item with the juiciest pussy of them all.",
         MealPrice = 16.26m,
         StockQuantity = 90,
-        MealTags = { MealTagType.Dietary },
+        MealTags = { "Halal" },
         DeliveryType = DeliveryType.Express,
         LastModifiedByOperatorID = 0,
         LastModifiedDate = DateTime.Now,
@@ -66,7 +66,7 @@ public partial class AdminMealListViewModel : ObservableObject
         Description = "Spaghettino faggetino, babino skibidi rizzler OH HELL NAWWWWW",
         MealPrice = 78.26m,
         StockQuantity = 3,
-        MealTags = { MealTagType.Dietary },
+        MealTags = { "Kosher" },
         DeliveryType = DeliveryType.Express,
         ImageSourceString = "ms-appx:///Assets/SampleMeal.png",
     };
