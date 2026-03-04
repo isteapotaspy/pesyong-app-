@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -42,6 +43,8 @@ public partial class App : Microsoft.UI.Xaml.Application
     public static App Instance => _instance ??= (App)Current;
     public AppUser CurrentUser { get; set; }
 
+    private IHost _host;
+
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -59,19 +62,21 @@ public partial class App : Microsoft.UI.Xaml.Application
         // Register repository accessors
         services.AddScoped<MealRepository>();
         services.AddSingleton<OrderRepository>();
-        services.AddSingleton<OrderRepository>();
         services.AddSingleton<CateringService>();
 
-        // Register ViewModel
+        // Customer ViewModels
         services.AddTransient<PackagesViewModel>();
         services.AddTransient<CheckoutViewModel>();
         services.AddTransient<HomeViewModel>();
+
+        // Admin ViewModels
         services.AddTransient<AdminMealPackageViewModel>();
         services.AddTransient<MealViewModel>();
         services.AddTransient<AdminMealListViewModel>();
 
 
         Services = services.BuildServiceProvider();
+
     }
 
     /// <summary>
