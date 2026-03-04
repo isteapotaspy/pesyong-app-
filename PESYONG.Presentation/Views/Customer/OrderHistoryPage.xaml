@@ -1,14 +1,501 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="PESYONG.Presentation.Views.Customer.OrderHistoryPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PESYONG.Presentation.Views.Customer"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    xmlns:local="using:PESYONG.ApplicationLogic.Converters"
+    xmlns:models="using:PESYONG.Domain.Entities.Orders"
+    mc:Ignorable="d"
+    Background="#FFFDF5">
+
+    <Page.Resources>
+        <local:PriceFormatConverter x:Key="PriceFormatConverter"/>
+        <local:DateTimeToStringConverter x:Key="DateTimeToStringConverter"/>
+        <local:OrderStatusToColorConverter x:Key="OrderStatusToColorConverter"/>
+        <local:OrderStatusToTextConverter x:Key="OrderStatusToTextConverter"/>
+        <local:OrderStatusToIconConverter x:Key="OrderStatusToIconConverter"/>
+        <local:OrderStatusToVisibilityConverter x:Key="OrderStatusToVisibilityConverter"/>
+        <local:OrderStatusToReorderConverter x:Key="OrderStatusToReorderConverter"/>
+        <local:VisibilityConverter x:Key="VisibilityConverter"/>
+
+        <Style x:Key="OrderCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFE5CC"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+
+        <Style x:Key="StatusBadgeStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Padding" Value="10,6"/>
+        </Style>
+
+        <Style x:Key="ProgressStepStyle" TargetType="Border">
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="CornerRadius" Value="16"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="{TemplateBinding BorderBrush}"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="#E65A00"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="#F0F0F0"/>
+                                            <Setter Target="contentPresenter.Foreground" Value="#999999"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              Foreground="{TemplateBinding Foreground}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="#FF6600" 
+                CornerRadius="12" 
+                Padding="20,15" 
+                Margin="20,20,20,0">
+            <StackPanel>
+                <TextBlock Text="Orders and Tracking" 
+                          FontSize="36" 
+                          FontWeight="Bold" 
+                          Foreground="White"/>
+                <TextBlock Text="Track your orders and view order history" 
+                          FontSize="16" 
+                          Foreground="#FFE5CC"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" 
+                      Padding="20"
+                      VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Empty State -->
+                <Border x:Name="EmptyStatePanel" 
+                        Grid.Row="0"
+                        Background="#FFF5E5"
+                        BorderBrush="#FFE5CC"
+                        BorderThickness="2"
+                        CornerRadius="12"
+                        Padding="40"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="Collapsed">
+                    <StackPanel Spacing="20" MaxWidth="400">
+                        <FontIcon Glyph="&#xE8C7;" 
+                                 FontSize="72" 
+                                 Foreground="#FFB266"
+                                 HorizontalAlignment="Center"/>
+                        <TextBlock Text="No Orders Yet" 
+                                  FontSize="24" 
+                                  FontWeight="Bold" 
+                                  Foreground="#FF6600"
+                                  HorizontalAlignment="Center"/>
+                        <TextBlock Text="Your order history will appear here once you place an order." 
+                                  FontSize="16" 
+                                  Foreground="#666666"
+                                  TextWrapping="Wrap"
+                                  TextAlignment="Center"
+                                  HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Orders List -->
+                <ItemsControl x:Name="OrdersList" Grid.Row="0" Visibility="Visible">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource OrderCardStyle}">
+                                <StackPanel Spacing="16">
+                                    <!-- Order Header -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Spacing="8">
+                                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                                <TextBlock Text="{Binding OrderID}" 
+                                                          FontSize="20" 
+                                                          FontWeight="Bold" 
+                                                          Foreground="#FF6600"/>
+                                                <Border Style="{StaticResource StatusBadgeStyle}"
+                                                        Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <FontIcon Glyph="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToIconConverter}}"
+                                                                 FontSize="12"
+                                                                 Foreground="White"/>
+                                                        <TextBlock Text="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToTextConverter}}"
+                                                                  FontSize="12"
+                                                                  FontWeight="SemiBold"
+                                                                  Foreground="White"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <StackPanel Spacing="4">
+                                                <TextBlock FontSize="14" Foreground="#666666">
+                                                    <Run Text="Order Date: "/>
+                                                    <Run Text="{Binding OrderDate, Converter={StaticResource DateTimeToStringConverter}}"/>
+                                                </TextBlock>
+                                                <TextBlock FontSize="14" Foreground="#666666">
+                                                    <Run Text="Delivery Date: "/>
+                                                    <Run Text="{Binding ActualDeliveryDate, Converter={StaticResource DateTimeToStringConverter}}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="1" 
+                                                   Text="{Binding OrderTotalAmount, Converter={StaticResource PriceFormatConverter}}"
+                                                   FontSize="24" 
+                                                   FontWeight="Bold" 
+                                                   Foreground="#FF6600"
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                    <!-- Order Items -->
+                                    <Border Background="#FFF5E5"
+                                            CornerRadius="8"
+                                            Padding="16">
+                                        <StackPanel Spacing="8">
+                                            <TextBlock Text="Items:" 
+                                                      FontWeight="SemiBold" 
+                                                      Foreground="#FF6600"
+                                                      FontSize="14"/>
+                                            <ItemsControl ItemsSource="{Binding OrderItems}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="•" 
+                                                                      Foreground="#FF6600"
+                                                                      FontSize="14"/>
+                                                            <TextBlock Text="{Binding MealProduct.ProductName}" 
+                                                                      Foreground="#666666"
+                                                                      FontSize="14"/>
+                                                            <TextBlock Text="x" 
+                                                                      Foreground="#FF6600"
+                                                                      FontSize="14"/>
+                                                            <TextBlock Text="{Binding MealProductOrderQty}" 
+                                                                      FontWeight="SemiBold"
+                                                                      Foreground="#FF6600"
+                                                                      FontSize="14"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Order Progress -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Pending Step -->
+                                        <Grid Grid.Column="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0"
+                                                    Style="{StaticResource ProgressStepStyle}"
+                                                    Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=0}">
+                                                <FontIcon Glyph="&#xE916;" 
+                                                         FontSize="14" 
+                                                         Foreground="White"/>
+                                            </Border>
+                                            <Border Grid.Column="1" 
+                                                    Height="2" 
+                                                    Margin="8,0"
+                                                    Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=0}"
+                                                    Visibility="{Binding ElementName=ProgressStep1, Converter={StaticResource VisibilityConverter}}"/>
+                                        </Grid>
+
+                                        <!-- Preparing Step -->
+                                        <Grid Grid.Column="1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0"
+                                                    Style="{StaticResource ProgressStepStyle}"
+                                                    Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=1}">
+                                                <FontIcon Glyph="&#xE7B8;" 
+                                                         FontSize="14" 
+                                                         Foreground="White"/>
+                                            </Border>
+                                            <Border Grid.Column="1" 
+                                                    Height="2" 
+                                                    Margin="8,0"
+                                                    Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=1}"
+                                                    Visibility="{Binding ElementName=ProgressStep2, Converter={StaticResource VisibilityConverter}}"/>
+                                        </Grid>
+
+                                        <!-- Out for Delivery Step -->
+                                        <Grid Grid.Column="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0"
+                                                    Style="{StaticResource ProgressStepStyle}"
+                                                    Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=2}">
+                                                <FontIcon Glyph="&#xE7C4;" 
+                                                         FontSize="14" 
+                                                         Foreground="White"/>
+                                            </Border>
+                                            <Border Grid.Column="1" 
+                                                    Height="2" 
+                                                    Margin="8,0"
+                                                    Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=2}"
+                                                    Visibility="{Binding ElementName=ProgressStep3, Converter={StaticResource VisibilityConverter}}"/>
+                                        </Grid>
+
+                                        <!-- Delivered Step -->
+                                        <Grid Grid.Column="3">
+                                            <Border Style="{StaticResource ProgressStepStyle}"
+                                                    Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=3}">
+                                                <FontIcon Glyph="&#xE73E;" 
+                                                         FontSize="14" 
+                                                         Foreground="White"/>
+                                            </Border>
+                                        </Grid>
+                                    </Grid>
+
+                                    <!-- Action Buttons -->
+                                    <Grid ColumnSpacing="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button Grid.Column="0" 
+                                                Style="{StaticResource ActionButtonStyle}"
+                                                Background="White"
+                                                BorderBrush="#FFB266"
+                                                BorderThickness="2"
+                                                Foreground="#FF6600"
+                                                IsEnabled="False">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE7C4;" 
+                                                         FontSize="16" 
+                                                         Foreground="#FF6600"/>
+                                                <TextBlock Text="Track Order"/>
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button Grid.Column="1" 
+                                                x:Name="ReviewButton"
+                                                Style="{StaticResource ActionButtonStyle}"
+                                                Background="#FF6600"
+                                                Foreground="White"
+                                                Tag="{Binding}"
+                                                Click="ReviewButton_Click"
+                                                Visibility="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToVisibilityConverter}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE734;" 
+                                                         FontSize="16" 
+                                                         Foreground="White"/>
+                                                <TextBlock Text="Leave Review"/>
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button Grid.Column="2" 
+                                                Style="{StaticResource ActionButtonStyle}"
+                                                Background="White"
+                                                BorderBrush="#FFB266"
+                                                BorderThickness="2"
+                                                Foreground="#FF6600"
+                                                IsEnabled="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToReorderConverter}}"
+                                                Tag="{Binding}"
+                                                Click="ReorderButton_Click">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE72E;" 
+                                                         FontSize="16" 
+                                                         Foreground="#FF6600"/>
+                                                <TextBlock Text="Reorder"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Help Card -->
+                <Border Grid.Row="1" 
+                        Background="#FFF0E0"
+                        BorderBrush="#FFB266"
+                        BorderThickness="2"
+                        CornerRadius="12"
+                        Padding="20"
+                        Margin="0,20,0,0">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Need Help?" 
+                                  FontSize="18" 
+                                  FontWeight="Bold" 
+                                  Foreground="#FF6600"/>
+                        <TextBlock Text="For questions about your order, please contact us at:" 
+                                  Foreground="#CC6600"
+                                  FontSize="14"/>
+                        <StackPanel Spacing="4">
+                            <TextBlock Foreground="#FF6600">
+                                <Run Text="📞 Phone: "/>
+                                <Run Text="(123) 456-7890"/>
+                            </TextBlock>
+                            <TextBlock Foreground="#FF6600">
+                                <Run Text="📧 Email: "/>
+                                <Run Text="support@orangecatering.com"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Review Dialog -->
+        <ContentDialog x:Name="ReviewDialog"
+                       Title="Leave a Review"
+                       PrimaryButtonText="Submit Review"
+                       CloseButtonText="Cancel"
+                       PrimaryButtonClick="ReviewDialog_PrimaryButtonClick"
+                       DefaultButton="Primary">
+            <ContentDialog.Content>
+                <StackPanel Width="400" Spacing="20">
+                    <TextBlock x:Name="ReviewDialogTitle" 
+                              FontSize="18" 
+                              FontWeight="SemiBold" 
+                              Foreground="#FF6600"
+                              TextWrapping="Wrap"/>
+
+                    <!-- Rating -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Rating" 
+                                  Foreground="#FF6600"
+                                  FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" 
+                                    HorizontalAlignment="Center"
+                                    Spacing="8">
+                            <Button x:Name="Star1" 
+                                    Click="StarRating_Click"
+                                    Tag="1"
+                                    Background="Transparent">
+                                <FontIcon x:Name="Star1Icon" 
+                                          Glyph="&#xE734;" 
+                                          FontSize="32" 
+                                          Foreground="#FFB266"/>
+                            </Button>
+                            <Button x:Name="Star2" 
+                                    Click="StarRating_Click"
+                                    Tag="2"
+                                    Background="Transparent">
+                                <FontIcon x:Name="Star2Icon" 
+                                          Glyph="&#xE734;" 
+                                          FontSize="32" 
+                                          Foreground="#FFB266"/>
+                            </Button>
+                            <Button x:Name="Star3" 
+                                    Click="StarRating_Click"
+                                    Tag="3"
+                                    Background="Transparent">
+                                <FontIcon x:Name="Star3Icon" 
+                                          Glyph="&#xE734;" 
+                                          FontSize="32" 
+                                          Foreground="#FFB266"/>
+                            </Button>
+                            <Button x:Name="Star4" 
+                                    Click="StarRating_Click"
+                                    Tag="4"
+                                    Background="Transparent">
+                                <FontIcon x:Name="Star4Icon" 
+                                          Glyph="&#xE734;" 
+                                          FontSize="32" 
+                                          Foreground="#FFB266"/>
+                            </Button>
+                            <Button x:Name="Star5" 
+                                    Click="StarRating_Click"
+                                    Tag="5"
+                                    Background="Transparent">
+                                <FontIcon x:Name="Star5Icon" 
+                                          Glyph="&#xE734;" 
+                                          FontSize="32" 
+                                          Foreground="#FFB266"/>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Review Text -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Your Review" 
+                                  Foreground="#FF6600"
+                                  FontWeight="SemiBold"/>
+                        <TextBox x:Name="ReviewTextBox" 
+                                 PlaceholderText="Share your experience with this item..."
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 MinHeight="120"/>
+                    </StackPanel>
+
+                    <TextBlock x:Name="ReviewStatusText" 
+                              Foreground="#666666"
+                              FontSize="12"/>
+                </StackPanel>
+            </ContentDialog.Content>
+        </ContentDialog>
     </Grid>
 </Page>

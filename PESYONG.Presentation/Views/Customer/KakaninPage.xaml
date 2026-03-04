@@ -1,14 +1,373 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="PESYONG.Presentation.Views.Customer.KakaninPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PESYONG.Presentation.Views.Customer"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    xmlns:local="using:PESYONG.ApplicationLogic.Converters"
+    xmlns:models="using:PESYONG.Domain.Entities.Meals.MealItem"
+    mc:Ignorable="d"
+    Background="#FFFDF5">
+
+    <Page.Resources>
+        <local:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVisibilityConverter"/>
+        <local:PriceFormatConverter x:Key="PriceFormatConverter"/>
+        <local:StockStatusToColorConverter x:Key="StockStatusToColorConverter"/>
+        <local:AvailableToButtonStyleConverter x:Key="AvailableToButtonStyleConverter"/>
+
+        <!-- Card Style with hover effects -->
+        <Style x:Key="KakaninCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFE5CC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Cart Badge Style -->
+        <Style x:Key="CartBadgeStyle" TargetType="Border">
+            <Setter Property="Background" Value="#FF6600"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+
+        <!-- Quantity Button Style -->
+        <Style x:Key="QuantityButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#FFB266"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{TemplateBinding CornerRadius}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="#FFF0E0" />
+                                            <Setter Target="ButtonBorder.BorderBrush" Value="#FF9933" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="#FFE5CC" />
+                                            <Setter Target="ButtonBorder.BorderBrush" Value="#FF6600" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="Transparent" />
+                                            <Setter Target="ButtonBorder.BorderBrush" Value="#CCCCCC" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Add to Cart Button Style -->
+        <Style x:Key="AddToCartButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#FF6600"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="#E65A00"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="#CC4D00"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="ButtonBorder.Background" Value="#CCCCCC"/>
+                                            <Setter Target="contentPresenter.Foreground" Value="#666666"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Content="{TemplateBinding Content}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              Foreground="{TemplateBinding Foreground}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="#FF6600" 
+                CornerRadius="12" 
+                Padding="20,15" 
+                Margin="20,20,20,0">
+            <StackPanel>
+                <TextBlock Text="Kakanin" 
+                          FontSize="36" 
+                          FontWeight="Bold" 
+                          Foreground="White"/>
+                <TextBlock Text="Traditional Filipino rice cakes and sweet treats" 
+                          FontSize="16" 
+                          Foreground="#FFE5CC"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Info Banner -->
+        <Border Grid.Row="1" 
+                Background="#FFF0E0" 
+                BorderBrush="#FFB266"
+                BorderThickness="2"
+                CornerRadius="12" 
+                Padding="16" 
+                Margin="20,20,20,0">
+            <TextBlock Text="🍰 Perfect as desserts or merienda! Can be ordered individually or as add-ons to catering packages."
+                      FontSize="14" 
+                      Foreground="#FF6600"
+                      FontWeight="Medium"
+                      TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- Scrollable Content -->
+        <ScrollViewer Grid.Row="2"
+                      Padding="20"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl x:Name="KakaninItemsControl">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapGrid Orientation="Horizontal" 
+                                 MaximumRowsOrColumns="5" 
+                                 ItemWidth="350"
+                                 ItemHeight="440"
+                                 HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="10">
+                            <Border x:Name="CardBorder"
+                                    MinWidth="280"
+                                    MaxWidth="380"
+                                    Style="{StaticResource KakaninCardStyle}"
+                                    PointerEntered="CardBorder_PointerEntered"
+                                    PointerExited="CardBorder_PointerExited">
+                                <Grid Margin="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="160"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Image Section -->
+                                    <Border Grid.Row="0" 
+                                            CornerRadius="10,10,0,0"
+                                            Background="#FFF0E0">
+                                        <Grid>
+                                            <Image Source="{Binding ImageSourceString}" 
+                                                   Stretch="UniformToFill"
+                                                   VerticalAlignment="Center"/>
+
+                                            <!-- Cart Badge -->
+                                            <Border Style="{StaticResource CartBadgeStyle}"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Top"
+                                                    Margin="8"
+                                                    Visibility="{Binding CartQuantity, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}">
+                                                <TextBlock Foreground="White"
+                                                          FontWeight="Bold"
+                                                          FontSize="10">
+                                                    <Run Text="{Binding CartQuantity}"/>
+                                                    <Run Text="in cart"/>
+                                                </TextBlock>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Content Section -->
+                                    <Grid Grid.Row="1" Margin="12">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Name -->
+                                        <TextBlock Grid.Row="0" 
+                                                  Text="{Binding MealName}" 
+                                                  FontSize="18" 
+                                                  FontWeight="Bold" 
+                                                  Foreground="#FF6600"
+                                                  TextWrapping="Wrap"
+                                                  Margin="0,0,0,4"/>
+
+                                        <!-- Description -->
+                                        <TextBlock Grid.Row="1" 
+                                                  Text="{Binding Description}" 
+                                                  FontSize="12" 
+                                                  Foreground="#666666"
+                                                  TextWrapping="Wrap"
+                                                  MaxHeight="32"
+                                                  TextTrimming="CharacterEllipsis"
+                                                  Margin="0,0,0,4"/>
+
+                                        <!-- Unit/PAX Info (derived from MinOrderQuantity or custom logic) -->
+                                        <TextBlock Grid.Row="2" 
+                                                  Text="{Binding UnitDisplay}"
+                                                  FontSize="10" 
+                                                  Foreground="#FF6600"
+                                                  FontWeight="SemiBold"
+                                                  Margin="0,0,0,4"/>
+
+                                        <!-- Price -->
+                                        <TextBlock Grid.Row="3" 
+                                                  FontSize="24" 
+                                                  FontWeight="Bold" 
+                                                  Foreground="#FF6600"
+                                                  Margin="0,0,0,8">
+                                            <Run Text="₱"/>
+                                            <Run Text="{Binding MealPrice, Converter={StaticResource PriceFormatConverter}}"/>
+                                        </TextBlock>
+
+                                        <!-- Stock Status -->
+                                        <TextBlock Grid.Row="4" 
+                                                  Text="{Binding AvailabilityStatus}"
+                                                  FontSize="10"
+                                                  Foreground="{Binding IsAvailable, Converter={StaticResource StockStatusToColorConverter}}"
+                                                  FontWeight="SemiBold"
+                                                  Margin="0,0,0,8"/>
+
+                                        <!-- Quantity Selector -->
+                                        <Border Grid.Row="3" 
+                                                Background="#FFF5E5" 
+                                                CornerRadius="6" 
+                                                Padding="8"
+                                                Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0" 
+                                                          Text="Quantity:" 
+                                                          FontWeight="SemiBold" 
+                                                          Foreground="#FF6600"
+                                                          VerticalAlignment="Center"
+                                                          FontSize="11"/>
+
+                                                <StackPanel Grid.Column="1" 
+                                                            Orientation="Horizontal" 
+                                                            HorizontalAlignment="Right"
+                                                            Spacing="6">
+                                                    <Button Style="{StaticResource QuantityButtonStyle}"
+                                                            Tag="{Binding MealID}"
+                                                            Click="DecreaseQuantity_Click"
+                                                            IsEnabled="{Binding CanDecreaseQuantity}">
+                                                        <FontIcon Glyph="&#xF8AB;" 
+                                                                 FontSize="10" 
+                                                                 Foreground="#FF6600"/>
+                                                    </Button>
+
+                                                    <TextBlock x:Name="QuantityText"
+                                                               Text="{Binding SelectedQuantity, Mode=OneWay}"
+                                                               Width="36"
+                                                               TextAlignment="Center"
+                                                               FontWeight="Bold"
+                                                               Foreground="#FF6600"
+                                                               FontSize="12"
+                                                               VerticalAlignment="Center"/>
+
+                                                    <Button Style="{StaticResource QuantityButtonStyle}"
+                                                            Tag="{Binding MealID}"
+                                                            Click="IncreaseQuantity_Click"
+                                                            IsEnabled="{Binding CanIncreaseQuantity}">
+                                                        <FontIcon Glyph="&#xF8AA;" 
+                                                                 FontSize="10" 
+                                                                 Foreground="#FF6600"/>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Add to Cart Button -->
+                                        <Button Grid.Row="6"
+                                                Style="{StaticResource AddToCartButtonStyle}"
+                                                Tag="{Binding MealID}"
+                                                Click="AddToCart_Click"
+                                                VerticalAlignment="Bottom"
+                                                HorizontalAlignment="Stretch"
+                                                Height="44"
+                                                IsEnabled="{Binding IsAvailable}">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                                                <FontIcon Glyph="&#xE7BF;" 
+                                                         FontSize="12"
+                                                         Foreground="White"/>
+                                                <TextBlock FontSize="12" FontWeight="SemiBold">
+                                                    <Run Text="Add "/>
+                                                    <Run Text="{Binding SelectedQuantity}"/>
+                                                    <Run Text=" to Cart (₱"/>
+                                                    <Run Text="{Binding TotalPrice}"/>
+                                                    <Run Text=")"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </Page>

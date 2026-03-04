@@ -1,6 +1,9 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using PESYONG.ApplicationLogic.Services;
+using PESYONG.Domain.Entities;
 using PESYONG.Domain.Entities.Financial.AcknowledgementReceipts;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
@@ -55,15 +58,7 @@ namespace PESYONG.Presentation.Views.Customer
                 this.InitializeComponent();
                 SelectedViands = new List<Meal>();
 
-                // For testing purposes, create a mock user if authentication not implemented yet
-                var currentUser = GetCurrentUser() ?? new AppUser
-                {
-                    Id = 1,
-                    UserName = "testuser",
-                    UserOrders = new List<Order>() // Initialize collections
-                };
-
-                _cartService = new CartService(currentUser);
+                _cartService = CartService.Instance;
 
                 LoadPackages();
                 LoadAvailableViands();
@@ -514,15 +509,19 @@ namespace PESYONG.Presentation.Views.Customer
                     itemName = package.ProductName;
                 }
 
-                // FIXED: Convert decimal to double properly
-                double priceAsDouble = (double)totalPrice;
+                // Create cart item
+                var cartItem = new CartItem
+                {
+                    Id = $"package_{package.MealProductID}",
+                    Name = itemName,
+                    Price = (double)totalPrice,
+                    Quantity = 1,
+                    Type = "package",
+                    ProductId = package.MealProductID,
+                    Pax = package.MealProductItems?.Count ?? 0
+                };
 
-                // Use CartService to add to cart
-                _cartService.AddToCart(
-                    productId: package.MealProductID,
-                    price: (decimal)priceAsDouble,  // Now passing double, not decimal
-                    quantity: 1
-                );
+                _cartService.AddToCart(cartItem);
 
                 // Show success message
                 var successDialog = new ContentDialog
@@ -534,8 +533,6 @@ namespace PESYONG.Presentation.Views.Customer
                 };
                 _ = successDialog.ShowAsync();
 
-                // Update cart badge
-                UpdateCartBadge();
             }
             catch (Exception ex)
             {
@@ -608,6 +605,22 @@ namespace PESYONG.Presentation.Views.Customer
         private bool IsSelectablePackage(MealProduct package)
         {
             return package?.MealProductItems == null || !package.MealProductItems.Any();
+        }
+
+        private void CardBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.RenderTransform = new ScaleTransform { ScaleX = 1.04, ScaleY = 1.04 };
+            }
+        }
+
+        private void CardBorder_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.RenderTransform = new ScaleTransform { ScaleX = 1.0, ScaleY = 1.0 };
+            }
         }
     }
 }
