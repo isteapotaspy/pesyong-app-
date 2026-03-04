@@ -14,6 +14,11 @@ using System.Runtime.CompilerServices;
 
 namespace PESYONG.Presentation.Views.Customer
 {
+    /// <summary>
+    /// Manages the display and interaction of a customer's past and active orders.
+    /// Provides functionality for order tracking, item reordering, 
+    /// and a star-based rating system for order reviews.
+    /// </summary>
     public sealed partial class OrderHistoryPage : Page, INotifyPropertyChanged
     {
         private ObservableCollection<OrderViewModel> _orders;
@@ -177,7 +182,7 @@ namespace PESYONG.Presentation.Views.Customer
                 return;
             }
 
-            // In a real app, save the review to your database
+            //save the review to your database
             var reviewData = new
             {
                 OrderId = _selectedOrderForReview?.OrderID,

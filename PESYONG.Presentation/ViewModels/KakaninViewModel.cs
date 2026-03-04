@@ -13,7 +13,12 @@ using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.ViewModels
 {
-    // ViewModel for Kakanin items
+    /// <summary>
+    /// Manages the presentation logic for individual Kakanin products.
+    /// Handles unit displays (per piece vs per dozen), stock validation, 
+    /// and synchronization with the <see cref="CartService"/>.
+    /// </summary>
+
     public class KakaninViewModel : INotifyPropertyChanged
     {
         private readonly Meal _meal;
@@ -31,6 +36,10 @@ namespace PESYONG.Presentation.ViewModels
         public int StockQuantity => _meal.StockQuantity;
         public int MinOrderQuantity => _meal.MinOrderQuantity;
 
+        /// <summary>
+        /// Returns a string indicating the unit of measurement based on the 
+        /// minimum order quantity (e.g., "per dozen" if 6 or more).
+        /// </summary>
         public string UnitDisplay => _meal.MinOrderQuantity >= 6 ? "per dozen" : "per piece";
 
         public bool IsAvailable => StockQuantity > 0;
@@ -68,6 +77,10 @@ namespace PESYONG.Presentation.ViewModels
 
         public decimal TotalPrice => MealPrice * SelectedQuantity;
 
+        /// <summary>
+        /// Validation logic to ensure the user cannot exceed a maximum of 20 
+        /// or the current physical stock limit.
+        /// </summary>
         public bool CanIncreaseQuantity => SelectedQuantity < 20 && SelectedQuantity < StockQuantity;
         public bool CanDecreaseQuantity => SelectedQuantity > MinOrderQuantity;
 
@@ -106,6 +119,10 @@ namespace PESYONG.Presentation.ViewModels
             }
         }
 
+        /// <summary>
+        /// Processes the current selection. If the item already exists in the cart, 
+        /// it increments the quantity; otherwise, it creates a new <see cref="CartItem"/>.
+        /// </summary>
         public void AddToCart()
         {
             // Check if item already exists in cart

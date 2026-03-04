@@ -12,6 +12,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace PESYONG.Presentation.ViewModels;
+
+/// <summary>
+/// Manages the catering selection process, allowing users to choose 
+/// from pre-defined packages or build a custom package.
+/// Handles dynamic pricing calculation, viand selection limits, 
+/// and integration with <see cref="CateringService"/> and <see cref="CartService"/>.
+/// </summary>
 public partial class PackagesViewModel : ObservableObject
 {
     private readonly CateringService _service;
@@ -39,6 +46,10 @@ public partial class PackagesViewModel : ObservableObject
         LoadPackages();
     }
 
+    /// <summary>
+    /// Fetches available viands and subscribes to their selection state 
+    /// to trigger real-time price updates in the UI.
+    /// </summary>
     private void LoadData()
     {
         var data = _service.GetAvailableViands();
@@ -114,6 +125,11 @@ public partial class PackagesViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Validates the selection (1-8 viands) and packages the custom 
+    /// selection as a <see cref="CartItem"/> for checkout.
+    /// </summary>
+
     [RelayCommand]
     private void AddCustomPackageToCart()
     {
@@ -167,8 +183,11 @@ public partial class PackagesViewModel : ObservableObject
         System.Diagnostics.Debug.WriteLine(message);
     }
 
-
-
+    /// <summary>
+    /// Converts the current selection into a formal <see cref="Order"/> 
+    /// and navigates the user to the <see cref="CheckoutPage"/>.
+    /// </summary>
+    /// 
     [RelayCommand(CanExecute = nameof(CanFinalize))]
     private void FinalizeOrder()
     {

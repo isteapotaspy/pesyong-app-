@@ -8,6 +8,17 @@ using System.Threading.Tasks;
 
 namespace PESYONG.ApplicationLogic.Converters
 {
+
+    /// <summary>
+    /// A multi-type converter that evaluates truthiness to return <see cref="Visibility"/>.
+    /// <list type="bullet">
+    /// <item>Booleans: True = Visible.</item>
+    /// <item>Integers: Greater than 0 = Visible.</item>
+    /// <item>Strings: Not null or empty = Visible.</item>
+    /// <item>Objects: Not null = Visible.</item>
+    /// </list>
+    /// </summary>
+    /// 
     public class VisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)

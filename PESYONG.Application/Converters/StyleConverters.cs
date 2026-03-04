@@ -10,7 +10,12 @@ using Windows.UI;
 
 namespace PESYONG.ApplicationLogic.Converters;
 
-// Converts boolean availability to a SolidColorBrush (green/red)
+
+/// <summary>
+/// Converts a boolean availability status into a <see cref="SolidColorBrush"/>.
+/// Returns Green (#4CAF50) for available and Red (#F44336) for out of stock.
+/// </summary>
+
 public class StockStatusToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
@@ -22,8 +27,16 @@ public class StockStatusToColorConverter : IValueConverter
         return new SolidColorBrush(color);
     }
 
-// Converts boolean availability into button background brush (orange when available, gray when not)
-public class AvailableToBackgroundConverter : IValueConverter
+    public object ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Determines the background <see cref="SolidColorBrush"/> for buttons based on availability.
+    /// Returns Brand Orange (#FF6600) if available, otherwise Light Gray (#CCCCCC).
+    /// </summary>
+    public class AvailableToBackgroundConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
@@ -37,8 +50,12 @@ public class AvailableToBackgroundConverter : IValueConverter
         => throw new NotImplementedException();
 }
 
-// Converts boolean availability into button foreground brush (white when available, dark gray when not)
-public class AvailableToForegroundConverter : IValueConverter
+
+    /// <summary>
+    /// Determines the text/icon <see cref="SolidColorBrush"/> for buttons based on availability.
+    /// Returns White for available items and Dark Gray for disabled/out-of-stock items.
+    /// </summary>
+    public class AvailableToForegroundConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
@@ -52,13 +69,13 @@ public class AvailableToForegroundConverter : IValueConverter
         => throw new NotImplementedException();
 }
 
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
+ 
 }
 
-// Converts a boolean availability into the actual Style object from Application resources
+/// <summary>
+/// Dynamically switches between defined XAML Styles based on product availability.
+/// Looks for 'AddToCartButtonStyle' or 'OutOfStockButtonStyle' in the Application Resources.
+/// </summary>
 public class AvailableToButtonStyleConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)

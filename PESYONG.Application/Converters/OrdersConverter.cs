@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace PESYONG.ApplicationLogic.Converters
 {
+    /// <summary>
+    /// Converts <see cref="DeliveryStatus"/> to a Hex color string. 
+    /// If a step index is provided as a parameter, it returns a gray color for future steps 
+    /// to support a progress-bar visual style.
+    /// </summary>
     public class OrderStatusToColorConverter : Microsoft.UI.Xaml.Data.IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
@@ -46,6 +51,11 @@ namespace PESYONG.ApplicationLogic.Converters
             => throw new NotImplementedException();
     }
 
+
+    /// <summary>
+    /// Converts <see cref="DeliveryStatus"/> enums into user-friendly status strings 
+    /// (e.g., "Out for Delivery").
+    /// </summary>
     public class OrderStatusToTextConverter : Microsoft.UI.Xaml.Data.IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
@@ -68,6 +78,11 @@ namespace PESYONG.ApplicationLogic.Converters
             => throw new NotImplementedException();
     }
 
+
+    /// <summary>
+    /// Maps <see cref="DeliveryStatus"/> to specific Segoe Fluent Icon glyph codes 
+    /// for visual status indicators.
+    /// </summary>
     public class OrderStatusToIconConverter : Microsoft.UI.Xaml.Data.IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
@@ -90,6 +105,11 @@ namespace PESYONG.ApplicationLogic.Converters
             => throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Returns <see cref="Visibility.Visible"/> only when the status is 'Delivered'. 
+    /// Useful for showing "Rate Order" or "Review" buttons.
+    /// </summary>
+
     public class OrderStatusToVisibilityConverter : Microsoft.UI.Xaml.Data.IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
@@ -107,6 +127,11 @@ namespace PESYONG.ApplicationLogic.Converters
             => throw new NotImplementedException();
     }
 
+
+    /// <summary>
+    /// Returns a boolean indicating if an order is eligible for reordering 
+    /// (true only if the status is 'Delivered').
+    /// </summary>
     public class OrderStatusToReorderConverter : Microsoft.UI.Xaml.Data.IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)

@@ -10,6 +10,13 @@ using System.Runtime.CompilerServices;
 
 namespace PESYONG.Presentation.Views.Customer
 {
+    /// <summary>
+    /// Manages the multi-step checkout process, including cart review, 
+    /// delivery information gathering, and payment method selection.
+    /// Coordinates between the <see cref="CartService"/> and the UI state 
+    /// to ensure accurate order totals and validation.
+    /// </summary>
+    /// 
     public sealed partial class CartPage : Page, INotifyPropertyChanged
     {
         private readonly CartService _cartService;
@@ -37,6 +44,10 @@ namespace PESYONG.Presentation.Views.Customer
             Cart.CollectionChanged += (s, e) => UpdateCartDisplay();
         }
 
+        /// <summary>
+        /// Synchronizes the UI elements with the current state of the cart, 
+        /// toggling visibility between the empty-state panel and the active items list.
+        /// </summary>
         private void UpdateCartDisplay()
         {
             // Update header subtitle
@@ -190,6 +201,10 @@ namespace PESYONG.Presentation.Views.Customer
             UpdateViewVisibility();
         }
 
+        /// <summary>
+        /// Validates the delivery input fields and distance calculations 
+        /// before transitioning the UI to the payment selection step.
+        /// </summary>
         private void ContinueToPayment_Click(object sender, RoutedEventArgs e)
         {
             // Validate delivery form
@@ -240,6 +255,10 @@ namespace PESYONG.Presentation.Views.Customer
             UpdateViewVisibility();
         }
 
+        /// <summary>
+        /// Finalizes the transaction by capturing the selected payment method, 
+        /// clearing the cart, and prompting the user for navigation to their order history.
+        /// </summary>
         private async void PlaceOrder_Click(object sender, RoutedEventArgs e)
         {
             string paymentMethod = PaymentRadioButtons.SelectedIndex switch

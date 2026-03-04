@@ -4,6 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Converts raw cart item type strings (e.g., "package", "kakanin") into 
+/// human-readable display names for the UI.
+/// </summary>
+
 namespace PESYONG.ApplicationLogic.Converters
 {
     public class CartItemTypeToDisplayConverter : Microsoft.UI.Xaml.Data.IValueConverter
