@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using PESYONG.ApplicationLogic.DTOs;
 using PESYONG.ApplicationLogic.Services;
+using PESYONG.Domain.Entities;
 using PESYONG.Presentation.Views;
 using PESYONG.Presentation.Views.Customer;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace PESYONG.Presentation.ViewModels;
 public partial class PackagesViewModel : ObservableObject
@@ -19,7 +20,6 @@ public partial class PackagesViewModel : ObservableObject
     [ObservableProperty]
     public partial ObservableCollection<MealSelectionDto> Viands { get; set; } = new();
 
-    // Change to PackageDisplayDto instead of MealProduct to avoid read-only issues
     [ObservableProperty]
     private ObservableCollection<PackageDisplayDto> _availablePackages = new();
 
@@ -34,7 +34,6 @@ public partial class PackagesViewModel : ObservableObject
     public PackagesViewModel(CateringService service, CartService cartService)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
-        _cartService = cartService ?? throw new ArgumentNullException(nameof(cartService));
 
         LoadData();
         LoadPackages();
@@ -78,18 +77,21 @@ public partial class PackagesViewModel : ObservableObject
 
         try
         {
+            var cartService = CartService.Instance;
             // Create a simplified cart item
-            var cartItem = new
+            var cartItem = new CartItem
             {
-                ProductId = package.Id,
-                ProductName = package.Name,
-                Price = package.Price,
-                Quantity = 1
+                Id = $"package_{package.Id}",
+                Name = package.Name,
+                Price = (double)package.Price, // Convert decimal to double
+                Quantity = 1,
+                Type = "package",
+                ProductId = package.Id
             };
 
             // Use the actual CartService method - you need to check what methods are available
             // Option 1: If there's an AddToCart method
-            _cartService.AddToCart(package.Id, package.Price, 1);
+            cartService.AddToCart(cartItem);
 
             // Option 2: If it expects a different type, you might need to create the proper entity
             // var orderMealProduct = new OrderMealProduct
@@ -112,11 +114,60 @@ public partial class PackagesViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void AddCustomPackageToCart()
+    {
+        try
+        {
+            var selectedViands = SelectedViands.ToList();
+            if (!selectedViands.Any())
+            {
+                ShowNotification("Please select at least one viand");
+                return;
+            }
+
+            if (selectedViands.Count > 8)
+            {
+                ShowNotification("You can only select up to 8 viands");
+                return;
+            }
+
+            var cartService = CartService.Instance;
+
+            // Create custom package cart item
+            var cartItem = new CartItem
+            {
+                Id = $"custom_package_{DateTime.Now.Ticks}",
+                Name = $"Custom Package ({selectedViands.Count} viands)",
+                Price = (double)FinalPrice,
+                Quantity = 1,
+                Type = "package",
+                ProductId = -1, // Custom package ID
+                Pax = selectedViands.Count
+            };
+
+            cartService.AddToCart(cartItem);
+            ShowNotification("Custom package added to cart!");
+
+            // Reset selection
+            foreach (var viand in selectedViands)
+            {
+                viand.IsSelected = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Error: {ex.Message}");
+        }
+    }
+
     private void ShowNotification(string message)
     {
         // Implement proper notification (you might want to use a service for this)
         System.Diagnostics.Debug.WriteLine(message);
     }
+
+
 
     [RelayCommand(CanExecute = nameof(CanFinalize))]
     private void FinalizeOrder()
