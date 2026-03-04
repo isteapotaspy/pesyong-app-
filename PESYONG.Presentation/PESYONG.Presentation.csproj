@@ -122,6 +122,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Themes\" />
+    <Folder Include="ViewModels\ObjectModels\" />
+    <Folder Include="ViewModels\PageModels\" />
     <Folder Include="Views\Admin\Logistics\" />
     <Folder Include="Views\Admin\Administration\" />
     <Folder Include="Views\Admin\Transactions\" />

@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <DataTemplate x:Key="AdminMealPackageTemplate" x:DataType="local:MealPackagePage">
+        <DataTemplate x:Key="AdminMealPackageTemplate">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -20,16 +20,14 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <!--
-                <Image Source="{x:Bind ImageSource}" Width="24" Height="24" Stretch="UniformToFill"/>
+                <!-- The phase of this code must have a Binding attribute -->
+                <!-- <Image  Width="24" Height="24" Stretch="UniformToFill"/>
                 <TextBlock Grid.Column="1"
-                     Text="{x:Bind MealName}"
                      x:Phase="1"
                      Style="{ThemeResource BaseTextBlockStyle}"
                      Margin="12,6,0,0"/>
                 <TextBlock  Grid.Column="1"
                      Grid.Row="1"
-                     Text="{x:Bind DeliveryType}"
                      x:Phase="2"
                      Style="{ThemeResource BodyTextBlockStyle}"
                      Margin="12,0,0,6"/> -->
@@ -38,21 +36,55 @@
     </Page.Resources>
 
     <Grid>
-        <TabView MaxWidth="360"
-                 CanReorderTabs="False" 
-                 IsAddTabButtonVisible="False">
-            <TabView.TabItems>
-                <TabViewItem Header="Catering Packages"
-                             IsClosable="False">
-                    
-                </TabViewItem>
-                <TabViewItem Header="User Packages"
-                             IsClosable="False">
-                    
-                </TabViewItem>
-            </TabView.TabItems>
-        </TabView>
-        
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" MaxWidth="360">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+
+            <ListView 
+                Grid.Row="0"
+                SelectionMode="Single" 
+                Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
+                Margin="12,36,0,12"
+                CanDragItems="True"
+                AllowDrop="True"
+                CornerRadius="6"/>
+
+            <Button Grid.Row="1" 
+                    Style="{StaticResource AccentButtonStyle}" 
+                    Content="Add another meal"
+                    Margin="12,0,0,24"/>
+        </Grid>
+
+        <ScrollViewer Grid.Column="1">
+            <StackPanel Orientation="Vertical" 
+                    Spacing="12" Padding="16"
+                    x:Name="MealFormsPanel">
+                
+                
+                <TextBox Header="Package ID" />
+                <!-- Change this shit to GUID later on-->
+                <TextBox Header="Owner/Creator ID"/>
+                <TextBox Header="Package Name" />
+                <TextBox Header="Package Description" />
+                
+                <Expander Width="Auto" HorizontalAlignment="Left" Padding="0">
+                    <Expander.Header>
+                        Meals contained by the package
+                    </Expander.Header>
+                    <Expander.Content>
+                        lkmlkjkl
+                    </Expander.Content>
+                </Expander>
+
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>

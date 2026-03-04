@@ -28,6 +28,7 @@ namespace PESYONG.Presentation.Views.Admin.Meals;
 public sealed partial class MealPage : Page
 {
     private AdminMealListViewModel _viewModel;
+    private MealViewModel _newMeal;
 
     public MealPage()
     {
@@ -77,40 +78,29 @@ public sealed partial class MealPage : Page
     {
         var hasSelection = _viewModel?.SelectedMeal != null;
         MainPanel.Visibility = Visibility.Visible;
-        //MainPanel.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
-        //NoSelectionMessage.Visibility = hasSelection ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void UpdateBindings()
     {
-        var selectedMeal = _viewModel?.SelectedMeal;
+        var currentMeal = _viewModel?.SelectedMeal ?? _newMeal;
 
-        if (selectedMeal != null)
+        if (currentMeal != null)
         {
-            // Update stock status color
             StockStatusBorder.Background = new SolidColorBrush(
-                selectedMeal.IsAvailable ? Colors.Green : Colors.Red);
+                currentMeal.IsAvailable ? Colors.Green : Colors.Red);
 
-            // Update low stock visibility
-            LowStockWarning.Visibility = selectedMeal.StockQuantity <= 5 ?
-                Visibility.Visible : Visibility.Collapsed;
-
-            // Update save button state
             SaveButton.Background = new SolidColorBrush(
-                selectedMeal.HasChanges ? Colors.Green : Colors.Gray);
-            SaveButton.IsEnabled = selectedMeal.HasChanges;
+                currentMeal.HasChanges ? Colors.Green : Colors.Gray);
+            SaveButton.IsEnabled = currentMeal.HasChanges;
 
-            // Update image
-            if (!string.IsNullOrEmpty(selectedMeal.ImageSourceString))
+            if (!string.IsNullOrEmpty(currentMeal.ImageSourceString))
             {
-                MealImageControl.Source = new BitmapImage(new Uri(selectedMeal.ImageSourceString));
+                MealImageControl.Source = new BitmapImage(new Uri(currentMeal.ImageSourceString));
             }
         }
         else
         {
-            // Reset to defaults
             StockStatusBorder.Background = new SolidColorBrush(Colors.Gray);
-            LowStockWarning.Visibility = Visibility.Collapsed;
             SaveButton.Background = new SolidColorBrush(Colors.Gray);
             SaveButton.IsEnabled = false;
             MealImageControl.Source = null;
@@ -131,34 +121,16 @@ public sealed partial class MealPage : Page
     private void DeliveryTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var comboBox = (ComboBox)sender;
-        var selectedMeal = _viewModel?.SelectedMeal;
+        var currentMeal = _viewModel?.SelectedMeal ?? _newMeal;
 
-        if (selectedMeal != null)
+        if (currentMeal != null)
         {
-            selectedMeal.DeliveryType = (DeliveryType)comboBox.SelectedIndex;
-            UpdateBindings(); // Refresh UI
+            currentMeal.DeliveryType = (DeliveryType)comboBox.SelectedIndex;
+            UpdateBindings(); 
         }
     }
 
-    private void DeleteButton_Click(object sender, RoutedEventArgs e)
-    {
-        var selectedMeal = _viewModel?.SelectedMeal;
-        if (selectedMeal != null)
-        {
-            _viewModel.DeleteMeal(selectedMeal);
-            UpdateVisibility(); // Refresh UI after deletion
-        }
-    }
 
-    private void SaveButton_Click(object sender, RoutedEventArgs e)
-    {
-        var selectedMeal = _viewModel?.SelectedMeal;
-        if (selectedMeal != null)
-        {
-            _viewModel.UpdateSelectedMealCommand.Execute(null);
-            UpdateBindings(); // Refresh UI after save
-        }
-    }
 
     // Your existing methods integrated below:
 
@@ -168,41 +140,6 @@ public sealed partial class MealPage : Page
         UpdateBindings();
     }
 
-    public void AddItems()
-    {
-        Meal sampleMeal1 = new Meal
-        {
-            MealID = 0,
-            OperatorID = 123,
-            MealName = "Spaghetti Carbonara",
-            Description = "Classic Italian pasta with creamy sauce and bacon",
-            MealPrice = 16.26m,
-            StockQuantity = 3,
-            MealTags = { MealTagType.Dietary },
-            DeliveryType = DeliveryType.Express,
-            ImageSourceString = "ms-appx:///Assets/SampleMeal",
-            CreationDate = DateTime.Now,
-        };
-
-        Meal sampleMeal2 = new Meal
-        {
-            MealID = 3,
-            OperatorID = 123,
-            MealName = "Spaghetti Assini",
-            Description = "Classic Italian pasta with creamy sauce and bacon",
-            MealPrice = 16.26m,
-            StockQuantity = 3,
-            MealTags = { MealTagType.Dietary },
-            DeliveryType = DeliveryType.Express,
-            ImageSourceString = "ms-appx:///Assets/SampleMeal",
-            CreationDate = DateTime.Now,
-        };
-
-        _viewModel.CreateMeal(new MealViewModel(sampleMeal1, _viewModel));
-        _viewModel.CreateMeal(new MealViewModel(sampleMeal2, _viewModel));
-        UpdateBindings(); // Refresh UI after adding items
-    }
-
     private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (sender is ListView lv)
@@ -210,19 +147,80 @@ public sealed partial class MealPage : Page
             _viewModel.SelectedMeal = lv.SelectedItem as MealViewModel;
         }
     }
+    
 
-    private void UpdateMealItemButton_Clicked(object sender, RoutedEventArgs e)
+    private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (_viewModel?.SelectedMeal != null)
+        var currentMeal = _viewModel?.SelectedMeal ?? _newMeal;
+
+        if (currentMeal != null)
         {
-            _viewModel.UpdateSelectedMealCommand.Execute(_viewModel.SelectedMeal);
-            UpdateBindings(); // Refresh UI after update
+            currentMeal.HasChanges = true;
+            UpdateBindings();
         }
     }
 
-    // New method to handle text changes for real-time updates
-    private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+    private void NumberBox_ValueChanged(object sender, NumberBoxValueChangedEventArgs e)
     {
-        UpdateBindings(); // Refresh UI when text changes
+        var currentMeal = _viewModel?.SelectedMeal ?? _newMeal;
+
+        if (currentMeal != null)
+        {
+            currentMeal.HasChanges = true;
+            UpdateBindings();
+        }
     }
+
+    // If you press the add new meal item button, then you switch out to the newMeal model.
+    // Then, data is passed there. Then fed to its parent, which will return an acceptable viewmodel.
+    private void AddMealButton_Clicked(object sender, RoutedEventArgs e)
+    {
+        _newMeal = new MealViewModel(_viewModel);
+        _viewModel.SelectedMeal = null;
+        MealFormsPanel.DataContext = _newMeal;
+        UpdateBindings();
+    }
+
+    private async void DeleteButton_Click(object sender, RoutedEventArgs e)
+    {
+        var selectedMeal = _viewModel?.SelectedMeal;
+        if (selectedMeal != null)
+        {
+            await _viewModel.DeleteMeal(selectedMeal);
+            UpdateVisibility();
+        }
+    }
+
+    private async void SaveButton_Click(object sender, RoutedEventArgs e)
+    {
+        // Create a new item
+        if (_viewModel?.SelectedMeal == null && _newMeal.MealID == null)
+        {
+            // Add validation here to complain if the datas aren't correct
+            if (_viewModel != null)
+            {
+                await _viewModel.CreateMeal(_newMeal);
+                UpdateBindings();
+            } // handle exceptions here            
+        }
+        // Update existing item in the stack
+        else if (_viewModel?.SelectedMeal != null)
+        {
+            _viewModel.UpdateSelectedMealCommand.Execute(_viewModel.SelectedMeal);
+            UpdateBindings();
+        }
+    }
+
+    private void ShowQueryPopupButton_Clicked(object sender, RoutedEventArgs e)
+    {
+        if (!QueryPopup.IsOpen) { QueryPopup.IsOpen = true; }
+
+    }
+
+    private void CloseQueryPopupButton_Clicked(object sender, RoutedEventArgs e)
+    {
+        // set the query popup toggle button as false
+        if (QueryPopup.IsOpen) { QueryPopup.IsOpen = false; }
+    }
+
 }

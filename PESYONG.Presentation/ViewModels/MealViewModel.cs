@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PESYONG.ApplicationLogic.Repositories;
-using PESYONG.Domain.Entities.Financial;
 using PESYONG.Domain.Entities.Meals.MealItem;
-using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Domain.Enums;
 
 namespace PESYONG.Presentation.ViewModels.Admin;
@@ -22,7 +19,7 @@ namespace PESYONG.Presentation.ViewModels.Admin;
 /// server communication, as well as transforms data for display.
 /// </summary>
 
-public partial class MealViewModel : ObservableObject
+public partial class MealViewModel : ObservableValidator
 {
     // reference to the model
     private Meal _meal = new();
@@ -37,9 +34,15 @@ public partial class MealViewModel : ObservableObject
         set => SetProperty(ref _hasChanges, value);
     }
 
-    public int? MealID { get => _meal.MealID; } 
-    public int? OperatorID { get => _meal.OperatorID; }    
+    public int? MealID { 
+        get => _meal.MealID; 
+    }
 
+    [Required]
+    public int OperatorID { get => _meal.OperatorID; }
+
+    [Required(ErrorMessage = "Meal.MealName is required.")]
+    [StringLength(100, ErrorMessage = "Meal.MealName must be less than 100 characters.")]
     private string _mealName = string.Empty;
     public string MealName
     {
@@ -56,6 +59,7 @@ public partial class MealViewModel : ObservableObject
         }
     }
 
+    [StringLength(500, ErrorMessage = "Meal.Description must be less than 500 characters.")]
     private string _description = string.Empty;
     public string Description 
     { 
@@ -72,6 +76,8 @@ public partial class MealViewModel : ObservableObject
         } 
     }
 
+    [Required(ErrorMessage = "Meal.MealPrice is required.")]
+    [Range(0.01, 1000000, ErrorMessage = "Meal.MealPrice must be greater than PHP0.01 and less than PHP1M.")]
     public decimal _mealPrice = 0m;
     public decimal MealPrice 
     { 
@@ -89,6 +95,8 @@ public partial class MealViewModel : ObservableObject
         } 
     }
 
+    [Required(ErrorMessage = "Meal.StockQuantity is required.")]
+    [Range(0, int.MaxValue, ErrorMessage = "Meal.StockQuantity cannot be negative.")]
     private int _stockQuantity = 0;
     public int StockQuantity 
     { 
@@ -110,6 +118,8 @@ public partial class MealViewModel : ObservableObject
         } 
     }
 
+    [Required(ErrorMessage = "Meal.MinOrderQuantity is required.")]
+    [Range(1, 1000, ErrorMessage = "Meal.MinOrderQuantity must be between 1 and 1000.")]
     private int _minOrderQuantity = 1;
     public int MinOrderQuantity 
     { 
@@ -129,22 +139,7 @@ public partial class MealViewModel : ObservableObject
         } 
     }
 
-    private List<MealTagType> _mealTags = new List<MealTagType>();
-    public List<MealTagType> MealTags
-    {
-        get => _mealTags;
-        set
-        {
-            if (_mealTags != value)
-            {
-                _mealTags = value;
-                OnPropertyChanged();
-                _meal.MealTags = value;
-                _hasChanges = true;
-            }
-        }
-    }
-
+    [Required(ErrorMessage = "Delivery type is required.")]
     private DeliveryType _deliveryType;
     public DeliveryType DeliveryType 
     {
@@ -160,6 +155,31 @@ public partial class MealViewModel : ObservableObject
             }
         } 
     }
+
+    private List<MealTagType> _mealTags = new List<MealTagType>();
+    public List<MealTagType> MealTags
+    {
+        get => _mealTags;
+        set
+        {
+            if (_mealTags != value)
+            {
+                _mealTags = value;
+                OnPropertyChanged();
+                //OnPropertyChanged(nameof(MealTagTokenMap));
+                _meal.MealTags = value;
+                _hasChanges = true;
+            }
+        }
+    }
+
+    // Convert enum into a map. 
+    //public Dictionary<MealTagType, Boolean> _mealTagTokenMap
+    //    = _mealTags.Zip();
+    //public string MealTagTokenMap
+    //{
+
+    //}
 
     // TECH DEBT: Implement CRUD for TS on Repository
     private string _imageSourceString = string.Empty;
@@ -208,6 +228,7 @@ public partial class MealViewModel : ObservableObject
         }
     }
     
+    // Change the currency to peso later on
     public string FormattedPrice => MealPrice.ToString("C");
     public bool IsAvailable => StockQuantity >= MinOrderQuantity;
     public string AvailabilityColor => IsAvailable ? "Green" : "Red";
@@ -232,6 +253,8 @@ public partial class MealViewModel : ObservableObject
             return $"{timeSpan.Days / 30} months ago";
         }
     }
+
+
 
     public string StockQuantityText => $"{StockQuantity} units";
     public string MinMaxOrderText => $"Min: {MinOrderQuantity} units";
@@ -267,7 +290,7 @@ public partial class MealViewModel : ObservableObject
     // This is what feeds the actual data to your VM
     public MealViewModel(Meal meal, AdminMealListViewModel parent) 
     {
-        _meal = meal ?? new Meal();
+        _meal = meal ?? new Meal(); 
         _parent = parent;
         _mealRepository = _parent.MealRepository;
         _hasChanges = false;
@@ -280,7 +303,26 @@ public partial class MealViewModel : ObservableObject
         _deliveryType = _meal.DeliveryType;
         _imageSourceString = _meal.ImageSourceString;
         _creationDate = _meal.CreationDate;
+
+        this.PropertyChanged += (s, e) =>
+        {
+            if (!e.PropertyName.Equals(nameof(HasChanges)))
+            {
+                HasChanges = true;
+            }
+        };
     }
 
-    // Implement your own interface here twin, or just READ/bbbbbbbbbbbbbbbbbbbbbbbbbget{} the data
+    public MealViewModel(AdminMealListViewModel parent)
+    {
+        _parent = parent;
+        _mealRepository = _parent.MealRepository;
+    }
+
+    public bool IsValid => !HasErrors;
+
+    public void ValidateAll()
+    {
+        ValidateAllProperties();
+    }
 }

@@ -27,7 +27,7 @@
                                         Icon="Mail" ToolTipService.ToolTip="Individual Meals" 
                                         Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage"/>
                 <NavigationViewItem Content="Meal Packages" 
-                                        Icon="Calendar" ToolTipService.ToolTip="Calendar" 
+                                        Icon="Calendar" ToolTipService.ToolTip="Meal Packages" 
                                         Tag="PESYONG.Presentation.Views.Admin.Meals.MealPackagePage"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>

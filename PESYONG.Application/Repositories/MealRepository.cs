@@ -35,6 +35,17 @@ public class MealRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<Meal> CreateMealAsyncReturnSelf(Meal meal)
+    {
+        _context.Meals.Add(meal);
+        await _context.SaveChangesAsync();
+
+
+        Debug.Write($"\n\n The meal has ID of {meal.MealID} and is named {meal.MealName} \n\n");
+        // Check if this is valid
+        return meal;
+    }
+
     public async Task<Meal> GetMealByIdAsync(int id)
     {
         return await _context.Meals.FirstOrDefaultAsync(m => m.MealID == id);
@@ -78,15 +89,13 @@ public class MealRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteMealAsync(int MealId)
+    public async Task DeleteMealAsync(int MealID)
     {
-        var meal = await _context.Meals.FindAsync(MealId);
+        var meal = await _context.Meals.FindAsync(MealID);
         if (meal != null)
         {
             _context.Meals.Remove(meal);
             await _context.SaveChangesAsync();
         }
     }
-
-
 }
