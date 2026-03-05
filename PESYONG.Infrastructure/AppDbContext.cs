@@ -1,7 +1,8 @@
+using System;
+using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Orders;
-using System.Reflection.Emit;
 
 namespace PESYONG.Infrastructure;
 
@@ -42,5 +43,21 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Meal>()
             .Property(m => m.MealPrice)
             .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.HasMany(o => o.OrderItems)
+                  .WithOne()
+                  .HasForeignKey("OrderID")
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrderMealProduct>(entity =>
+        {
+            entity.HasKey(e => e.OrderID);
+            entity.Property<Guid>("OrderID").IsRequired(); // Use Guid instead of int
+        });
+
+
     }
 }

@@ -81,4 +81,6 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     // Helper to access App.Current.Services easily
     public static new App Current => (App)Microsoft.UI.Xaml.Application.Current;
+
+    public object DispatcherQueue { get; internal set; }
 }

@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Data;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
 using PESYONG.Presentation.Views.Admin.Meals;
-using System.Diagnostics;
 
 namespace PESYONG.Presentation.ViewModels.Admin;
 
@@ -73,14 +75,22 @@ public partial class AdminMealListViewModel : ObservableObject
 
     public AdminMealListViewModel(MealRepository mealRepository)
     {
+        Meals = new ObservableCollection<MealViewModel>();
+        BindingOperations.EnableCollectionSynchronization(Meals, _lockObject);
+        SelectedMeal = null;
         _mealRepository = mealRepository ?? throw new ArgumentNullException(nameof(mealRepository), "MealRepository must be registered in DI container");
 
         Debug.Write("\n\nThe first meal is " + sampleMeal1.IsValid() + "\n\n");
         MealViewModel mealvm1 = new MealViewModel(sampleMeal1, this);
         Debug.Write("\n\nThe first meal view model is " + mealvm1.IsValid + "\n\n");
 
-        Meals.Add(mealvm1);
-        Meals.Add(new MealViewModel(sampleMeal2, this));
+        // Use other patterns for this later
+        _ = Task.Run(async () =>
+        {
+            await CreateMeal(new MealViewModel(sampleMeal1, this));
+            await CreateMeal(new MealViewModel(sampleMeal2, this));
+            await InitializeExistingMealsAsync();
+        });
     }
 
     public async Task InitializeExistingMealsAsync()
@@ -111,17 +121,27 @@ public partial class AdminMealListViewModel : ObservableObject
 
     public async Task CreateMeal(MealViewModel newMeal)
     {
-        var createdMeal = await _mealRepository.CreateMealAsyncReturnSelf(newMeal.GetMeal());
-        var createdVm = new MealViewModel(createdMeal, this);
-
-        Meals.Add(createdVm);
-
-        if (Meals.Any())
+        try
         {
-            Debug.WriteLine("A meal is added on Observables.");
-        }
+            Meal createdMeal = await _mealRepository.CreateMealAsyncReturnSelf(newMeal.GetMeal());
+            MealViewModel createdVM = new MealViewModel(createdMeal, this);
 
-        SelectedMeal = createdVm;
+            Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread().TryEnqueue(() =>
+            {
+
+                Meals?.Add(createdVM);
+                if (Meals?.Count > 0) SelectedMeal = createdVM;
+
+                Debug.Write($"[DEBUG] Item added. New count: {Meals?.Count}");
+                Debug.Write($"[DEBUG] Created item initialized in SelectedMeal.");
+            });
+        }
+        catch(Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] CreatedMeal failed: {ex.Message}");
+        }
+        
+
     }
 
     [RelayCommand]
