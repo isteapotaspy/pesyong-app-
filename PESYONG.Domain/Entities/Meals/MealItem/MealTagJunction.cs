@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace PESYONG.Domain.Entities.Meals.MealItem;
 
 /// <summary>
+/// DO NOT USE THIS. Deprecated.
 /// Junction entity that uses many [MealTag]s to categorize a [Meal] in the domain model.
 /// </summary>
 public class MealTagJunction

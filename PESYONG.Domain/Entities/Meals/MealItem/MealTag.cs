@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 namespace PESYONG.Domain.Entities.Meals.MealItem;
 
 /// <summary>
+/// DO NOT USE THIS. Deprecated.
+/// 
 /// Represents a tag that categorizes a meal, such as dietary preference, cuisine, or meal type.
 /// This has its own table called MealTags created by OPERATOR
 /// </summary>

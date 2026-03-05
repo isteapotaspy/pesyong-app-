@@ -39,148 +39,284 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0" MaxWidth="300">
+        <!-- Make this reactive. Big screen 48 padding, smol screen 48 padding -->
+        <Grid Grid.Column="0" 
+              HorizontalAlignment="Left">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             
-            
-            <ListView 
-                Grid.Row="0"
+            <ListView Grid.Row="0"
                 SelectionMode="Single" 
                 ItemsSource="{Binding Meals}"
                 ItemTemplate="{StaticResource AdminMealListViewTemplate}"
                 SelectionChanged="ListView_SelectionChanged"
                 Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
-                Margin="0,36,0,12"
+                Margin="12,36,0,12"
                 CornerRadius="6"/>
 
-            <Button Grid.Row="1" 
+            <StackPanel Grid.Row="1" 
+                        Orientation="Horizontal"
+                        Margin="12,0,0,24"
+                        Spacing="12">
+                <Grid x:Name="Output" 
+                      HorizontalAlignment="Left" 
+                      VerticalAlignment="Top" >
+                    <Button 
+                            x:Name="QueryPopupToggleButton"
+                            Content="Filter meal list" 
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="ShowQueryPopupButton_Clicked"/>
+                    <Popup x:Name="QueryPopup" 
+                           VerticalOffset="-170" 
+                           HorizontalOffset="0" 
+                           IsLightDismissEnabled="True"
+                           >
+                        <Border Padding="20" 
+                                CornerRadius="{StaticResource OverlayCornerRadius}" 
+                                Width="200" Height="160" BorderThickness="1" 
+                                BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                                <TextBlock Text="Simple Popup" FontSize="16" HorizontalAlignment="Center" />
+                                <Button Content="Close" Click="CloseQueryPopupButton_Clicked" />
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+                <Button 
                     Style="{StaticResource AccentButtonStyle}" 
                     Content="Add another meal"
-                    Margin="0,0,0,24"/>
+                    Click="AddMealButton_Clicked"/>
+            </StackPanel>
         </Grid>
 
-        <ScrollViewer Grid.Column="1">
-            <StackPanel Orientation="Vertical" Spacing="12" Padding="16"
-                DataContext="{Binding SelectedMeal}">
+        <ScrollViewer Grid.Column="1"
+                      Padding="12,12,12,12"
+                      Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+            <StackPanel Orientation="Vertical" 
+                        x:Name="MealFormsPanel"
+                        DataContext="{Binding SelectedMeal}">
 
                 <!-- Fallback when no meal is selected -->
                 <StackPanel x:Name="MainPanel" Visibility="Visible">
-
-                    <!-- Conditional visibility based on SelectedMeal -->
-                    <StackPanel.Resources>
-                        <x:Boolean x:Key="HasSelectedMeal">True</x:Boolean>
-                    </StackPanel.Resources>
-
                     <!-- Meal Image with Fallback -->
-                    <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="8" 
-                    Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
-                        <Image x:Name="MealImageControl" Source="{Binding MealImage}" 
-                       Width="200" Height="150" Stretch="Uniform"/>
-                    </Border>
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MaxWidth="150"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
 
-                    <TextBox Header="Meal ID" 
-                             Text="{Binding MealID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             PlaceholderText=""/>
-
-                    <TextBox Header="Operator ID"
-                             Text="{Binding OperatorID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             PlaceholderText=""/>
-
-                    <!-- Meal Name -->
-                    <TextBox Header="Meal Name" 
-                     Text="{Binding MealName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     PlaceholderText="Enter meal name"/>
-
-                    <!-- Description -->
-                    <TextBox Header="Description" 
-                     Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     AcceptsReturn="True" TextWrapping="Wrap" Height="80"
-                     PlaceholderText="Enter meal description"/>
-
-                    <!-- Price and Stock Info -->
-                    <StackPanel Orientation="Horizontal" Spacing="16">
-                        <!-- Price -->
-                        <TextBox Header="Price" 
-                         Text="{Binding MealPrice, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                         Width="120"/>
-
-                        <!-- Formatted Price Display -->
-                        <TextBlock Text="{Binding FormattedPrice, FallbackValue='$0.00'}" 
-                           FontSize="14" VerticalAlignment="Bottom" Margin="0,0,0,8" 
-                           Foreground="DarkGreen" FontWeight="SemiBold"/>
-                    </StackPanel>
-
-                    <!-- Stock Management -->
-                    <StackPanel Orientation="Horizontal" Spacing="16">
-                        <!-- Stock Quantity -->
-                        <TextBox Header="Stock Quantity" 
-                         Text="{Binding StockQuantity, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                         Width="120"/>
-
-                        <!-- Min Order Quantity -->
-                        <TextBox Header="Min Order" 
-                         Text="{Binding MinOrderQuantity, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                         Width="120"/>
-                    </StackPanel>
-
-                    <!-- Stock Status Indicator -->
-                    <Border x:Name="StockStatusBorder" Background="LightGray" CornerRadius="4" 
-                    Padding="8,4" HorizontalAlignment="Left">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="{Binding StockStatus, FallbackValue='Loading...'}" 
-                               Foreground="White" FontWeight="Bold"/>
-                            <TextBlock Text="{Binding StockQuantityText, FallbackValue='0 units'}" 
-                               Foreground="White" Opacity="0.9"/>
+                        <StackPanel 
+                            Grid.Column="0"
+                            Margin="0,24,0,0">
+                            <Border 
+                                    BorderBrush="LightGray" 
+                                    BorderThickness="1" 
+                                    CornerRadius="2" 
+                                    Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
+                                    MaxWidth="150"
+                                    MaxHeight="150">
+                                    <Image x:Name="MealImageControl" 
+                                           Source="{Binding MealImage}" 
+                                           Width="120" Height="120" 
+                                           Stretch="Uniform"
+                                           />
+                            </Border>
+                            <Button x:Name="ModifyImageButton" 
+                                    Content="Change Photo" 
+                                    Margin="0,12,12,12"
+                                    Style="{StaticResource DefaultButtonStyle}" 
+                                    Foreground="White"
+                                    Click="DeleteButton_Click"/>
                         </StackPanel>
-                    </Border>
 
-                    <!-- Low Stock Warning -->
-                    <Border x:Name="LowStockWarning" Background="#FFFFE6" BorderBrush="#FFFFCC" 
-                    BorderThickness="1" CornerRadius="4" Padding="8">
-                        <TextBlock Text="⚠ Low stock alert! Replenish inventory soon." 
-                           Foreground="#996600" FontWeight="SemiBold"/>
-                    </Border>
+                        <StackPanel Grid.Column="1"
+                                    Margin="24,12,12,12">
 
-                    <!-- Delivery Type -->
-                    <ComboBox Header="Delivery Type" 
-                      SelectedIndex="0"
-                      Loaded="DeliveryTypeComboBox_Loaded"
-                      SelectionChanged="DeliveryTypeComboBox_SelectionChanged">
-                        <ComboBoxItem Content="Standard Delivery"/>
-                        <ComboBoxItem Content="Express Delivery"/>
-                        <ComboBoxItem Content="Self Pickup"/>
-                    </ComboBox>
+                            <TextBlock Style="{StaticResource TitleTextBlockStyle}"
+                                       Margin="0,6,0,0">
+                                Catering Meal
+                            </TextBlock>
 
-                    <!-- Creation Info -->
-                    <TextBlock Text="{Binding RelativeCreationTime, FallbackValue='Recently created'}" 
-                       FontSize="12" Foreground="Gray" FontStyle="Italic"/>
+                            <!-- Meal ID & Creator Deets -->
+                            <StackPanel Orientation="Vertical" 
+                                        Margin="0,6,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0"
+                                            Header="Meal ID" 
+                                            Text="{Binding MealID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Margin="0,0,3,0"
+                                             PlaceholderText=""/>                                        
+                                    <TextBox Grid.Column="1"
+                                             Header="Creator ID"
+                                             Text="{Binding OperatorID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             PlaceholderText=""
+                                             Margin="3,0,0,0"
+                                             Height="60"
+                                             TextChanged="TextBox_TextChanged"/>                                    
+                                </Grid>
+                                <StackPanel Grid.Column="1"
+                                            Margin="0,12,0,0">
+                                    <CalendarDatePicker 
+                                            Date="{Binding CreationDate}"
+                                            Header="Creation Date" 
+                                            Height="60"/>
+                                    <TextBlock Text="{Binding RelativeCreationTime, FallbackValue='Recently created'}" 
+                                               FontSize="12" 
+                                               Foreground="Gray" 
+                                               FontStyle="Italic"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Orientation="Vertical"
+                                Margin="0,6,0,0">
+                        <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}">
+                                Meal Details
+                        </TextBlock>
+                        <!-- Meal Name -->
+                        <TextBox Header="Meal Title" 
+                                         Text="{Binding MealName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,6,0,0"
+                                         PlaceholderText="Enter meal name"
+                                         TextChanged="TextBox_TextChanged"/>
+
+                        <!-- Description -->
+                        <TextBox Header="Description" 
+                                 Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,6,0,0"
+                                 AcceptsReturn="True" 
+                                 TextWrapping="Wrap" 
+                                 Height="120"
+                                 PlaceholderText="Enter meal description"
+                                 TextChanged="TextBox_TextChanged"/>
+
+                        <!-- Price and Stock Info -->
+                        <StackPanel Orientation="Horizontal" 
+                                    Spacing="16" 
+                                    Margin="0,6,0,0">
+                            <!-- Price -->
+                            <TextBox Header="Price" 
+                                 Text="{Binding MealPrice, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                 Margin="0,6,0,0"
+                                 Width="120">
+                                <TextBox.InputScope>
+                                    <InputScope>
+                                        <InputScope.Names>
+                                            <InputScopeName NameValue="Number"/>
+                                        </InputScope.Names>
+                                    </InputScope>
+                                </TextBox.InputScope>
+                            </TextBox>
+
+                            <!-- Formatted Price Display -->
+                            <TextBlock Text="{Binding FormattedPrice, FallbackValue='$0.00'}" 
+                                FontSize="24" VerticalAlignment="Bottom"
+                                Foreground="DarkGreen" 
+                                FontWeight="SemiBold"/>
+                        </StackPanel>
+
+
+                        <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                                   Margin="0,24,0,0">
+                                Stock Management
+                        </TextBlock>
+                        <!-- Stock Management -->
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+
+                            <NumberBox Header="Stock Quantity" 
+                                       Value="{Binding StockQuantity, Mode=TwoWay}"
+                                       MinWidth="36"
+                                       Margin="0,6,0,0"
+                                       Width="120"
+                                       SpinButtonPlacementMode="Inline"
+                                       SmallChange="1"
+                                       LargeChange="10"
+                                       Minimum="0"
+                                       ValidationMode="InvalidInputOverwritten"
+                                       ValueChanged="NumberBox_ValueChanged"/>
+
+                            <NumberBox Header="Min Order" 
+                                       Value="{Binding MinOrderQuantity, Mode=TwoWay}"
+                                       MinWidth="36"
+                                       Margin="0,6,0,0"
+                                       Width="120"
+                                       SpinButtonPlacementMode="Inline"
+                                       SmallChange="1"
+                                       LargeChange="5"
+                                       Minimum="1"
+                                       ValidationMode="InvalidInputOverwritten"
+                                       ValueChanged="NumberBox_ValueChanged"/>
+
+                        </StackPanel>
+
+                        <!-- Stock Status Indicator -->
+                        <Border x:Name="StockStatusBorder" 
+                                HorizontalAlignment="Left"
+                                Background="LightGray" 
+                                CornerRadius="2" 
+                                Margin="0,6,8,8"
+                                Padding="8,4" >
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding StockStatus, FallbackValue='Loading...'}" 
+                                   Foreground="White" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding StockQuantityText, FallbackValue='0 units'}" 
+                                   Foreground="White" Opacity="0.9"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Delivery Type -->
+                        <ComboBox Header="Delivery Type" 
+                                  SelectedIndex="0"
+                                  Margin="0,12,0,0"
+                                  Loaded="DeliveryTypeComboBox_Loaded"
+                                  SelectionChanged="DeliveryTypeComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Standard Delivery"/>
+                            <ComboBoxItem Content="Express Delivery"/>
+                            <ComboBoxItem Content="Same Day Delivery"/>
+                            <ComboBoxItem Content="Overnight Delivery"/>
+                            <ComboBoxItem Content="Pickup"/>
+                        </ComboBox>
+                        
+                        <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                                    Margin="0,24,0,0">
+                                    Meal Tags
+                        </TextBlock>
+                        <!-- Mealtags -->
+                        <StackPanel Orientation="Vertical" Spacing="16">
+                            <TextBlock>Add a tokenizing textbar here to automatically generate and bind meal tags, then add auto searching</TextBlock>
+                        </StackPanel>
+                    </StackPanel>
 
                     <!-- Action Buttons -->
-                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+                                Margin="12,12,12,12"
+                                Spacing="8" >
                         <Button x:Name="DeleteButton" Content="Delete" 
-                        Style="{StaticResource DefaultButtonStyle}" Foreground="White"/>
-
-                        <Button x:Name="SaveButton" Content="Save Changes" 
-                        Style="{StaticResource AccentButtonStyle}" Foreground="White"/>
+                                Style="{StaticResource DefaultButtonStyle}" Foreground="White"
+                                Click="DeleteButton_Click"/>
+                        <Button x:Name="SaveButton" 
+                                Content="Save Changes" 
+                                Style="{StaticResource AccentButtonStyle}" 
+                                Foreground="White"
+                                Click="SaveButton_Click"/>
                     </StackPanel>
 
                 </StackPanel>
-
-                <!--                 
-                <TextBlock x:Name="NoSelectionMessage" Text="Select a meal to edit" 
-                   Visibility="Collapsed" FontSize="16" HorizontalAlignment="Center" 
-                   VerticalAlignment="Center" Margin="0,100,0,0"/>
-                -->
             </StackPanel>
         </ScrollViewer>
-
-
     </Grid>
 </Page>

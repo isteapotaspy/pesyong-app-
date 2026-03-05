@@ -25,7 +25,7 @@ public class Meal
 {
     // Primary key
     [Key]
-    public int MealID { get; set; }
+    public int? MealID { get; set; }
 
     // The recipientid will be replaced by OperatorID.
     public int OperatorID { get; set; }
@@ -33,7 +33,8 @@ public class Meal
     private readonly AppUser? Operator;
 
     //removed mealtagjunction
-    public ICollection<MealTagType> MealTags { get; set; } = new List<MealTagType>();
+    public ICollection<string> MealTags { get; set; } = new List<string>();
+    //public ICollection<MealTagType> MealTags { get; set; } = new List<MealTagType>();
 
     // Attributes
     [Required(ErrorMessage = "Meal.MealName is required.")]
@@ -69,13 +70,15 @@ public class Meal
     [Required(ErrorMessage = "Delivery type is required.")]
     public DeliveryType DeliveryType { get; set; }
 
-
-
-
     // Server-side details ONLY
     // Timestamp and Audit
     [Required]
     public DateTime CreationDate { get; set; } = DateTime.UtcNow;
+
+
+
+
+
 
     // UpdatedBy -> Admin/Operator (mapping to AdminUser)
     [Required]
@@ -90,5 +93,20 @@ public class Meal
     // Optional attributes (for now)
     // This needs more validation
     public string ImageSourceString { get; set; } = string.Empty;
+
+    public bool IsValid()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+
+        return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
+    }
+    public IEnumerable<string> GetValidationErrors()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+        Validator.TryValidateObject(this, validationContext, validationResults, true);
+        return validationResults.Select(vr => vr.ErrorMessage);
+    }
 }
 

@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <DataTemplate x:Key="AdminMealPackageTemplate" x:DataType="local:MealPackagePage">
+        <DataTemplate x:Key="MealPackageListViewTemplate" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -19,9 +19,8 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                
+                <Image Width="24" Height="24" Stretch="UniformToFill"/>
                 <!--
-                <Image Source="{x:Bind ImageSource}" Width="24" Height="24" Stretch="UniformToFill"/>
                 <TextBlock Grid.Column="1"
                      Text="{x:Bind MealName}"
                      x:Phase="1"
@@ -32,27 +31,213 @@
                      Text="{x:Bind DeliveryType}"
                      x:Phase="2"
                      Style="{ThemeResource BodyTextBlockStyle}"
-                     Margin="12,0,0,6"/> -->
+                     Margin="12,0,0,6"/>
+                -->
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="MealListViewTemplate" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Image Width="24" Height="24" Stretch="UniformToFill"/>
+                
+                <!-- Create a special view model for this -->
+                
+                <!--
+                <TextBlock Grid.Column="1"
+                     Text="{x:Bind MealName}"
+                     x:Phase="1"
+                     Style="{ThemeResource BaseTextBlockStyle}"
+                     Margin="12,6,0,0"/>
+                <TextBlock  Grid.Column="1"
+                     Grid.Row="1"
+                     Text="{x:Bind DeliveryType}"
+                     x:Phase="2"
+                     Style="{ThemeResource BodyTextBlockStyle}"
+                     Margin="12,0,0,6"/>
+                -->
             </Grid>
         </DataTemplate>
     </Page.Resources>
 
     <Grid>
-        <TabView MaxWidth="360"
-                 CanReorderTabs="False" 
-                 IsAddTabButtonVisible="False">
-            <TabView.TabItems>
-                <TabViewItem Header="Catering Packages"
-                             IsClosable="False">
-                    
-                </TabViewItem>
-                <TabViewItem Header="User Packages"
-                             IsClosable="False">
-                    
-                </TabViewItem>
-            </TabView.TabItems>
-        </TabView>
-        
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Make this reactive. Big screen 48 padding, smol screen 48 padding -->
+        <Grid Grid.Column="0" 
+              HorizontalAlignment="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ListView Grid.Row="0"
+                SelectionMode="Single" 
+                Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
+                Margin="12,36,0,12"
+                CornerRadius="6"/>
+
+            <StackPanel Grid.Row="1" 
+                        Orientation="Horizontal"
+                        Margin="12,0,0,24"
+                        Spacing="12">
+                <Grid x:Name="Output" 
+                      HorizontalAlignment="Left" 
+                      VerticalAlignment="Top" >
+                    <Button 
+                            x:Name="QueryPopupToggleButton"
+                            Content="Filter meal list" 
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="ShowQueryPopupButton_Clicked"/>
+                    <Popup x:Name="QueryPopup" 
+                           VerticalOffset="-170" 
+                           HorizontalOffset="0" 
+                           IsLightDismissEnabled="True">
+                        <Border Padding="20" 
+                                CornerRadius="{StaticResource OverlayCornerRadius}" 
+                                Width="200" Height="160" BorderThickness="1" 
+                                BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                                <TextBlock Text="Simple Popup" FontSize="16" HorizontalAlignment="Center" />
+                                <Button Content="Close" Click="CloseQueryPopupButton_Clicked" />
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+                <Button 
+                    Style="{StaticResource AccentButtonStyle}" 
+                    Content="Add another package"/>
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Column="1"
+                      Padding="12,12,12,12"
+                      Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+            <Grid>
+                <StackPanel Orientation="Vertical" 
+                        x:Name="MealFormsPanel"
+                        DataContext="{Binding SelectedMeal}">
+
+                <!-- Fallback when no meal is selected -->
+                <StackPanel x:Name="MainPanel" Visibility="Visible">
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MaxWidth="150"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel 
+                            Grid.Column="0"
+                            Margin="0,24,0,0">
+                            <Border 
+                                    BorderBrush="LightGray" 
+                                    BorderThickness="1" 
+                                    CornerRadius="2" 
+                                    Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
+                                    MaxWidth="150"
+                                    MaxHeight="150">
+                                <Image x:Name="MealImageControl" 
+                                           Width="120" Height="120" 
+                                           Stretch="Uniform"
+                                           />
+                            </Border>
+                            <Button x:Name="ModifyImageButton" 
+                                    Content="Change Photo" 
+                                    Margin="0,12,12,12"
+                                    Style="{StaticResource DefaultButtonStyle}" 
+                                    Foreground="White"
+                                    />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1"
+                                    Margin="24,12,12,12">
+
+                            <TextBlock Style="{StaticResource TitleTextBlockStyle}"
+                                       Margin="0,6,0,0">
+                                Meal Packages
+                            </TextBlock>
+
+                            <!-- Meal ID & Creator Deets -->
+                            <StackPanel Orientation="Vertical" 
+                                        Margin="0,6,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0"
+                                            Header="Item ID" 
+                                             Margin="0,0,3,0"
+                                             PlaceholderText=""/>
+                                    <TextBox Grid.Column="1"
+                                             Header="Creator ID"
+                                             PlaceholderText=""
+                                             Margin="3,0,0,0"
+                                             Height="60"
+                                             />
+                                </Grid>
+                                <StackPanel Grid.Column="1"
+                                            Margin="0,12,0,0">
+                                    <CalendarDatePicker 
+                                            Header="Creation Date" 
+                                            Height="60"/>
+                                    <TextBlock  
+                                               FontSize="12" 
+                                               Foreground="Gray" 
+                                               FontStyle="Italic"/>
+                                </StackPanel>
+                            </StackPanel>                        
+                        </StackPanel>                   
+                    </Grid>
+                </StackPanel>              
+                
+
+                <!-- Package Details -->
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                           Margin="0,6,0,0">
+                           Package Details
+                    </TextBlock>
+                    <TextBox Header="Meal Package Title" 
+                             Margin="0,6,0,0"
+                             PlaceholderText="Enter meal name"
+                             TextChanged="TextBox_TextChanged"/>
+                    <TextBox Header="Description" 
+                             Margin="0,6,0,0"
+                             AcceptsReturn="True" 
+                             TextWrapping="Wrap" 
+                             Height="120"
+                             PlaceholderText="Enter meal description"
+                             TextChanged="TextBox_TextChanged"/>
+                </StackPanel>
+
+                <!-- Package Items-->
+                <StackPanel>
+                    <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
+                               Margin="0,6,0,0">
+                               Package Items
+                    </TextBlock>
+
+                    <ListView 
+                                SelectionMode="Single" 
+                                Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}"
+                                CornerRadius="6"/>
+                </StackPanel>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
     </Grid>
+
 </Page>

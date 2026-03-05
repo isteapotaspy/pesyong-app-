@@ -16,6 +16,7 @@ namespace PESYONG.Domain.Entities.Orders;
 
 public class OrderMealProduct
 {
+
     [ForeignKey(nameof(OrderID))]
     public Guid OrderID { get; set; }
     public Order? Order { get; set; }

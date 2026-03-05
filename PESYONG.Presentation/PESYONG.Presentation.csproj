@@ -130,11 +130,16 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Themes\" />
-    <Folder Include="Views\Admin\Logistics\" />
+    <Folder Include="ViewModels\ObjectModels\" />
+    <Folder Include="ViewModels\PageModels\" />
     <Folder Include="Views\Admin\Administration\" />
     <Folder Include="Views\Admin\Transactions\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\Admin\Logistics\DeliveryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
     <Page Update="Views\Shared\ProfilePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

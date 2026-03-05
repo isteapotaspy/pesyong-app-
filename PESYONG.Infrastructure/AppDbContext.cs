@@ -1,3 +1,5 @@
+using System;
+using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Orders;
@@ -37,6 +39,27 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Ensure your Decimal prices don't lose precision
+        modelBuilder.Entity<Meal>()
+            .Property(m => m.MealPrice)
+            .HasPrecision(18, 2);
+
+//         Previous working code per 3/5/2026 9:24AM - SD Session
+//         modelBuilder.Entity<Order>(entity =>
+//         {
+//             entity.HasMany(o => o.OrderItems)
+//                   .WithOne()
+//                   .HasForeignKey("OrderID")
+//                   .OnDelete(DeleteBehavior.Cascade);
+//         });
+
+//         modelBuilder.Entity<OrderMealProduct>(entity =>
+//         {
+//             entity.HasKey(e => e.OrderID);
+//             entity.Property<Guid>("OrderID").IsRequired(); // Use Guid instead of int
+//         });
+
 
         // Meal configurations
         modelBuilder.Entity<Meal>(entity =>

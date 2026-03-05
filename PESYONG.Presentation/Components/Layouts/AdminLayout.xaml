@@ -23,19 +23,25 @@
             
             <NavigationViewItem Content="Meals" Icon="Contact" ToolTipService.ToolTip="Account">
                 <NavigationViewItem.MenuItems>
-                <NavigationViewItem Content="Individual Meals" 
+                <NavigationViewItem Content="Catering Meals" 
                                         Icon="Mail" ToolTipService.ToolTip="Individual Meals" 
                                         Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage"/>
-                <NavigationViewItem Content="Meal Packages" 
-                                        Icon="Calendar" ToolTipService.ToolTip="Calendar" 
+                    
+                <NavigationViewItem Content="Catering Packages" 
+                                        Icon="Calendar" ToolTipService.ToolTip="Meal Packages" 
+                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPackagePage"/>
+                <NavigationViewItem Content="Customer Packages" 
+                                        Icon="Calendar" ToolTipService.ToolTip="Meal Packages" 
                                         Tag="PESYONG.Presentation.Views.Admin.Meals.MealPackagePage"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
             
-            <NavigationViewItem Content="Logistics" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+            <NavigationViewItem Content="Logistics" Icon="Page2" ToolTipService.ToolTip="Logistics" SelectsOnInvoked="False">
                 <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Events" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
-                    <NavigationViewItem Content="Deliveries" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                    <NavigationViewItem Content="Delivery" 
+                                        Icon="OpenLocal" 
+                                        ToolTipService.ToolTip="Deliveries" 
+                                        Tag="PESYONG.Presentation.Views.Admin.Logistics.DeliveryPage"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
 
