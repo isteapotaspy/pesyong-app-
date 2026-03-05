@@ -5,6 +5,12 @@ using PESYONG.Domain.Enums; // Required for DeliveryStatus
 using System.Linq;
 
 namespace PESYONG.Presentation.ViewModels;
+
+/// <summary>
+/// Prepares and finalizes order details before submission.
+/// Maps UI-specific fields like shipping addresses and customer notes 
+/// back to the <see cref="Order"/> domain entity.
+/// </summary>
 public partial class CheckoutViewModel : ObservableObject
 {
     [ObservableProperty]
@@ -17,6 +23,10 @@ public partial class CheckoutViewModel : ObservableObject
     private string _notes = string.Empty;
 
     // This is called by the View's OnNavigatedTo
+    /// <summary>
+    /// Loads the existing order data into the checkout state.
+    /// Usually called during navigation to pre-populate address and notes.
+    /// </summary>
     public void Initialize(Order order)
     {
         CurrentOrder = order;
@@ -25,6 +35,10 @@ public partial class CheckoutViewModel : ObservableObject
         Notes = order.CustomerNotes ?? string.Empty;
     }
 
+    /// <summary>
+    /// Synchronizes UI edits to the <see cref="Order"/> model and 
+    /// updates the <see cref="DeliveryStatus"/> to Pending to begin processing.
+    /// </summary>
     [RelayCommand]
     private void PlaceOrder()
     {

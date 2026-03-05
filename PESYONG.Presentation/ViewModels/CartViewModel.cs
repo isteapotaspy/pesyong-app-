@@ -6,6 +6,12 @@ using PESYONG.Domain.Enums;
 using System;
 
 namespace PESYONG.Presentation.ViewModels;
+
+/// <summary>
+/// Manages the shopping cart state and checkout logic.
+/// Handles delivery fee calculations based on location, 
+/// item quantity adjustments, and order initialization.
+/// </summary>
 public partial class CartViewModel : ObservableObject
 {
     // Uses your Domain Model from audit.txt
@@ -20,7 +26,10 @@ public partial class CartViewModel : ObservableObject
 
     [ObservableProperty] private decimal _deliveryFee;
 
-    // Logic translated from Figma cart-page.txt
+    /// <summary>
+    /// Calculates fee based on distance: Flat 15.00 for 'poblacion', 
+    /// or base 25.00 + 10.00 per extra km for 'outside' locations.
+    /// </summary>
     public decimal CalculatedDeliveryFee =>
         LocationType == "poblacion" ? 15.00m : Math.Max(25.00m, 25.00m + (decimal)(Math.Floor(Distance - 1) * 10));
 
@@ -30,6 +39,11 @@ public partial class CartViewModel : ObservableObject
 
     public decimal GrandTotal => Subtotal + DeliveryFee;
 
+
+    /// <summary>
+    /// Maps a <see cref="MealProduct"/> to an <see cref="OrderMealProduct"/> 
+    /// and attaches it to the current active order.
+    /// </summary>
     [RelayCommand]
     private void AddProductToCart(MealProduct product)
     {

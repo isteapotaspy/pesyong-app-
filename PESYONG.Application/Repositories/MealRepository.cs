@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,7 +41,19 @@ public class MealRepository
         return await _context.Meals.FirstOrDefaultAsync(m => m.MealID == id);
     }
 
-    public async Task<List<Meal>> GetAllMealsAsync() => await _context.Meals.ToListAsync();
+    public async Task<List<Meal>> GetAllMealsAsync()
+    {
+        var meals = await _context.Meals.ToListAsync();
+
+        if (meals == null || !meals.Any())
+        {
+            Debug.WriteLine("No meals found in database");
+            return new List<Meal>(); // Return empty list instead of null
+        }
+
+        Debug.WriteLine($"Retrieved {meals.Count} meals from database");
+        return meals;
+    }
 
     // Know the IQueryable pattern. This is a more potent implemention
     // as opposed to blind searching by a single ID or all the items.

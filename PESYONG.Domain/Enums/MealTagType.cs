@@ -13,8 +13,12 @@ namespace PESYONG.Domain.Enums
         Cuisine = 3,         // Filipino, Italian, etc.
         Ingredient = 4,      // Chicken, Seafood, etc.
         MealTime = 5,        // Breakfast, Lunch, Dinner
-        Special = 6          // Spicy, Kid-Friendly, etc.
-
-
+        Special = 6,       // Spicy, Kid-Friendly, etc.
+        Kakanin = 7,
+        Dessert = 8,
+        MainDish = 9,
+        SideDish = 10,  
+        Beverage = 11,
+        Viand = 12,
     }
 }

@@ -44,7 +44,7 @@ public class Order
     }
 
     // Order dated details
-    public DateTime OrderDate { get; } = DateTime.Now;
+    public DateTime OrderDate { get; set; } = DateTime.Now;
 
     [Display(Name = "Estimated Delivery Date")]
     [DataType(DataType.Date)]

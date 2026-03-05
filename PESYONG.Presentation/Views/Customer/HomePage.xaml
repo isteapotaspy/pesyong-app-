@@ -9,24 +9,135 @@
     mc:Ignorable="d">
 
     <ScrollViewer>
-        <StackPanel Spacing="20" Padding="40">
-            <Border Background="#FF6600" CornerRadius="15" Padding="40">
-                <StackPanel Spacing="10">
-                    <TextBlock Text="Welcome to PESHONG!" FontSize="42" FontWeight="Bold" Foreground="White"/>
-                    <TextBlock Text="Authentic Filipino flavors delivered to your doorstep." FontSize="18" Foreground="White" Opacity="0.9"/>
-                    <Button Content="View Packages" Background="White" Foreground="#FF6600" CornerRadius="20" Margin="0,20,0,0" Padding="20,10"/>
-                </StackPanel>
+        <StackPanel Spacing="24" Padding="40" Background="LightBlue">
+            <!-- Hero Section -->
+            <Border CornerRadius="15" Padding="0">
+                <Border Background="#FF6600" CornerRadius="15" Padding="40">
+                    <StackPanel MaxWidth="600" Spacing="10">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left" Margin="0,0,0,16">
+                            <TextBlock Text="★" FontSize="20" Foreground="#FFD700" />
+                            <Border Background="#FFD700" CornerRadius="20" Padding="12,4">
+                                <TextBlock Text="Premium Quality" Foreground="#FF6600" FontSize="12" FontWeight="SemiBold"/>
+                            </Border>
+                        </StackPanel>
+
+                        <TextBlock Text="Welcome to Orange Catering!" FontSize="42" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Authentic Filipino flavors delivered to your doorstep. Fresh, delicious, and perfect for any occasion." 
+                                  FontSize="18" Foreground="White" Opacity="0.9" TextWrapping="Wrap"/>
+
+                        <Button Background="White" Foreground="#FF6600" 
+                                CornerRadius="20" Margin="0,20,0,0" Padding="20,10" 
+                                FontWeight="Bold" FontSize="16">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="View Packages" VerticalAlignment="Center"/>
+                                <TextBlock Text="🛒" FontSize="18" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
             </Border>
 
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="20">
-                <Border Grid.Column="0" Background="#FF6600" Height="200" CornerRadius="10">
-                    <TextBlock Text="Catering Packages" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontWeight="Bold"/>
+            <!-- Active Promos Section (Static Example) -->
+            <StackPanel Spacing="12">
+                <Border Background="#FFF9E6" CornerRadius="12" Padding="16" BorderBrush="#FFB266" BorderThickness="2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#FF6600" CornerRadius="20" Width="40" Height="40" Margin="0,0,12,0">
+                            <TextBlock Text="🔔" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Weekend Special" FontWeight="Bold" Foreground="#CC5200"/>
+                                <Border Background="#4CAF50" CornerRadius="12" Padding="8,2">
+                                    <TextBlock Text="Active" Foreground="White" FontSize="10"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="15% off on all catering packages" Foreground="#CC5200" FontSize="14"/>
+                            <TextBlock Text="Valid until December 31, 2024" Foreground="#666666" FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
-                <Border Grid.Column="1" Background="#FF6600" Height="200" CornerRadius="10">
-                    <TextBlock Text="Short Orders" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontWeight="Bold"/>
+            </StackPanel>
+
+            <!-- Features Grid -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Catering Packages -->
+                <Border Grid.Column="0" Background="#FF6600" CornerRadius="15" Padding="20" Margin="0,0,10,0">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="📦" FontSize="48"/>
+                        <TextBlock Text="Catering Packages" FontWeight="Bold" Foreground="White" FontSize="24" TextWrapping="Wrap"/>
+                        <TextBlock Text="Perfect for events &amp; celebrations" Foreground="#FFE6CC" FontSize="14" TextWrapping="Wrap"/>
+                        <Border Background="White" CornerRadius="20" Padding="12,6" Margin="0,10,0,0">
+                            <TextBlock Text="Explore →" Foreground="#FF6600" HorizontalAlignment="Center"/>
+                        </Border>
+                    </StackPanel>
                 </Border>
-                <Border Grid.Column="2" Background="#FF6600" Height="200" CornerRadius="10">
-                    <TextBlock Text="Kakanin" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="White" FontWeight="Bold"/>
+
+                <!-- Short Orders -->
+                <Border Grid.Column="1" Background="#E65C00" CornerRadius="15" Padding="20" Margin="5,0">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="🍽️" FontSize="48"/>
+                        <TextBlock Text="Short Orders" FontWeight="Bold" Foreground="White" FontSize="24" TextWrapping="Wrap"/>
+                        <TextBlock Text="Individual viands &amp; meals" Foreground="#FFE6CC" FontSize="14" TextWrapping="Wrap"/>
+                        <Border Background="White" CornerRadius="20" Padding="12,6" Margin="0,10,0,0">
+                            <TextBlock Text="Explore →" Foreground="#CC5200" HorizontalAlignment="Center"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Kakanin -->
+                <Border Grid.Column="2" Background="#CC5200" CornerRadius="15" Padding="20" Margin="10,0,0,0">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="🍚" FontSize="48"/>
+                        <TextBlock Text="Kakanin" FontWeight="Bold" Foreground="White" FontSize="24" TextWrapping="Wrap"/>
+                        <TextBlock Text="Traditional Filipino treats" Foreground="#FFE6CC" FontSize="14" TextWrapping="Wrap"/>
+                        <Border Background="White" CornerRadius="20" Padding="12,6" Margin="0,10,0,0">
+                            <TextBlock Text="Explore →" Foreground="#B34700" HorizontalAlignment="Center"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Info Cards -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="#FFF2E6" CornerRadius="15" Padding="24" BorderBrush="#FFB266" BorderThickness="1" Margin="0,0,10,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="🚚 Smart Delivery" FontWeight="Bold" Foreground="#CC5200" FontSize="20"/>
+                        <TextBlock TextWrapping="Wrap" Foreground="#CC5200">
+                            <Run FontWeight="Bold" Text="Poblacion:"/>
+                            <Run Text=" ₱15 flat rate"/>
+                            <LineBreak/>
+                            <Run FontWeight="Bold" Text="Outside:"/>
+                            <Run Text=" Starting at ₱25"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Background="#FFF2E6" CornerRadius="15" Padding="24" BorderBrush="#FFB266" BorderThickness="1" Margin="10,0,0,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="💳 Payment Options" FontWeight="Bold" Foreground="#CC5200" FontSize="20"/>
+                        <TextBlock Text="Cash on Delivery • GCash • Down Payment for Catering Events" 
+                                   TextWrapping="Wrap" Foreground="#CC5200"/>
+                    </StackPanel>
                 </Border>
             </Grid>
         </StackPanel>
