@@ -1,26 +1,14 @@
-﻿using PESYONG.Domain.Entities.Orders;
+﻿using Microsoft.EntityFrameworkCore;
+using PESYONG.Domain.Entities.Orders;
+using PESYONG.Domain.Enums;
 using PESYONG.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-
-/// <summary>
-/// This serves as the quasi-controller from an frontend-based API.
-/// An ASP.NET backend wasn't implemented. Instead, the data doesn't 
-/// go through an API layer and goes directly to the database. 
-/// 
-/// Speficially, chis handles the orders in the system. 
-/// </summary>
- 
-/// <remarks>
-/// TASK. Need to implement AuthorizationService, which will check data access patterns.
-/// TASK. Need to implement LoggingService, which will log all transactions and bind it to an AppUser.
-/// </remarks>
- 
 namespace PESYONG.ApplicationLogic.Repositories;
+
 public class OrderRepository
 {
     private readonly AppDbContext _context;
@@ -29,18 +17,139 @@ public class OrderRepository
     {
         _context = context;
     }
-    
-    public async Task SaveOrderAsync(Order order)
+
+    public async Task CreateOrderAsync(Order order)
     {
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
     }
 
-    public List<Order> GetOrderHistory(int userId)
+    public async Task<Order> GetOrderByIdAsync(Guid id)
     {
-        return _context.Orders
-            .Where(o => o.RecipientID== userId)
+        return await _context.Orders
+            .Include(o => o.Recipient)
+            .Include(o => o.Receipt)
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.OrderID == id);
+    }
+
+    public async Task<List<Order>> GetAllOrdersAsync()
+    {
+        return await _context.Orders
+            .Include(o => o.Recipient)
+            .Include(o => o.OrderItems)
             .OrderByDescending(o => o.OrderDate)
-            .ToList();
+            .ToListAsync();
+    }
+
+    public async Task<List<Order>> GetOrdersByRecipientAsync(int recipientId)
+    {
+        return await _context.Orders
+            .Where(o => o.RecipientID == recipientId)
+            .Include(o => o.OrderItems)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+    }
+
+    public async Task<List<Order>> GetOrdersByStatusAsync(DeliveryStatus status)
+    {
+        return await _context.Orders
+            .Where(o => o.DeliveryStatus == status)
+            .Include(o => o.Recipient)
+            .Include(o => o.OrderItems)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+    }
+
+    public async Task<List<Order>> GetCartOrdersAsync()
+    {
+        return await _context.Orders
+            .Where(o => o.DeliveryType == DeliveryStatus.OnCart)
+            .Include(o => o.OrderItems)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+    }
+
+    public async Task UpdateOrderAsync(Order order)
+    {
+        _context.Orders.Update(order);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateOrderStatusAsync(Guid orderId, DeliveryStatus newStatus)
+    {
+        var order = await _context.Orders.FindAsync(orderId);
+        if (order != null)
+        {
+            order.DeliveryStatus = newStatus;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task AssignReceiptAsync(Guid orderId, int receiptId)
+    {
+        var order = await _context.Orders.FindAsync(orderId);
+        if (order != null)
+        {
+            order.ReceiptID = receiptId;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task DeleteOrderAsync(Guid orderId)
+    {
+        var order = await _context.Orders.FindAsync(orderId);
+        if (order != null)
+        {
+            _context.Orders.Remove(order);
+            await _context.SaveChangesAsync();
+        }
+    }
+}
+
+public class OrderMealProductRepository
+{
+    private readonly AppDbContext _context;
+
+    public OrderMealProductRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task AddOrderItemAsync(OrderMealProduct orderItem)
+    {
+        _context.OrderMealProducts.Add(orderItem);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<OrderMealProduct>> GetOrderItemsByOrderAsync(Guid orderId)
+    {
+        return await _context.OrderMealProducts
+            .Where(oi => oi.OrderID == orderId)
+            .ToListAsync();
+    }
+
+    public async Task UpdateOrderItemQuantityAsync(Guid orderId, int mealProductId, int newQuantity)
+    {
+        var orderItem = await _context.OrderMealProducts
+            .FirstOrDefaultAsync(oi => oi.OrderID == orderId && oi.MealProductID == mealProductId);
+
+        if (orderItem != null)
+        {
+            orderItem.MealProductOrderQty = newQuantity;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task RemoveOrderItemAsync(Guid orderId, int mealProductId)
+    {
+        var orderItem = await _context.OrderMealProducts
+            .FirstOrDefaultAsync(oi => oi.OrderID == orderId && oi.MealProductID == mealProductId);
+
+        if (orderItem != null)
+        {
+            _context.OrderMealProducts.Remove(orderItem);
+            await _context.SaveChangesAsync();
+        }
     }
 }

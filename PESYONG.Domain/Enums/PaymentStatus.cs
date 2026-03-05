@@ -11,6 +11,7 @@ namespace PESYONG.Domain.Enums
         Draft,
         Issued,
         Paid,
+        Completed,
         Refunded,
         Voided,
         Cancelled

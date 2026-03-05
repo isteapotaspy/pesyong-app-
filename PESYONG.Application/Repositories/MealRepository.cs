@@ -17,6 +17,7 @@ using PESYONG.Infrastructure;
 /// </summary>
 
 namespace PESYONG.ApplicationLogic.Repositories;
+
 public class MealRepository
 {
     private readonly AppDbContext _context;
@@ -89,13 +90,15 @@ public class MealRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteMealAsync(int MealID)
+    // Fix the duplicate method issue - remove the one that throws NotImplementedException
+    public async Task DeleteMealAsync(int mealId)
     {
-        var meal = await _context.Meals.FindAsync(MealID);
+        var meal = await _context.Meals.FindAsync(mealId);
         if (meal != null)
         {
             _context.Meals.Remove(meal);
             await _context.SaveChangesAsync();
         }
     }
+
 }

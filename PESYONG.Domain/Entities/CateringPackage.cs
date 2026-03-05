@@ -18,7 +18,7 @@ public class CateringPackage
     public List<string>? Viands { get; set; }
     public bool IsSelectable => Viands == null;
     public double Price { get; set; }
-    public int Pax { get; set; }
+    public int Pax { get; set; }    
     public string Image { get; set; } = string.Empty;
     public string? Badge { get; set; }
     public string Description { get; set; } = string.Empty;

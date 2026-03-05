@@ -1,103 +1,86 @@
-﻿
-using PESYONG.Domain.Entities;
-using PESYONG.Domain.Entities.Meals.MealProduct;
-using PESYONG.Domain.Entities.Orders;
-using PESYONG.Domain.Entities.Users.Identity;
-using PESYONG.Domain.Enums;
+﻿using PESYONG.Domain.Entities;
+using PESYONG.Domain.Entities.Logistics;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace PESYONG.ApplicationLogic.Services;
-
-public class CartService
+namespace PESYONG.ApplicationLogic.Services
 {
-    // ObservableCollection automatically updates the WinUI UI when items are added/removed
-    public ObservableCollection<CartItem> Cart { get; private set; } = new();
-    public DeliveryInfo? Delivery { get; private set; }
-
-    private Order _activeOrder;
-    private Order _activeCart;
-    private readonly AppUser _currentUser;
-
-    public CartService(AppUser user)
+    public class CartService
     {
-        _currentUser = user;
-        // Find existing cart or create new
-        _activeOrder = user.UserOrders.FirstOrDefault(o => o.DeliveryStatus == DeliveryStatus.OnCart)
-                       ?? new Order { RecipientID = user.Id, DeliveryStatus = DeliveryStatus.OnCart };
-    }
+        private static CartService _instance;
+        public static CartService Instance => _instance ??= new CartService();
 
-    public Order InitializeCart(AppUser user)
-    {
-        // Search user's orders for one still "OnCart"
-        _activeCart = user.UserOrders.FirstOrDefault(o => o.DeliveryStatus == DeliveryStatus.OnCart);
+        public ObservableCollection<CartItem> Cart { get; } = new ObservableCollection<CartItem>();
+        public DeliveryInfo Delivery { get; set; }
 
-        if (_activeCart == null)
+        private CartService()
         {
-            _activeCart = new Order
+            Delivery = new DeliveryInfo();
+        }
+            // Private constructor for singleton
+
+        public void AddToCart(CartItem item)
+        {
+            var existingItem = Cart.FirstOrDefault(x => x.Id == item.Id && x.Type == item.Type);
+            if (existingItem != null)
             {
-                OrderID = Guid.NewGuid(), // Order gets a Guid
-                RecipientID = user.Id,    // User gets an int (from IdentityUser<int>)
-                DeliveryStatus = DeliveryStatus.OnCart
-            };
-        }
-        return _activeCart;
-    }
-    private List<CartItem> _cartItems = new();
-
-    public void AddToCart(int productId, decimal price, int quantity = 1)
-    {
-        var existingItem = _cartItems.FirstOrDefault(x => x.ProductId == productId);
-
-        if (existingItem != null)
-        {
-            existingItem.Quantity += quantity;
-        }
-        else
-        {
-            _cartItems.Add(new CartItem
+                existingItem.Quantity += item.Quantity;
+            }
+            else
             {
-                ProductId = productId,
-                Price = (double)price,
-                Quantity = quantity
-            });
+                Cart.Add(item);
+            }
+
+            CartUpdated?.Invoke(this, EventArgs.Empty);
         }
-    }
 
-    public void RemoveFromCart(string id)
-    {
-        var item = Cart.FirstOrDefault(i => i.Id == id);
-        if (item != null) Cart.Remove(item);
-    }
-
-    public void UpdateQuantity(string id, int quantity)
-    {
-        if (quantity <= 0)
+        public void RemoveFromCart(string itemId)
         {
-            RemoveFromCart(id);
-            return;
+            var item = Cart.FirstOrDefault(x => x.Id == itemId);
+            if (item != null)
+            {
+                Cart.Remove(item);
+            }
         }
 
-        var item = Cart.FirstOrDefault(i => i.Id == id);
-        if (item != null) item.Quantity = quantity;
-    }
+        public void UpdateQuantity(string itemId, int newQuantity)
+        {
+            var item = Cart.FirstOrDefault(x => x.Id == itemId);
+            if (item != null)
+            {
+                if (newQuantity <= 0)
+                {
+                    Cart.Remove(item);
+                }
+                else
+                {
+                    item.Quantity = newQuantity;
+                }
+            }
+        }
 
-    public void SetDelivery(DeliveryInfo info) => Delivery = info;
+        public void ClearCart()
+        {
+            Cart.Clear();
+            Delivery = null;
+        }
 
-    public void ClearCart()
-    {
-        Cart.Clear();
-        Delivery = null;
-    }
+        public double GetSubtotal()
+        {
+            return Cart.Sum(item => item.Price * item.Quantity);
+        }
 
-    public double GetSubtotal() => Cart.Sum(item => item.Price * item.Quantity);
+        public double GetTotal()
+        {
+            return GetSubtotal() + (Delivery?.DeliveryFee ?? 0);
+        }
 
-    public double GetTotal()
-    {
-        double subtotal = GetSubtotal();
-        double fee = Delivery?.DeliveryFee ?? 0;
-        return subtotal + fee;
+        public void SetDelivery(DeliveryInfo deliveryInfo)
+        {
+            Delivery = deliveryInfo;
+        }
+
+        public event EventHandler CartUpdated;
     }
 }

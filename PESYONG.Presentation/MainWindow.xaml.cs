@@ -1,6 +1,8 @@
-using System;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
 using PESYONG.Presentation.Interfaces;
+using System;
+using Windows.System;
 
 namespace PESYONG.Presentation;
 
@@ -28,7 +30,8 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         // This will determine what layout your user goes.
-        SetLayoutBasedOnUserRole(isAdmin: true);
+        SetLayoutBasedOnUserRole(isAdmin: false);
+        this.Content.KeyDown += OnKeyDown;
     }
 
     public void SetLayoutBasedOnUserRole(bool isAdmin)
@@ -70,6 +73,32 @@ public sealed partial class MainWindow : Window
     {
         SetLayoutBasedOnUserRole(isAdmin: false);
     }
+
+    private void OnKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == VirtualKey.F11)
+        {
+            ToggleFullscreen();
+            e.Handled = true;
+        }
+    }
+
+    private void ToggleFullscreen()
+    {
+        var presenter = this.AppWindow.Presenter;
+
+        if (presenter.Kind == Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen)
+        {
+            // Exit fullscreen
+            this.AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.Overlapped);
+        }
+        else
+        {
+            // Enter fullscreen
+            this.AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);
+        }
+    }
+
 
 
     // IMPLEMENT THIS ON LOGIN PAGE

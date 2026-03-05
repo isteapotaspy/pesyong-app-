@@ -8,8 +8,19 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PESYONG.ApplicationLogic.Repositories;
+using PESYONG.Domain.Entities.Financial;
+using PESYONG.Domain.Entities.Financial.Promos;
 using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Domain.Entities.Meals.MealProduct;
+using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.ViewModels.Admin;
 
@@ -18,14 +29,17 @@ namespace PESYONG.Presentation.ViewModels.Admin;
 /// This handles UI actions, coordinates model updates and
 /// server communication, as well as transforms data for display.
 /// </summary>
+/// 
 
 public partial class MealViewModel : ObservableValidator
 {
     // reference to the model
     private Meal _meal = new();
     public Meal GetMeal() => _meal;
+
     // reference to the repository (or API if you have an actual backend)
-    private readonly MealRepository _mealRepository;
+    private readonly MealRepository? _mealRepository;
+
     // page specific shits
     private bool _hasChanges = false;
     public bool HasChanges
@@ -44,6 +58,8 @@ public partial class MealViewModel : ObservableValidator
     [Required(ErrorMessage = "Meal.MealName is required.")]
     [StringLength(100, ErrorMessage = "Meal.MealName must be less than 100 characters.")]
     private string _mealName = string.Empty;
+    [Required(ErrorMessage = "Meal.MealName is required.")]
+    [StringLength(100, ErrorMessage = "Meal.MealName must be less than 100 characters.")]
     public string MealName
     {
         get => _mealName;
@@ -55,14 +71,16 @@ public partial class MealViewModel : ObservableValidator
                 OnPropertyChanged();
                 _meal.MealName = value;
                 _hasChanges = true;
+                ValidateAllProperties();
             }
         }
     }
 
     [StringLength(500, ErrorMessage = "Meal.Description must be less than 500 characters.")]
     private string _description = string.Empty;
-    public string Description 
-    { 
+    [StringLength(500, ErrorMessage = "Meal.Description must be less than 500 characters.")]
+    public string Description
+    {
         get => _description;
         set
         {
@@ -72,8 +90,9 @@ public partial class MealViewModel : ObservableValidator
                 OnPropertyChanged();
                 _meal.Description = value;
                 _hasChanges = true;
+                ValidateAllProperties();
             }
-        } 
+        }
     }
 
     [Required(ErrorMessage = "Meal.MealPrice is required.")]
@@ -85,24 +104,27 @@ public partial class MealViewModel : ObservableValidator
         set
         {
             if (_mealPrice != value)
-            { 
+            {
                 _mealPrice = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(FormattedPrice));
                 _meal.MealPrice = value;
                 _hasChanges = true;
+                ValidateAllProperties();
             }
-        } 
+        }
     }
 
     [Required(ErrorMessage = "Meal.StockQuantity is required.")]
     [Range(0, int.MaxValue, ErrorMessage = "Meal.StockQuantity cannot be negative.")]
     private int _stockQuantity = 0;
-    public int StockQuantity 
-    { 
+    [Required(ErrorMessage = "Meal.StockQuantity is required.")]
+    [Range(0, int.MaxValue, ErrorMessage = "Meal.StockQuantity cannot be negative.")]
+    public int StockQuantity
+    {
         get => _stockQuantity;
-        set 
-        { 
+        set
+        {
             if (_stockQuantity != value)
             {
                 _stockQuantity = value;
@@ -114,15 +136,18 @@ public partial class MealViewModel : ObservableValidator
                 OnPropertyChanged(nameof(LowStockWarningVisibility));
                 _meal.StockQuantity = value;
                 _hasChanges = true;
+                ValidateAllProperties();
             }
-        } 
+        }
     }
 
     [Required(ErrorMessage = "Meal.MinOrderQuantity is required.")]
     [Range(1, 1000, ErrorMessage = "Meal.MinOrderQuantity must be between 1 and 1000.")]
     private int _minOrderQuantity = 1;
-    public int MinOrderQuantity 
-    { 
+    [Required(ErrorMessage = "Meal.MinOrderQuantity is required.")]
+    [Range(1, 1000, ErrorMessage = "Meal.MinOrderQuantity must be between 1 and 1000.")]
+    public int MinOrderQuantity
+    {
         get => _minOrderQuantity;
         set
         {
@@ -132,11 +157,12 @@ public partial class MealViewModel : ObservableValidator
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(IsAvailable));
                 OnPropertyChanged(nameof(AvailabilityColor));
-                OnPropertyChanged(nameof(MinMaxOrderText)); 
+                OnPropertyChanged(nameof(MinMaxOrderText));
                 _meal.MinOrderQuantity = value;
                 _hasChanges = true;
+                ValidateAllProperties();
             }
-        } 
+        }
     }
 
     [Required(ErrorMessage = "Delivery type is required.")]
@@ -156,8 +182,9 @@ public partial class MealViewModel : ObservableValidator
         } 
     }
 
-    private List<string> _mealTags = new List<string>();
-    public List<string> MealTags
+    private DeliveryType _deliveryType;
+    [Required(ErrorMessage = "Delivery type is required.")]
+    public DeliveryType DeliveryType
     {
         get => _mealTags;
         set
@@ -169,6 +196,42 @@ public partial class MealViewModel : ObservableValidator
                 //OnPropertyChanged(nameof(MealTagTokenMap));
                 _meal.MealTags = value;
                 _hasChanges = true;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private int _operatorId;
+    public int OperatorId
+    {
+        get => _operatorId;
+        set
+        {
+            if (_operatorId != value)
+            {
+                _operatorId = value;
+                OnPropertyChanged();
+                _meal.OperatorID = value;
+                _hasChanges = true;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private int _lastModifiedByOperatorID;
+    [Required]
+    public int LastModifiedByOperatorID
+    {
+        get => _lastModifiedByOperatorID;
+        set
+        {
+            if (_lastModifiedByOperatorID != value)
+            {
+                _lastModifiedByOperatorID = value;
+                OnPropertyChanged();
+                _meal.LastModifiedByOperatorID = value;
+                _hasChanges = true;
+                ValidateAllProperties();
             }
         }
     }
@@ -183,10 +246,10 @@ public partial class MealViewModel : ObservableValidator
 
     // TECH DEBT: Implement CRUD for TS on Repository
     private string _imageSourceString = string.Empty;
-    public string ImageSourceString 
-    { 
+    public string ImageSourceString
+    {
         get => _imageSourceString;
-        set 
+        set
         {
             if (_imageSourceString != value)
             {
@@ -200,6 +263,7 @@ public partial class MealViewModel : ObservableValidator
     }
 
     private DateTime _creationDate;
+    [Required]
     public DateTime CreationDate
     {
         get => _creationDate;
@@ -209,11 +273,44 @@ public partial class MealViewModel : ObservableValidator
             {
                 _creationDate = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(RelativeCreationTime)); 
+                OnPropertyChanged(nameof(RelativeCreationTime));
+                _meal.CreationDate = value;
             }
         }
     }
 
+    private DateTime _lastModifiedDate;
+    [Required]
+    public DateTime LastModifiedDate
+    {
+        get => _lastModifiedDate;
+        set
+        {
+            if (_lastModifiedDate != value)
+            {
+                _lastModifiedDate = value;
+                OnPropertyChanged();
+                _meal.LastModifiedDate = value;
+                _hasChanges = true;
+            }
+        }
+    }
+
+    private AppUser? _modifiedByOperator;
+    public AppUser? ModifiedByOperator
+    {
+        get => _modifiedByOperator;
+        set
+        {
+            if (_modifiedByOperator != value)
+            {
+                _modifiedByOperator = value;
+                OnPropertyChanged();
+                _meal.ModifiedByOperator = value;
+                _hasChanges = true;
+            }
+        }
+    }
 
     // Helper viewmodels
     public BitmapImage? MealImage
@@ -259,70 +356,331 @@ public partial class MealViewModel : ObservableValidator
     public string StockQuantityText => $"{StockQuantity} units";
     public string MinMaxOrderText => $"Min: {MinOrderQuantity} units";
     public Visibility LowStockWarningVisibility => StockQuantity <= 5 ? Visibility.Visible : Visibility.Collapsed;
+    public bool IsValid => !HasErrors;
 
     // RELAY COMMANDS
-    // This is item-based commands that will directly communicate with the backend.
     [RelayCommand]
     public async Task CreateCommand()
     {
-        if (_hasChanges && !MealID.HasValue)
+        ValidateAllProperties();
+        if (IsValid && _hasChanges && MealID == null)
         {
-            await _mealRepository.CreateMealAsync(_meal);
-            _hasChanges = false;
-        } // add error handling
+            if (_mealRepository != null)
+            {
+                await _mealRepository.CreateMealAsync(_meal);
+                _hasChanges = false;
+            }
+        }
+    }
+
+    [RelayCommand]
+    public async Task UpdateCommand()
+    {
+        ValidateAllProperties();
+        if (IsValid && _hasChanges && MealID.HasValue)
+        {
+            if (_mealRepository != null)
+            {
+                await _mealRepository.UpdateMealAsync(_meal);
+                _hasChanges = false;
+            }
+        }
+    }
+
+    [RelayCommand]
+    public async Task DeleteCommand()
+    {
+        if (MealID.HasValue && _mealRepository != null)
+        {
+            await _mealRepository.DeleteMealAsync(_meal.MealID);
+            _parent?.DeleteMeal(this);
+        }
     }
 
     // PARENT DEPENDENCY INJECTION
-    // Implemented if you have a parent VM element (like an Observable List).
-    // It allows for the individual item element to modify itself and relay that event to its parent.
-    // Operationally speaking, this means that if you have a list of Meals represented by MealViewModel,
-    // then if you delete from that list (a.k.a. it's parent) then that also means you've deleted the 
-    // actual item also FOR REALS.
+    private readonly AdminMealListViewModel? _parent;
 
-    private readonly AdminMealListViewModel _parent;
-    // add a case later where you grab the OperatorID so that it can be logged
-    // remove this in the parent as well for syncing
-    public RelayCommand DeleteCommand => new RelayCommand(() => _parent.DeleteMeal(this));
-    public RelayCommand RequestUpdateCommand => new RelayCommand(() =>
-                                        _parent.UpdateSelectedMealCommand.Execute(null));
+    public RelayCommand DeleteCommandParent => new RelayCommand(() => _parent?.DeleteMeal(this));
+    public RelayCommand RequestUpdateCommand => new RelayCommand(() => _parent?.UpdateSelectedMealCommand.Execute(null));
 
     // INITIAL DATA LOADING (via constructor injection)
-    // This is what feeds the actual data to your VM
-    public MealViewModel(Meal meal, AdminMealListViewModel parent) 
+    public MealViewModel(Meal meal, AdminMealListViewModel? parent)
     {
         _meal = meal ?? new Meal(); 
         _parent = parent;
-        _mealRepository = _parent.MealRepository;
+        _mealRepository = parent?.MealRepository;
         _hasChanges = false;
 
         _mealName = _meal.MealName ?? string.Empty;
         _description = _meal.Description ?? string.Empty;
         _mealPrice = _meal.MealPrice;
         _stockQuantity = _meal.StockQuantity;
-        _mealTags = (List<string>)_meal.MealTags;
+        _minOrderQuantity = _meal.MinOrderQuantity;
+        _mealTags = _meal.MealTags?.ToList() ?? new List<MealTagType>();
         _deliveryType = _meal.DeliveryType;
-        _imageSourceString = _meal.ImageSourceString;
+        _operatorId = _meal.OperatorID;
+        _lastModifiedByOperatorID = _meal.LastModifiedByOperatorID;
+        _imageSourceString = _meal.ImageSourceString ?? string.Empty;
         _creationDate = _meal.CreationDate;
+        _lastModifiedDate = _meal.LastModifiedDate;
+        _modifiedByOperator = _meal.ModifiedByOperator;
 
-        this.PropertyChanged += (s, e) =>
-        {
-            if (!e.PropertyName.Equals(nameof(HasChanges)))
-            {
-                HasChanges = true;
-            }
-        };
-    }
-
-    public MealViewModel(AdminMealListViewModel parent)
-    {
-        _parent = parent;
-        _mealRepository = _parent.MealRepository;
-    }
-
-    public bool IsValid => !HasErrors;
-
-    public void ValidateAll()
-    {
         ValidateAllProperties();
     }
+
+    public MealViewModel() : this(new Meal(), null) { }
+}
+
+public partial class MealProductViewModel : ObservableValidator
+{
+    private MealProduct _mealProduct = new();
+    public MealProduct GetMealProduct() => _mealProduct;
+
+    private int _mealProductID;
+    public int MealProductID
+    {
+        get => _mealProductID;
+        set
+        {
+            if (_mealProductID != value)
+            {
+                _mealProductID = value;
+                OnPropertyChanged();
+                _mealProduct.MealProductID = value;
+            }
+        }
+    }
+
+    private int _ownerID;
+    public int OwnerID
+    {
+        get => _ownerID;
+        set
+        {
+            if (_ownerID != value)
+            {
+                _ownerID = value;
+                OnPropertyChanged();
+                _mealProduct.OwnerID = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private int? _promoID;
+    public int? PromoID
+    {
+        get => _promoID;
+        set
+        {
+            if (_promoID != value)
+            {
+                _promoID = value;
+                OnPropertyChanged();
+                _mealProduct.PromoID = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    //mao ba ni tong di na need? 
+    private AppUser? _owner;
+    public AppUser? Owner
+    {
+        get => _owner;
+        set
+        {
+            if (_owner != value)
+            {
+                _owner = value;
+                OnPropertyChanged();
+                _mealProduct.Owner = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private ICollection<MealProductItem> _mealProductItems = [];
+    public ICollection<MealProductItem> MealProductItems
+    {
+        get => _mealProductItems;
+        set
+        {
+            if (_mealProductItems != value)
+            {
+                _mealProductItems = value;
+                OnPropertyChanged();
+                _mealProduct.MealProductItems = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private Promo? _promo;
+    public Promo? Promo
+    {
+        get => _promo;
+        set
+        {
+            if (_promo != value)
+            {
+                _promo = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ProductBasePrice));
+                OnPropertyChanged(nameof(DiscountAmount));
+                OnPropertyChanged(nameof(FinalPrice));
+                _mealProduct.Promo = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private string _productName = string.Empty;
+    [Required]
+    [StringLength(100)]
+    public string ProductName
+    {
+        get => _productName;
+        set
+        {
+            if (_productName != value)
+            {
+                _productName = value;
+                OnPropertyChanged();
+                _mealProduct.ProductName = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private string _productDescription = string.Empty;
+    [StringLength(100)]
+    public string ProductDescription
+    {
+        get => _productDescription;
+        set
+        {
+            if (_productDescription != value)
+            {
+                _productDescription = value;
+                OnPropertyChanged();
+                _mealProduct.ProductDescription = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    // Computed properties
+    public decimal ProductBasePrice => MealProductItems.Sum(item => item.ItemPrice);
+    public decimal DiscountAmount => ProductBasePrice - FinalPrice;
+    public decimal FinalPrice => Promo?.ApplyDiscount(ProductBasePrice) ?? ProductBasePrice;
+    public bool IsValid => !HasErrors;
+
+    public MealProductViewModel(MealProduct mealProduct)
+    {
+        _mealProduct = mealProduct ?? new MealProduct();
+        _mealProductID = _mealProduct.MealProductID;
+        _ownerID = _mealProduct.OwnerID;
+        _promoID = _mealProduct.PromoID;
+        _owner = _mealProduct.Owner;
+        _mealProductItems = _mealProduct.MealProductItems ?? [];
+        _promo = _mealProduct.Promo;
+        _productName = _mealProduct.ProductName ?? string.Empty;
+        _productDescription = _mealProduct.ProductDescription ?? string.Empty;
+
+        ValidateAllProperties();
+    }
+
+    public MealProductViewModel() : this(new MealProduct()) { }
+}
+
+public partial class MealProductItemViewModel : ObservableValidator
+{
+    private MealProductItem _mealProductItem = new();
+    public MealProductItem GetMealProductItem() => _mealProductItem;
+
+    private int _mealID;
+    public int MealID
+    {
+        get => _mealID;
+        set
+        {
+            if (_mealID != value)
+            {
+                _mealID = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ItemPrice));
+                _mealProductItem.MealID = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private Meal? _meal;
+    public Meal? Meal
+    {
+        get => _meal;
+        set
+        {
+            if (_meal != value)
+            {
+                _meal = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ItemPrice));
+                _mealProductItem.Meal = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private int _quantity = 1;
+    [Range(1, 100)]
+    public int Quantity
+    {
+        get => _quantity;
+        set
+        {
+            if (_quantity != value)
+            {
+                _quantity = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ItemPrice));
+                _mealProductItem.Quantity = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    private string _requestDescription = string.Empty;
+    [StringLength(100)]
+    public string RequestDescription
+    {
+        get => _requestDescription;
+        set
+        {
+            if (_requestDescription != value)
+            {
+                _requestDescription = value;
+                OnPropertyChanged();
+                _mealProductItem.RequestDescription = value;
+                ValidateAllProperties();
+            }
+        }
+    }
+
+    public decimal ItemPrice => Meal?.MealPrice * Quantity ?? 0m;
+    public bool IsValid => !HasErrors;
+
+    public MealProductItemViewModel(MealProductItem mealProductItem)
+    {
+        _mealProductItem = mealProductItem ?? new MealProductItem();
+        _mealID = _mealProductItem.MealID;
+        _meal = _mealProductItem.Meal;
+        _quantity = _mealProductItem.Quantity;
+        _requestDescription = _mealProductItem.RequestDescription ?? string.Empty;
+
+        ValidateAllProperties();
+    }
+
+    public MealProductItemViewModel() : this(new MealProductItem()) { }
 }
