@@ -1,13 +1,14 @@
 using System;
+using System.Linq;
 using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
-using PESYONG.Domain.Entities.Meals.MealItem;
-using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Audits;
 using PESYONG.Domain.Entities.Financial;
 using PESYONG.Domain.Entities.Financial.AcknowledgementReceipts;
 using PESYONG.Domain.Entities.Financial.Promos;
 using PESYONG.Domain.Entities.Logistics;
+using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Users.Identity;
 
 namespace PESYONG.Infrastructure;
@@ -20,7 +21,8 @@ public class AppDbContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseInMemoryDatabase("TestDatabase"); // FIXED: removed underscore
+            optionsBuilder.UseInMemoryDatabase("TestDatabase");
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
         base.OnConfiguring(optionsBuilder);
     }
@@ -81,6 +83,12 @@ public class AppDbContext : DbContext
                   .HasForeignKey(e => e.ReceiptID)
                   .OnDelete(DeleteBehavior.SetNull);
         });
+
+        modelBuilder.Entity<Meal>()
+                  .Property(m => m.MealTags)
+                  .HasConversion(
+                  v => string.Join(",", v), 
+                  v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());  
 
         // OrderMealProduct configuration
         modelBuilder.Entity<OrderMealProduct>(entity =>

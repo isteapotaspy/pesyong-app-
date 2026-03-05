@@ -31,15 +31,17 @@ public sealed partial class MealPage : Page
 {
     private readonly MealRepository MealRepository;
     private MealViewModel SelectedMealViewModel;
-    private ObservableCollection<MealViewModel> MealListViewModels;
+    private ObservableCollection<MealViewModel> MealListViewModels = new();
 
     public MealPage()
     {
         InitializeComponent();
     }
 
-    public MealPage(MealViewModel MealViewModel) : this()
+    public MealPage(MealViewModel MealViewModel, MealRepository MealRepository) : this()
     {
+        this.MealRepository = MealRepository;
+
         SelectedMealViewModel = MealViewModel;
         SelectedMealViewModel.ClearMealViewModel();
         DataContext = MealViewModel;
@@ -49,15 +51,27 @@ public sealed partial class MealPage : Page
 
     private async Task InitializeMealListViewModels()
     {
-        var mealList = await MealRepository.GetAllMealsAsync();
+        foreach (Meal meal in meals)
+        {
+            Debug.WriteLine($"\n\nMealPage.xaml.cs tried to add meal {meal.MealName} in the database");
+            await MealRepository.CreateMealAsync(meal);
+        }
 
-        MealListViewModels = new ObservableCollection<MealViewModel>(
-            mealList.Select(meal => MealViewModel.CreateFromEntity(meal, MealRepository))
-        );
+        var allMeals = await MealRepository.GetAllMealsAsync();
+        Debug.WriteLine($"Total meals in database: {allMeals.Count}");
+        
+        // Process of addming a new viewmodel
+        foreach (var meal in allMeals)
+        {
+            Debug.WriteLine($"Meal ID: {meal.MealID}, Name: {meal.MealName}");
+
+            var mealViewModel = MealViewModel.CreateFromEntity(meal, MealRepository);
+            MealListViewModels.Add(mealViewModel);
+        }
     }
 
     private void AddMealButton_Click(object sender, RoutedEventArgs e) { }
-
+                          
     private void DeleteButton_Click(object sender, RoutedEventArgs e) { }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e) { }
@@ -86,4 +100,73 @@ public sealed partial class MealPage : Page
 
         Debug.WriteLine($"\n\nSelected: {SelectedMealViewModel?.MealName}\n");
     }
+
+    List<Meal> meals = new List<Meal>
+            {
+                new Meal
+                {
+                    MealID = 1,
+                    MealName = "Puto",
+                    MealPrice = 60,
+                    Description = "Soft and fluffy steamed rice cake",
+                    ImageSourceString = "ms-appx:///Assets/Images/puto.jpg",
+                    StockQuantity = 50,
+                    MinOrderQuantity = 6, // Sold by dozens
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                },
+                new Meal
+                {
+                    MealName = "Kutsinta",
+                    MealPrice = 50,
+                    Description = "Brown rice cake with coconut topping",
+                    ImageSourceString = "ms-appx:///Assets/Images/kutsinta.jpg",
+                    StockQuantity = 45,
+                    MinOrderQuantity = 6,
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                },
+                new Meal
+                {
+                    MealID = 3,
+                    MealName = "Bibingka",
+                    MealPrice = 80,
+                    Description = "Traditional baked rice cake",
+                    ImageSourceString = "ms-appx:///Assets/Images/bibingka.jpg",
+                    StockQuantity = 30,
+                    MinOrderQuantity = 1,
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                },
+                new Meal
+                {
+                    MealID = 4,
+                    MealName = "Suman",
+                    MealPrice = 70,
+                    Description = "Sticky rice wrapped in banana leaves",
+                    ImageSourceString = "ms-appx:///Assets/Images/suman.jpg",
+                    StockQuantity = 40,
+                    MinOrderQuantity = 6,
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                },
+                new Meal
+                {
+                    MealID = 5,
+                    MealName = "Sapin-Sapin",
+                    MealPrice = 90,
+                    Description = "Multi-layered sweet rice cake",
+                    ImageSourceString = "ms-appx:///Assets/Images/sapin-sapin.jpg",
+                    StockQuantity = 25,
+                    MinOrderQuantity = 1,
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                },
+                new Meal
+                {
+                    MealID = 6,
+                    MealName = "Biko",
+                    MealPrice = 75,
+                    Description = "Sweet sticky rice with coconut caramel",
+                    ImageSourceString = "ms-appx:///Assets/Images/biko.jpg",
+                    StockQuantity = 35,
+                    MinOrderQuantity = 1,
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                }
+            };
 }

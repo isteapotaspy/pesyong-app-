@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -18,8 +21,10 @@ using PESYONG.ApplicationLogic.Mapping;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.ApplicationLogic.ViewModels.ObjectModels;
+using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Infrastructure;
+using PESYONG.Presentation.Profiler;
 using PESYONG.Presentation.ViewModels;
 using PESYONG.Presentation.ViewModels.Admin;
 using Windows.ApplicationModel;
@@ -56,12 +61,19 @@ public partial class App : Microsoft.UI.Xaml.Application
         this.InitializeComponent();
 
         var services = new ServiceCollection();
-        services.AddAutoMapper(typeof(CateringMappingProfile));
+        services.AddAutoMapper(
+            typeof(CateringMappingProfile).Assembly,
+            typeof(MealMappingProfile).Assembly
+            );
 
-        services.AddDbContext<AppDbContext>();
+        services.AddDbContext<AppDbContext>(options =>
+            options.UseInMemoryDatabase("TestDatabase"),
+            ServiceLifetime.Singleton);
+
 
         // Register repository accessors
-        services.AddScoped<MealRepository>();
+        services.AddTransient<MealRepository>(provider =>
+            new MealRepository(provider.GetRequiredService<AppDbContext>()));
         services.AddSingleton<OrderRepository>();
         services.AddSingleton<CateringService>();
 
@@ -71,12 +83,19 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddTransient<HomeViewModel>();
 
         // Admin ViewModels
-        services.AddTransient<MealViewModel>();
+        // THIS IS WHY WE FREAKING USE DEPENDENCY INJECTION 
+        // I LITERALLY SAID TO LEARN THIS JUD BA UNYA WA GINA TAKE SERIOUSLY ISTG
+        services.AddTransient<MealViewModel>(provider =>
+        {
+            var mealRepo = provider.GetRequiredService<MealRepository>();
+            return new MealViewModel(mealRepo);
+        });
         services.AddTransient<AdminMealPackageViewModel>();
 
 
         Services = services.BuildServiceProvider();
 
+        TestDependencyInjection();
     }
 
     /// <summary>
@@ -89,6 +108,34 @@ public partial class App : Microsoft.UI.Xaml.Application
         MainWindow = new MainWindow();
         MainWindow.Activate();
     }
+
+    // Move this to proper testing suite later on
+    private void TestDependencyInjection()
+    {
+        try
+        {
+            Debug.WriteLine("\n\n=== Testing Dependency Injection ===");
+
+            // Test 1: Can resolve MealRepository?
+            var mealRepo = Services.GetService<MealRepository>();
+            Debug.WriteLine($"MealRepository: {(mealRepo != null ? "[/] Resolved" : "[X] Failed")}");
+
+            // Test 2: Can resolve MealViewModel?
+            var mealVM = Services.GetService<MealViewModel>();
+            Debug.WriteLine($"MealViewModel: {(mealVM != null ? "[/] Resolved" : "[X] Failed")}");
+
+            // Test 3: Test database connection
+            var dbContext = Services.GetService<AppDbContext>();
+            Debug.WriteLine($"DbContext: {(dbContext != null ? "[/] Resolved" : "[X] Failed")}");
+
+            Debug.WriteLine("=== Dependency Injection Test Complete ===\n");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Dependency Injection Test Failed: {ex.Message}\n");
+        }
+    }
+
 
     // Helper to access App.Current.Services easily
     public static new App Current => (App)Microsoft.UI.Xaml.Application.Current;

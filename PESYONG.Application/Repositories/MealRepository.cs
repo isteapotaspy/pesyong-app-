@@ -35,8 +35,11 @@ public class MealRepository
     /// <returns></returns>
     public async Task CreateMealAsync(Meal meal)
     {
+        // Add exception handling for colliding meal ID
         _context.Meals.Add(meal);
+        Debug.Write($"\n\n The meal has ID of {meal.MealID} and is named {meal.MealName} \n\n");
         await _context.SaveChangesAsync();
+
     }
 
     /// <summary>
@@ -62,7 +65,18 @@ public class MealRepository
     /// <returns></returns>
     public async Task<Meal> GetMealByIdAsync(int id)
     {
-        return await _context.Meals.FirstOrDefaultAsync(m => m.MealID == id);
+        try
+        {
+            // Try without including navigation properties first
+            return await _context.Meals
+                .AsNoTracking() // Avoid change tracking issues
+                .FirstOrDefaultAsync(m => m.MealID == id);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"GetMealByIdAsync error: {ex.Message}");
+            return null;
+        }
     }
 
     /// <summary>

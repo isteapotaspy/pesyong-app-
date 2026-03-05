@@ -31,11 +31,10 @@ public class Meal
     // The recipientid will be replaced by OperatorID.
     public int OperatorID { get; set; }
     [ForeignKey(nameof(OperatorID))]
-    private readonly AppUser? Operator;
+    public AppUser? Operator;
 
     //removed mealtagjunction
     public ICollection<string> MealTags { get; set; } = new List<string>();
-    //public ICollection<MealTagType> MealTags { get; set; } = new List<MealTagType>();
 
     // Attributes
     [Required(ErrorMessage = "Meal.MealName is required.")]
@@ -85,8 +84,8 @@ public class Meal
     [Required]
     public int LastModifiedByOperatorID { get; set; }
 
-    [ForeignKey(nameof(LastModifiedByOperatorID))]
-    public virtual AppUser? ModifiedByOperator { get; set; }
+    //[ForeignKey(nameof(LastModifiedByOperatorID))]
+    //public virtual AppUser? ModifiedByOperator { get; set; }
 
     [Required]
     public DateTime LastModifiedDate { get; set; } = DateTime.UtcNow;
