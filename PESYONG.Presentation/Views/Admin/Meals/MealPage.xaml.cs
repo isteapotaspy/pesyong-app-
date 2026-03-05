@@ -30,7 +30,6 @@ namespace PESYONG.Presentation.Views.Admin.Meals;
 public sealed partial class MealPage : Page
 {
     private readonly MealRepository MealRepository;
-    private MealViewModel SelectedMealViewModel;
     private ObservableCollection<MealViewModel> MealListViewModels = new();
 
     public MealPage()
@@ -41,9 +40,6 @@ public sealed partial class MealPage : Page
     public MealPage(MealViewModel MealViewModel, MealRepository MealRepository) : this()
     {
         this.MealRepository = MealRepository;
-
-        SelectedMealViewModel = MealViewModel;
-        SelectedMealViewModel.ClearMealViewModel();
         DataContext = MealViewModel;
 
         this.Loaded += async (s, e) => await InitializeMealListViewModels();
@@ -96,9 +92,13 @@ public sealed partial class MealPage : Page
     private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var listView = (ListView)sender;
-        SelectedMealViewModel = (MealViewModel)listView.SelectedItem;
+        DataContext = (MealViewModel)listView.SelectedItem;
+        UpdatePageForm();
 
-        Debug.WriteLine($"\n\nSelected: {SelectedMealViewModel?.MealName}\n");
+    }
+
+    private void UpdatePageForm()
+    {
     }
 
     List<Meal> meals = new List<Meal>

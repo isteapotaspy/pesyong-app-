@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:objectmodels="using:PESYONG.ApplicationLogic.ViewModels.ObjectModels"
+    d:DataContext="{d:DesignInstance objectmodels:MealViewModel}"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -102,8 +103,7 @@
                       Padding="12,12,12,12"
                       Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
             <StackPanel Orientation="Vertical" 
-                        x:Name="MealFormsPanel"
-                        DataContext="{x:Bind SelectedMealViewModel}">
+                        x:Name="MealFormsPanel">
 
                 <!-- Fallback when no meal is selected -->
                 <StackPanel x:Name="MainPanel" Visibility="Visible">
@@ -157,7 +157,7 @@
 
                                     <TextBox Grid.Column="0"
                                             Header="Meal ID" 
-                                            Text="{x:Bind MealID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Text="{Binding MealID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              Margin="0,0,3,0"
                                              PlaceholderText=""/>                                        
                                     <TextBox Grid.Column="1"
