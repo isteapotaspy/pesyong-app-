@@ -21,12 +21,14 @@ public partial class OrderViewModel : ObservableObject
     }
 
     public Guid OrderID => _order.OrderID;
+
     public DateTime OrderDate => _order.OrderDate;
 
     /// <summary>
     /// Gets the collection of products included in this specific order.
     /// </summary>
     public ICollection<OrderMealProduct> OrderItems => _order.OrderItems;
+
     public decimal OrderTotalAmount => _order.OrderTotalAmount;
 
     public DeliveryStatus DeliveryStatus

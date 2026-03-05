@@ -73,14 +73,14 @@ public class Delivery : ILogisticsItem
     [StringLength(500)]
     public string? ProofOfDelivery { get; set; }
 
-    [StringLength(500)]
-    public string? CurrentLocation { get; set; }
+    //[StringLength(500)]
+    //public string? CurrentLocation { get; set; }
 
-    [Column(TypeName = "datetime2")]
-    public DateTime? LastLocationUpdate { get; set; }
+    //[Column(TypeName = "datetime2")]
+    //public DateTime? LastLocationUpdate { get; set; }
 
-    [Required]
-    public bool SignatureRequired { get; set; } = true;
+    //[Required]
+    //public bool SignatureRequired { get; set; } = true;
 
     [StringLength(100)]
     public string? ReceivedBy { get; set; }

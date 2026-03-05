@@ -16,7 +16,14 @@ public class DeliveryViewModel
     public string StatusDisplay => Status.ToString();
     public DateTime CreatedDate { get; set; }
     public string DeliveryAddress { get; set; } = string.Empty;
-    public string? TrackingNumber { get; set; }
+
+    private string? _trackingNumber = string.Empty;
+    public string? TrackingNumber
+    {
+        get => _trackingNumber;
+        set 
+        { }
+    }
     public decimal ShippingCost { get; set; }
     public string? ShippingMethod { get; set; }
     public string? CarrierName { get; set; }

@@ -75,14 +75,16 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Admin\SettingsPage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\Admin\AuditsPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
+		<ItemGroup>
+			<Page Update="Views\Admin\SettingsPage.xaml">
+				<SubType>Designer</SubType>
+			</Page>
+		</ItemGroup>
+		<ItemGroup>
+			<Page Update="Views\Admin\AuditsPage.xaml">
+				<Generator>MSBuild:Compile</Generator>
+			</Page>
+		</ItemGroup>
   <ItemGroup>
     <Page Update="Views\Admin\MealsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -130,7 +132,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Themes\" />
-    <Folder Include="ViewModels\ObjectModels\" />
     <Folder Include="ViewModels\PageModels\" />
     <Folder Include="Views\Admin\Administration\" />
     <Folder Include="Views\Admin\Transactions\" />
@@ -140,10 +141,11 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-    <Page Update="Views\Shared\ProfilePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
+		<ItemGroup>
+			<Page Update="Views\Shared\ProfilePage.xaml">
+				<Generator>MSBuild:Compile</Generator>
+			</Page>
+		</ItemGroup>
   <ItemGroup>
     <Page Update="Views\Customer\CateringPackagesPage.xaml">
       <Generator>MSBuild:Compile</Generator>

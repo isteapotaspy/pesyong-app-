@@ -76,7 +76,7 @@ public partial class AdminMealListViewModel : ObservableObject
     public AdminMealListViewModel(MealRepository mealRepository)
     {
         Meals = new ObservableCollection<MealViewModel>();
-        BindingOperations.EnableCollectionSynchronization(Meals, _lockObject);
+        //BindingOperations.EnableCollectionSynchronization(Meals, _lockObject);
         SelectedMeal = null;
         _mealRepository = mealRepository ?? throw new ArgumentNullException(nameof(mealRepository), "MealRepository must be registered in DI container");
 

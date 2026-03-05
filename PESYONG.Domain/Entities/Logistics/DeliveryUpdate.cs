@@ -17,7 +17,7 @@ public class DeliveryUpdate
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int DeliveryUpdateID { get; set; }
+    public Guid DeliveryUpdateID { get; set; }
 
     // Foreign and navigation keys
     [ForeignKey("Delivery")]

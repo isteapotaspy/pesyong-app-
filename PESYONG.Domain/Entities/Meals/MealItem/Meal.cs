@@ -28,7 +28,7 @@ public class Meal
     public int? MealID { get; set; }
 
     // The recipientid will be replaced by OperatorID.
-    public int OperatorID { get; set; }
+    public int? OperatorID { get; set; }
     [ForeignKey(nameof(OperatorID))]
     private readonly AppUser? Operator;
 

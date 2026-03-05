@@ -8,13 +8,13 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PESYONG.ApplicationLogic.Repositories;
-using PESYONG.Domain.Entities.Financial;
 using PESYONG.Domain.Entities.Financial.Promos;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Domain.Enums;
-namespace PESYONG.Presentation.ViewModels.Admin;
+
+namespace PESYONG.Presentation.ViewModels.Admin.ObjectModel;
 
 /// <summary>
 /// This handles the UI - Server data transfer for Meals.
@@ -45,7 +45,7 @@ public partial class MealViewModel : ObservableValidator
     }
 
     [Required]
-    public int OperatorID { get => (int)_meal?.OperatorID; }
+    public int OperatorID { get => _meal.OperatorID; }
 
     [Required(ErrorMessage = "Meal.MealName is required.")]
     [StringLength(100, ErrorMessage = "Meal.MealName must be less than 100 characters.")]
@@ -157,9 +157,9 @@ public partial class MealViewModel : ObservableValidator
         }
     }
 
-    [Required(ErrorMessage = "Delivery type is required.")]
     private DeliveryType _deliveryType;
-    public DeliveryType DeliveryType 
+    [Required(ErrorMessage = "Delivery type is required.")]
+    public DeliveryType DeliveryType
     {
         get => _deliveryType;
         set
@@ -170,11 +170,11 @@ public partial class MealViewModel : ObservableValidator
                 OnPropertyChanged();
                 _meal.DeliveryType = value;
                 _hasChanges = true;
+                ValidateAllProperties();
             }
-        } 
+        }
     }
 
-    // Add error handling for this
     private List<string> _mealTags;
     public List<string> MealTags
     {
@@ -193,8 +193,8 @@ public partial class MealViewModel : ObservableValidator
         }
     }
 
-    private int? _operatorId;
-    public int? OperatorId
+    private int _operatorId;
+    public int OperatorId
     {
         get => _operatorId;
         set
@@ -221,7 +221,7 @@ public partial class MealViewModel : ObservableValidator
             {
                 _lastModifiedByOperatorID = value;
                 OnPropertyChanged();
-                _meal.LastModifiedByOperatorID = (int)value;
+                _meal.LastModifiedByOperatorID = value;
                 _hasChanges = true;
                 ValidateAllProperties();
             }
@@ -288,21 +288,28 @@ public partial class MealViewModel : ObservableValidator
         }
     }
 
-    private AppUser? _modifiedByOperator;
-    public AppUser? ModifiedByOperator
+    // Make this non-modifiable later
+    private int _modifiedByOperatorID;
+    public int ModifiedByOperatorID
     {
-        get => _modifiedByOperator;
-        set
-        {
-            if (_modifiedByOperator != value)
-            {
-                _modifiedByOperator = value;
-                OnPropertyChanged();
-                _meal.ModifiedByOperator = value;
-                _hasChanges = true;
-            }
-        }
+        get => _modifiedByOperatorID;
     }
+
+    //private AppUser? _modifiedByOperator;
+    //public AppUser? ModifiedByOperator
+    //{
+    //    get => _modifiedByOperator;
+    //    set
+    //    {
+    //        if (_modifiedByOperator != value)
+    //        {
+    //            _modifiedByOperator = value;
+    //            OnPropertyChanged();
+    //            _meal.ModifiedByOperator = value;
+    //            _hasChanges = true;
+    //        }
+    //    }
+    //}
 
     // Helper viewmodels
     public BitmapImage? MealImage
@@ -342,9 +349,6 @@ public partial class MealViewModel : ObservableValidator
             return $"{timeSpan.Days / 30} months ago";
         }
     }
-
-
-
     public string StockQuantityText => $"{StockQuantity} units";
     public string MinMaxOrderText => $"Min: {MinOrderQuantity} units";
     public Visibility LowStockWarningVisibility => StockQuantity <= 5 ? Visibility.Visible : Visibility.Collapsed;
@@ -379,20 +383,20 @@ public partial class MealViewModel : ObservableValidator
         }
     }
 
-    [RelayCommand]
-    public async Task DeleteCommand()
-    {
-        if (MealID.HasValue && _mealRepository != null)
-        {
-            await _mealRepository.DeleteMealAsync((int)_meal.MealID);
-            _parent?.DeleteMeal(this);
-        }
-    }
+    //Not implemented
+    //[RelayCommand]
+    //public async Task DeleteCommand()
+    //{
+    //    if (MealID.HasValue && _mealRepository != null)
+    //    {
+    //        await _mealRepository.DeleteMealAsync(_meal?.MealID);
+    //        _parent?.DeleteMeal(this);
+    //    }
+    //}
 
     // PARENT DEPENDENCY INJECTION
     private readonly AdminMealListViewModel? _parent;
-
-    public RelayCommand DeleteCommandParent => new RelayCommand(() => _parent?.DeleteMeal(this));
+    //public RelayCommand DeleteCommandParent => new RelayCommand(() => _parent?.DeleteMeal(this));
     public RelayCommand RequestUpdateCommand => new RelayCommand(() => _parent?.UpdateSelectedMealCommand.Execute(null));
 
     // INITIAL DATA LOADING (via constructor injection)
@@ -408,7 +412,7 @@ public partial class MealViewModel : ObservableValidator
         _mealPrice = _meal.MealPrice;
         _stockQuantity = _meal.StockQuantity;
         _minOrderQuantity = _meal.MinOrderQuantity;
-        _mealTags = _meal.MealTags?.ToList() ?? new List<string>();
+        _mealTags = _meal.MealTags?.ToList() ?? new List<String>();
         _deliveryType = _meal.DeliveryType;
         _operatorId = _meal.OperatorID;
         _lastModifiedByOperatorID = _meal.LastModifiedByOperatorID;
@@ -423,256 +427,3 @@ public partial class MealViewModel : ObservableValidator
     public MealViewModel() : this(new Meal(), null) { }
 }
 
-public partial class MealProductViewModel : ObservableValidator
-{
-    private MealProduct _mealProduct = new();
-    public MealProduct GetMealProduct() => _mealProduct;
-
-    private int _mealProductID;
-    public int MealProductID
-    {
-        get => _mealProductID;
-        set
-        {
-            if (_mealProductID != value)
-            {
-                _mealProductID = value;
-                OnPropertyChanged();
-                _mealProduct.MealProductID = value;
-            }
-        }
-    }
-
-    private int _ownerID;
-    public int OwnerID
-    {
-        get => _ownerID;
-        set
-        {
-            if (_ownerID != value)
-            {
-                _ownerID = value;
-                OnPropertyChanged();
-                _mealProduct.OwnerID = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    private int? _promoID;
-    public int? PromoID
-    {
-        get => _promoID;
-        set
-        {
-            if (_promoID != value)
-            {
-                _promoID = value;
-                OnPropertyChanged();
-                _mealProduct.PromoID = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    //mao ba ni tong di na need? 
-    private AppUser? _owner;
-    public AppUser? Owner
-    {
-        get => _owner;
-        set
-        {
-            if (_owner != value)
-            {
-                _owner = value;
-                OnPropertyChanged();
-                _mealProduct.Owner = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    private ICollection<MealProductItem> _mealProductItems = [];
-    public ICollection<MealProductItem> MealProductItems
-    {
-        get => _mealProductItems;
-        set
-        {
-            if (_mealProductItems != value)
-            {
-                _mealProductItems = value;
-                OnPropertyChanged();
-                _mealProduct.MealProductItems = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    private Promo? _promo;
-    public Promo? Promo
-    {
-        get => _promo;
-        set
-        {
-            if (_promo != value)
-            {
-                _promo = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ProductBasePrice));
-                OnPropertyChanged(nameof(DiscountAmount));
-                OnPropertyChanged(nameof(FinalPrice));
-                _mealProduct.Promo = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    private string _productName = string.Empty;
-    [Required]
-    [StringLength(100)]
-    public string ProductName
-    {
-        get => _productName;
-        set
-        {
-            if (_productName != value)
-            {
-                _productName = value;
-                OnPropertyChanged();
-                _mealProduct.ProductName = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    private string _productDescription = string.Empty;
-    [StringLength(100)]
-    public string ProductDescription
-    {
-        get => _productDescription;
-        set
-        {
-            if (_productDescription != value)
-            {
-                _productDescription = value;
-                OnPropertyChanged();
-                _mealProduct.ProductDescription = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    // Computed properties
-    public decimal ProductBasePrice => MealProductItems.Sum(item => item.ItemPrice);
-    public decimal DiscountAmount => ProductBasePrice - FinalPrice;
-    public decimal FinalPrice => Promo?.ApplyDiscount(ProductBasePrice) ?? ProductBasePrice;
-    public bool IsValid => !HasErrors;
-
-    public MealProductViewModel(MealProduct mealProduct)
-    {
-        _mealProduct = mealProduct ?? new MealProduct();
-        _mealProductID = _mealProduct.MealProductID;
-        _ownerID = _mealProduct.OwnerID;
-        _promoID = _mealProduct.PromoID;
-        _owner = _mealProduct.Owner;
-        _mealProductItems = _mealProduct.MealProductItems ?? [];
-        _promo = _mealProduct.Promo;
-        _productName = _mealProduct.ProductName ?? string.Empty;
-        _productDescription = _mealProduct.ProductDescription ?? string.Empty;
-
-        ValidateAllProperties();
-    }
-
-    public MealProductViewModel() : this(new MealProduct()) { }
-}
-
-public partial class MealProductItemViewModel : ObservableValidator
-{
-    private MealProductItem _mealProductItem = new();
-    public MealProductItem GetMealProductItem() => _mealProductItem;
-
-    private int _mealID;
-    public int MealID
-    {
-        get => _mealID;
-        set
-        {
-            if (_mealID != value)
-            {
-                _mealID = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ItemPrice));
-                _mealProductItem.MealID = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    private Meal? _meal;
-    public Meal? Meal
-    {
-        get => _meal;
-        set
-        {
-            if (_meal != value)
-            {
-                _meal = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ItemPrice));
-                _mealProductItem.Meal = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    private int _quantity = 1;
-    [Range(1, 100)]
-    public int Quantity
-    {
-        get => _quantity;
-        set
-        {
-            if (_quantity != value)
-            {
-                _quantity = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ItemPrice));
-                _mealProductItem.Quantity = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    private string _requestDescription = string.Empty;
-    [StringLength(100)]
-    public string RequestDescription
-    {
-        get => _requestDescription;
-        set
-        {
-            if (_requestDescription != value)
-            {
-                _requestDescription = value;
-                OnPropertyChanged();
-                _mealProductItem.RequestDescription = value;
-                ValidateAllProperties();
-            }
-        }
-    }
-
-    public decimal ItemPrice => Meal?.MealPrice * Quantity ?? 0m;
-    public bool IsValid => !HasErrors;
-
-    public MealProductItemViewModel(MealProductItem mealProductItem)
-    {
-        _mealProductItem = mealProductItem ?? new MealProductItem();
-        _mealID = _mealProductItem.MealID;
-        _meal = _mealProductItem.Meal;
-        _quantity = _mealProductItem.Quantity;
-        _requestDescription = _mealProductItem.RequestDescription ?? string.Empty;
-
-        ValidateAllProperties();
-    }
-
-    public MealProductItemViewModel() : this(new MealProductItem()) { }
-}
