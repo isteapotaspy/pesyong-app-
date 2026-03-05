@@ -1,4 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.UI.Xaml;
@@ -12,15 +17,11 @@ using Microsoft.UI.Xaml.Shapes;
 using PESYONG.ApplicationLogic.Mapping;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Services;
+using PESYONG.ApplicationLogic.ViewModels.ObjectModels;
 using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Infrastructure;
 using PESYONG.Presentation.ViewModels;
 using PESYONG.Presentation.ViewModels.Admin;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -70,9 +71,8 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddTransient<HomeViewModel>();
 
         // Admin ViewModels
-        services.AddTransient<AdminMealPackageViewModel>();
         services.AddTransient<MealViewModel>();
-        services.AddTransient<AdminMealListViewModel>();
+        services.AddTransient<AdminMealPackageViewModel>();
 
 
         Services = services.BuildServiceProvider();

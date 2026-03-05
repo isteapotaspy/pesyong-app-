@@ -24,14 +24,14 @@ public class ShortOrderViewModel : INotifyPropertyChanged
     private int _stockQuantity;
     private int _minOrderQuantity = 1;
     private DeliveryType _deliveryType;
-    private List<MealTagType> _mealTags = new List<MealTagType>();
+    private List<string> _mealTags = new List<string>();
 
     /// <summary>
     /// Constructor to create ViewModel from Meal entity
     /// </summary>
     public ShortOrderViewModel(Meal meal, int cartQuantity = 0)
     {
-        _mealId = meal.MealID;
+        _mealId = meal.MealID.Value;
         _mealName = meal.MealName;
         _mealPrice = meal.MealPrice;
         _imageSourceString = meal.ImageSourceString ?? string.Empty;
@@ -39,7 +39,7 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         _stockQuantity = meal.StockQuantity;
         _minOrderQuantity = meal.MinOrderQuantity;
         _deliveryType = meal.DeliveryType;
-        _mealTags = meal.MealTags?.ToList() ?? new List<MealTagType>();
+        _mealTags = meal.MealTags?.ToList();
         _cartQuantity = cartQuantity;
         _totalPrice = _mealPrice * _selectedQuantity;
     }
@@ -250,7 +250,7 @@ public class ShortOrderViewModel : INotifyPropertyChanged
     /// <summary>
     /// Meal tags for categorization.
     /// </summary>
-    public List<MealTagType> MealTags
+    public List<string> MealTags
     {
         get => _mealTags;
         set
@@ -351,7 +351,7 @@ public class ShortOrderViewModel : INotifyPropertyChanged
     /// <summary>
     /// Method to check if meal has specific tag
     /// </summary>
-    public bool HasTag(MealTagType tag)
+    public bool HasTag(string tag)
     {
         return MealTags.Contains(tag);
     }

@@ -61,7 +61,7 @@ namespace PESYONG.Presentation.Views.Customer
                     StockQuantity = 50,
                     MinOrderQuantity = 1,
                     DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<MealTagType> { MealTagType.Dietary, MealTagType.Dietary }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -73,7 +73,7 @@ namespace PESYONG.Presentation.Views.Customer
                     StockQuantity = 30,
                     MinOrderQuantity = 1,
                     DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<MealTagType> { MealTagType.Dietary, MealTagType.Dietary }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -85,7 +85,7 @@ namespace PESYONG.Presentation.Views.Customer
                     StockQuantity = 40,
                     MinOrderQuantity = 1,
                     DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<MealTagType> { MealTagType.Dietary, MealTagType.Dietary }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -97,7 +97,7 @@ namespace PESYONG.Presentation.Views.Customer
                     StockQuantity = 25,
                     MinOrderQuantity = 1,
                     DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<MealTagType> { MealTagType.Dietary, MealTagType.Dietary }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -109,7 +109,7 @@ namespace PESYONG.Presentation.Views.Customer
                     StockQuantity = 15,
                     MinOrderQuantity = 1,
                     DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<MealTagType> { MealTagType.Dietary, MealTagType.Dietary }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -121,13 +121,13 @@ namespace PESYONG.Presentation.Views.Customer
                     StockQuantity = 35,
                     MinOrderQuantity = 1,
                     DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<MealTagType> { MealTagType.Dietary, MealTagType.Dietary}
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 }
             };
 
             // Convert Meal entities to ShortOrderViewModels
             ShortOrders = new ObservableCollection<ShortOrderViewModel>(
-                meals.Select(meal => new ShortOrderViewModel(meal, GetCartQuantityForMeal(meal.MealID)))
+                meals.Select(meal => new ShortOrderViewModel(meal, GetCartQuantityForMeal(meal.MealID.Value)))
             );
 
             // Subscribe to property changes for UI updates

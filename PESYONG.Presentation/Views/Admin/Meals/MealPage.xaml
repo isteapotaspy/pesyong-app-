@@ -3,14 +3,13 @@
     x:Class="PESYONG.Presentation.Views.Admin.Meals.MealPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PESYONG.Presentation.ViewModels.Admin"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    d:DataContext="{d:DesignInstance Type=local:AdminMealListViewModel}"
+    xmlns:objectmodels="using:PESYONG.ApplicationLogic.ViewModels.ObjectModels"
     mc:Ignorable="d">
 
     <Page.Resources>
-        <DataTemplate x:Key="AdminMealListViewTemplate" x:DataType="local:MealViewModel">
+        <DataTemplate x:Key="AdminMealListViewTemplate" x:DataType="objectmodels:MealViewModel">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -20,7 +19,9 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions> 
+                <!--
                 <Image Source="{x:Bind MealImage}" Width="24" Height="24" Stretch="UniformToFill"/>
+                    -->
                 <TextBlock Grid.Column="1"
                      Text="{x:Bind MealName}"
                      x:Phase="1"
@@ -51,9 +52,10 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             
-            <ListView Grid.Row="0"
+            <ListView 
+                Grid.Row="0"
                 SelectionMode="Single" 
-                ItemsSource="{Binding Meals}"
+                ItemsSource="{x:Bind MealListViewModels}"
                 ItemTemplate="{StaticResource AdminMealListViewTemplate}"
                 SelectionChanged="ListView_SelectionChanged"
                 Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
@@ -71,7 +73,7 @@
                             x:Name="QueryPopupToggleButton"
                             Content="Filter meal list" 
                             Style="{StaticResource AccentButtonStyle}"
-                            Click="ShowQueryPopupButton_Clicked"/>
+                            Click="ShowQueryPopupButton_Click"/>
                     <Popup x:Name="QueryPopup" 
                            VerticalOffset="-170" 
                            HorizontalOffset="0" 
@@ -84,7 +86,7 @@
                                 Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
                                 <TextBlock Text="Simple Popup" FontSize="16" HorizontalAlignment="Center" />
-                                <Button Content="Close" Click="CloseQueryPopupButton_Clicked" />
+                                <Button Content="Close" Click="CloseQueryPopupButton_Click" />
                             </StackPanel>
                         </Border>
                     </Popup>
@@ -92,7 +94,7 @@
                 <Button 
                     Style="{StaticResource AccentButtonStyle}" 
                     Content="Add another meal"
-                    Click="AddMealButton_Clicked"/>
+                    Click="AddMealButton_Click"/>
             </StackPanel>
         </Grid>
 
@@ -101,7 +103,7 @@
                       Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
             <StackPanel Orientation="Vertical" 
                         x:Name="MealFormsPanel"
-                        DataContext="{Binding SelectedMeal}">
+                        DataContext="{x:Bind SelectedMealViewModel}">
 
                 <!-- Fallback when no meal is selected -->
                 <StackPanel x:Name="MainPanel" Visibility="Visible">
@@ -280,9 +282,7 @@
                         <!-- Delivery Type -->
                         <ComboBox Header="Delivery Type" 
                                   SelectedIndex="0"
-                                  Margin="0,12,0,0"
-                                  Loaded="DeliveryTypeComboBox_Loaded"
-                                  SelectionChanged="DeliveryTypeComboBox_SelectionChanged">
+                                  Margin="0,12,0,0">
                             <ComboBoxItem Content="Standard Delivery"/>
                             <ComboBoxItem Content="Express Delivery"/>
                             <ComboBoxItem Content="Same Day Delivery"/>

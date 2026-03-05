@@ -48,7 +48,7 @@ namespace PESYONG.Presentation.Views.Customer
                     ImageSourceString = "ms-appx:///Assets/Images/puto.jpg",
                     StockQuantity = 50,
                     MinOrderQuantity = 6, // Sold by dozens
-                    MealTags = new List<MealTagType> { MealTagType.Kakanin, MealTagType.Dessert }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -59,7 +59,7 @@ namespace PESYONG.Presentation.Views.Customer
                     ImageSourceString = "ms-appx:///Assets/Images/kutsinta.jpg",
                     StockQuantity = 45,
                     MinOrderQuantity = 6,
-                    MealTags = new List<MealTagType> { MealTagType.Kakanin, MealTagType.Dessert }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -70,7 +70,7 @@ namespace PESYONG.Presentation.Views.Customer
                     ImageSourceString = "ms-appx:///Assets/Images/bibingka.jpg",
                     StockQuantity = 30,
                     MinOrderQuantity = 1,
-                    MealTags = new List<MealTagType> { MealTagType.Kakanin, MealTagType.Dessert }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -81,7 +81,7 @@ namespace PESYONG.Presentation.Views.Customer
                     ImageSourceString = "ms-appx:///Assets/Images/suman.jpg",
                     StockQuantity = 40,
                     MinOrderQuantity = 6,
-                    MealTags = new List<MealTagType> { MealTagType.Kakanin, MealTagType.Dessert }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -92,7 +92,7 @@ namespace PESYONG.Presentation.Views.Customer
                     ImageSourceString = "ms-appx:///Assets/Images/sapin-sapin.jpg",
                     StockQuantity = 25,
                     MinOrderQuantity = 1,
-                    MealTags = new List<MealTagType> { MealTagType.Kakanin, MealTagType.Dessert }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -103,7 +103,7 @@ namespace PESYONG.Presentation.Views.Customer
                     ImageSourceString = "ms-appx:///Assets/Images/biko.jpg",
                     StockQuantity = 35,
                     MinOrderQuantity = 1,
-                    MealTags = new List<MealTagType> { MealTagType.Kakanin, MealTagType.Dessert }
+                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
                 }
             };
 

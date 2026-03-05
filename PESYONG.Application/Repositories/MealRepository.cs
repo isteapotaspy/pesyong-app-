@@ -27,15 +27,23 @@ public class MealRepository
         _context = context;
     }
 
-    // We should probably add an authorization logic to this
-    // Depends on the app user logging in, probably
-    // CREATE. To initialize a new object in the database.
+    
+    /// <summary>
+    /// Creates a meal in the database.
+    /// </summary>
+    /// <param name="meal"></param>
+    /// <returns></returns>
     public async Task CreateMealAsync(Meal meal)
     {
         _context.Meals.Add(meal);
         await _context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Creates a meal in the database and returns the created meal with its assigned MealID.
+    /// </summary>
+    /// <param name="meal"></param>
+    /// <returns></returns>
     public async Task<Meal> CreateMealAsyncReturnSelf(Meal meal)
     {
         _context.Meals.Add(meal);
@@ -47,11 +55,20 @@ public class MealRepository
         return meal;
     }
 
+    /// <summary>
+    /// Grabs a meal by its ID. Returns null if not found.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<Meal> GetMealByIdAsync(int id)
     {
         return await _context.Meals.FirstOrDefaultAsync(m => m.MealID == id);
     }
 
+    /// <summary>
+    /// Returns all the meals in the table.
+    /// </summary>
+    /// <returns></returns>
     public async Task<List<Meal>> GetAllMealsAsync()
     {
         var meals = await _context.Meals.ToListAsync();
@@ -79,18 +96,33 @@ public class MealRepository
     ///         .Where(m => m.MealPrice < 50)
     ///         .OrderBy(m => m.MMealName);
     /// var results = await _mealRepository.GetMealsAsync(complexQuery);
+    /// 
+
+    /// <summary>
+    /// Allows for complex query to occur.
+    /// </summary>
+    /// <param name="query"></param>
     public async Task<List<Meal>> GetMealsAsync(IQueryable<Meal> query)
     {
         return await query.ToListAsync();
     }
 
+    /// <summary>
+    /// Updates a meal. Pass through the entire meal object and update by its delta.
+    /// </summary>
+    /// <param name="meal"></param>
+    /// <returns></returns>
     public async Task UpdateMealAsync(Meal meal)
     {
         _context.Meals.Update(meal);
         await _context.SaveChangesAsync();
     }
 
-    // Fix the duplicate method issue - remove the one that throws NotImplementedException
+    /// <summary>
+    /// Deletes a meal in the database.
+    /// </summary>
+    /// <param name="mealId"></param>
+    /// <returns></returns>
     public async Task DeleteMealAsync(int mealId)
     {
         var meal = await _context.Meals.FindAsync(mealId);

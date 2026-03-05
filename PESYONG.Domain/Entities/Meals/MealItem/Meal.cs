@@ -25,6 +25,7 @@ public class Meal
 {
     // Primary key
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int? MealID { get; set; }
 
     // The recipientid will be replaced by OperatorID.
