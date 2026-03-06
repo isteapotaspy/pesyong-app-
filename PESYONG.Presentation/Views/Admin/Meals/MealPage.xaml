@@ -157,7 +157,7 @@
 
                                     <TextBox Grid.Column="0"
                                             Header="Meal ID" 
-                                            Text="{x:Bind MealID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Text="{Binding MealID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              Margin="0,0,3,0"
                                              PlaceholderText=""/>                                        
                                     <TextBox Grid.Column="1"

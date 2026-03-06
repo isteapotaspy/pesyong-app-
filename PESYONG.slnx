@@ -13,5 +13,4 @@
     <Platform Solution="*|x86" Project="x86" />
     <Deploy />
   </Project>
-  <Project Path="PESYONG.Service/PESYONG.Service.csproj" Id="f0d96f29-a8fd-4261-9142-3de923f1dd26" />
 </Solution>
