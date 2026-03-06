@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Media.Imaging;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
@@ -55,6 +56,13 @@ public partial class MealViewModel : ObservableObject
     [ObservableProperty]
     private string imageSourceString = string.Empty;
 
+    private BitmapImage _mealImage = new BitmapImage();
+    public BitmapImage MealImage
+    {
+        get => _mealImage;
+        set => SetProperty(ref _mealImage, value);
+    }
+
     [ObservableProperty]
     private ObservableCollection<string> selectedTags = new();
 
@@ -98,13 +106,18 @@ public partial class MealViewModel : ObservableObject
             "Low-Carb", "High-Protein", "Keto", "Paleo", "Organic"
         };
 
-        PropertyChanged += (s, e) =>
+        PropertyChanged += async (s, e) =>
         {
             if (e.PropertyName != nameof(HasValidationErrors) &&
                 e.PropertyName != nameof(ValidationErrors))
             {
                 Validate();
                 SaveCommand.NotifyCanExecuteChanged();
+            }
+
+            if (e.PropertyName == nameof(ImageSourceString))
+            {
+                await LoadMealImageAsync();
             }
         };
     }
@@ -259,6 +272,22 @@ public partial class MealViewModel : ObservableObject
             {
                 ShowEventOnDebugConsole("Error", "An error occurred while deleting meal", "OK");
             }
+        }
+    }
+
+    private async Task LoadMealImageAsync()
+    {
+        if (string.IsNullOrEmpty(ImageSourceString))
+            return;
+
+        try
+        {
+            MealImage = new BitmapImage(new Uri(ImageSourceString));
+        }
+        catch (Exception ex)
+        {
+            // Handle invalid URI or loading errors
+            Debug.WriteLine($"Failed to load image: {ex.Message}");
         }
     }
 
