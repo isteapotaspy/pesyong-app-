@@ -66,16 +66,21 @@ public partial class App : Microsoft.UI.Xaml.Application
             typeof(MealMappingProfile).Assembly
             );
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseInMemoryDatabase("TestDatabase"),
-            ServiceLifetime.Singleton);
+        var connectionString =
+                @"Server=(localdb)\MSSQLLocalDB;Database=PesyongDb;Trusted_Connection=True;TrustServerCertificate=True;";
+
+        services.AddDbContextFactory<AppDbContext>(options =>
+        {
+            options.UseSqlServer(connectionString);
+        });
 
 
         // Register repository accessors
         services.AddTransient<MealRepository>(provider =>
-            new MealRepository(provider.GetRequiredService<AppDbContext>()));
-        services.AddSingleton<OrderRepository>();
-        services.AddSingleton<CateringService>();
+         new MealRepository(provider.GetRequiredService<IDbContextFactory<AppDbContext>>()));
+        services.AddScoped<OrderRepository>();
+
+        services.AddScoped<CateringService>();
 
         // Customer ViewModels
         services.AddTransient<PackagesViewModel>();
@@ -90,6 +95,7 @@ public partial class App : Microsoft.UI.Xaml.Application
             var mealRepo = provider.GetRequiredService<MealRepository>();
             return new MealViewModel(mealRepo);
         });
+
         services.AddTransient<AdminMealPackageViewModel>();
 
 

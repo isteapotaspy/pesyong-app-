@@ -52,16 +52,17 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            
+
             <ListView 
-                Grid.Row="0"
-                SelectionMode="Single" 
-                ItemsSource="{x:Bind MealListViewModels}"
-                ItemTemplate="{StaticResource AdminMealListViewTemplate}"
-                SelectionChanged="ListView_SelectionChanged"
-                Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
-                Margin="12,36,0,12"
-                CornerRadius="6"/>
+                 x:Name="MealsListView"
+                 Grid.Row="0"
+                 SelectionMode="Single" 
+                 ItemsSource="{x:Bind MealListViewModels, Mode=OneWay}"
+                 ItemTemplate="{StaticResource AdminMealListViewTemplate}"
+                 SelectionChanged="ListView_SelectionChanged"
+                 Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
+                 Margin="12,36,0,12"
+                 CornerRadius="6"/>
 
             <StackPanel Grid.Row="1" 
                         Orientation="Horizontal"
@@ -280,15 +281,10 @@
                         </Border>
 
                         <!-- Delivery Type -->
-                        <ComboBox Header="Delivery Type" 
-                                  SelectedIndex="0"
-                                  Margin="0,12,0,0">
-                            <ComboBoxItem Content="Standard Delivery"/>
-                            <ComboBoxItem Content="Express Delivery"/>
-                            <ComboBoxItem Content="Same Day Delivery"/>
-                            <ComboBoxItem Content="Overnight Delivery"/>
-                            <ComboBoxItem Content="Pickup"/>
-                        </ComboBox>
+                        <ComboBox Header="Delivery Type"
+                         ItemsSource="{x:Bind DeliveryTypes, Mode=OneWay}"
+                        SelectedItem="{Binding DeliveryType, Mode=TwoWay}"
+                         Margin="0,12,0,0"/>
                         
                         <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
                                     Margin="0,24,0,0">

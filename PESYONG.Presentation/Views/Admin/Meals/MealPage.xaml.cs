@@ -1,118 +1,233 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Formats.Asn1;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.UI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Imaging;
-using PESYONG.ApplicationLogic.DTOs;
 using PESYONG.ApplicationLogic.Repositories;
-using PESYONG.ApplicationLogic.Utilities;
 using PESYONG.ApplicationLogic.ViewModels.ObjectModels;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
-using PESYONG.Presentation.ViewModels.Admin;
-using Windows.Storage;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace PESYONG.Presentation.Views.Admin.Meals;
-
-/// <summary>
-/// This is the page for editing Meals in Admin, navigatable though AdminLayout.
-/// </summary>
-
-public sealed partial class MealPage : Page
+namespace PESYONG.Presentation.Views.Admin.Meals
 {
-    private readonly MealRepository MealRepository;
-    private ObservableCollection<MealViewModel> MealListViewModels = new();
-
-    public MealPage()
+    public sealed partial class MealPage : Page
     {
-        InitializeComponent();
-    }
+        private readonly MealRepository _mealRepository;
 
-    public MealPage(MealViewModel MealViewModel, MealRepository MealRepository) : this()
-    {
-        this.MealRepository = MealRepository;
-        DataContext = MealViewModel;
+        public ObservableCollection<MealViewModel> MealListViewModels { get; } = new();
 
-        this.Loaded += async (s, e) => await InitializeMealListViewModels();
-    }
+        public Array DeliveryTypes { get; } = Enum.GetValues(typeof(DeliveryType));
 
-    private async Task InitializeMealListViewModels()
-    {
-        foreach (Meal meal in meals)
+        private MealViewModel? SelectedMealViewModel => DataContext as MealViewModel;
+
+        public MealPage()
         {
-            Debug.WriteLine($"\n\nMealPage.xaml.cs tried to add meal {meal.MealName} in the database");
-            await MealRepository.CreateMealAsync(meal);
+            this.InitializeComponent();
+
+            _mealRepository = App.Current.Services.GetRequiredService<MealRepository>();
+
+            this.Loaded += MealPage_Loaded;
         }
 
-        var allMeals = await MealRepository.GetAllMealsAsync();
-        Debug.WriteLine($"Total meals in database: {allMeals.Count}");
-        
-        // Process of addming a new viewmodel
-        foreach (var meal in allMeals)
+        private async void MealPage_Loaded(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine($"Meal ID: {meal.MealID}, Name: {meal.MealName}");
-
-            var mealViewModel = MealViewModel.CreateFromEntity(meal, MealRepository);
-            MealListViewModels.Add(mealViewModel);
+            await EnsureSeedDataAsync();
+            await RefreshMealListAsync();
         }
-    }
 
-    private void AddMealButton_Click(object sender, RoutedEventArgs e) { }
-                          
-    private void DeleteButton_Click(object sender, RoutedEventArgs e) { }
+        private async Task EnsureSeedDataAsync()
+        {
+            var existingMeals = await _mealRepository.GetAllMealsAsync();
 
-    private void SaveButton_Click(object sender, RoutedEventArgs e) { }
+            if (existingMeals.Any())
+            {
+                Debug.WriteLine("Meals already exist in database. Skipping seed.");
+                return;
+            }
 
-    private void ShowQueryPopupButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (!QueryPopup.IsOpen) { QueryPopup.IsOpen = true; }
-    }
+            Debug.WriteLine("Database is empty. Seeding starter meals...");
 
-    private void CloseQueryPopupButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (QueryPopup.IsOpen) { QueryPopup.IsOpen = false; }
-    }
+            foreach (Meal meal in GetSeedMeals())
+            {
+                await _mealRepository.CreateMealAsync(meal);
+            }
+        }
 
-    private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        // Your code here
-    }
+        private async Task RefreshMealListAsync()
+        {
+            MealListViewModels.Clear();
 
-    private void NumberBox_ValueChanged(object sender, NumberBoxValueChangedEventArgs e) { }
+            var allMeals = await _mealRepository.GetAllMealsAsync();
+            Debug.WriteLine($"Loaded {allMeals.Count} meals from database.");
 
-    private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        var listView = (ListView)sender;
-        DataContext = (MealViewModel)listView.SelectedItem;
-        UpdatePageForm();
+            foreach (var meal in allMeals.OrderBy(m => m.MealID))
+            {
+                var mealViewModel = MealViewModel.CreateFromEntity(meal, _mealRepository);
+                MealListViewModels.Add(mealViewModel);
+            }
 
-    }
+            if (MealListViewModels.Count > 0)
+            {
+                if (SelectedMealViewModel?.MealID is int selectedId)
+                {
+                    var matched = MealListViewModels.FirstOrDefault(x => x.MealID == selectedId);
+                    if (matched != null)
+                    {
+                        MealsListView.SelectedItem = matched;
+                        DataContext = matched;
+                        return;
+                    }
+                }
 
-    private void UpdatePageForm()
-    {
-    }
+                MealsListView.SelectedItem = MealListViewModels[0];
+                DataContext = MealListViewModels[0];
+            }
+            else
+            {
+                var emptyVm = new MealViewModel(_mealRepository);
+                emptyVm.ClearMealViewModel();
+                emptyVm.MinOrderQuantity = 1;
+                emptyVm.DeliveryType = DeliveryType.Delivery;
 
-    List<Meal> meals = new List<Meal>
+                DataContext = emptyVm;
+            }
+        }
+
+        private void AddMealButton_Click(object sender, RoutedEventArgs e)
+        {
+            var newMealVm = new MealViewModel(_mealRepository);
+            newMealVm.ClearMealViewModel();
+            newMealVm.MinOrderQuantity = 1;
+            newMealVm.StockQuantity = 0;
+            newMealVm.DeliveryType = DeliveryType.Delivery;
+            newMealVm.CreationDate = DateTime.UtcNow;
+            newMealVm.LastModifiedDate = DateTime.UtcNow;
+
+            DataContext = newMealVm;
+            MealsListView.SelectedItem = null;
+
+            Debug.WriteLine("Created new draft meal.");
+        }
+
+        private async void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MealViewModel vm)
+                return;
+
+            try
+            {
+                vm.LastModifiedDate = DateTime.UtcNow;
+
+                if (vm.MealID.HasValue)
+                {
+                    Debug.WriteLine($"Updating meal ID {vm.MealID.Value}...");
+                    await _mealRepository.UpdateMealAsync(vm.ToEntity());
+                }
+                else
+                {
+                    Debug.WriteLine("Creating new meal...");
+                    var createdMeal = await _mealRepository.CreateMealAsyncReturnSelf(vm.ToEntity());
+                    vm.LoadFromEntity(createdMeal);
+                }
+
+                await RefreshMealListAsync();
+
+                var refreshedVm = MealListViewModels.FirstOrDefault(x => x.MealID == vm.MealID);
+                if (refreshedVm != null)
+                {
+                    MealsListView.SelectedItem = refreshedVm;
+                    DataContext = refreshedVm;
+                }
+
+                Debug.WriteLine("Meal saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Save failed: {ex.Message}");
+            }
+        }
+
+        private async void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MealViewModel vm || !vm.MealID.HasValue)
+            {
+                Debug.WriteLine("Delete skipped: no saved meal selected.");
+                return;
+            }
+
+            try
+            {
+                Debug.WriteLine($"Deleting meal ID {vm.MealID.Value}...");
+                await _mealRepository.DeleteMealAsync(vm.MealID.Value);
+
+                await RefreshMealListAsync();
+
+                Debug.WriteLine("Meal deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Delete failed: {ex.Message}");
+            }
+        }
+
+        private void ShowQueryPopupButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!QueryPopup.IsOpen)
+            {
+                QueryPopup.IsOpen = true;
+            }
+        }
+
+        private void CloseQueryPopupButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (QueryPopup.IsOpen)
+            {
+                QueryPopup.IsOpen = false;
+            }
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // optional live UI updates
+        }
+
+        private void NumberBox_ValueChanged(object sender, NumberBoxValueChangedEventArgs e)
+        {
+            // optional live UI updates
+        }
+
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (((ListView)sender).SelectedItem is MealViewModel selectedMeal)
+            {
+                DataContext = selectedMeal;
+                UpdatePageForm();
+            }
+        }
+
+        private void UpdatePageForm()
+        {
+            // keep empty for now unless you want extra visual logic
+        }
+
+        private List<Meal> GetSeedMeals()
+        {
+            return new List<Meal>
             {
                 new Meal
                 {
-                    MealID = 1,
                     MealName = "Puto",
                     MealPrice = 60,
                     Description = "Soft and fluffy steamed rice cake",
                     ImageSourceString = "ms-appx:///Assets/Images/puto.jpg",
                     StockQuantity = 50,
-                    MinOrderQuantity = 6, // Sold by dozens
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                    MinOrderQuantity = 6,
+                    DeliveryType = DeliveryType.Delivery,
+                    MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
@@ -122,51 +237,54 @@ public sealed partial class MealPage : Page
                     ImageSourceString = "ms-appx:///Assets/Images/kutsinta.jpg",
                     StockQuantity = 45,
                     MinOrderQuantity = 6,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                    DeliveryType = DeliveryType.Delivery,
+                    MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
-                    MealID = 3,
                     MealName = "Bibingka",
                     MealPrice = 80,
                     Description = "Traditional baked rice cake",
                     ImageSourceString = "ms-appx:///Assets/Images/bibingka.jpg",
                     StockQuantity = 30,
                     MinOrderQuantity = 1,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                    DeliveryType = DeliveryType.Delivery,
+                    MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
-                    MealID = 4,
                     MealName = "Suman",
                     MealPrice = 70,
                     Description = "Sticky rice wrapped in banana leaves",
                     ImageSourceString = "ms-appx:///Assets/Images/suman.jpg",
                     StockQuantity = 40,
                     MinOrderQuantity = 6,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                    DeliveryType = DeliveryType.Delivery,
+                    MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
-                    MealID = 5,
                     MealName = "Sapin-Sapin",
                     MealPrice = 90,
                     Description = "Multi-layered sweet rice cake",
                     ImageSourceString = "ms-appx:///Assets/Images/sapin-sapin.jpg",
                     StockQuantity = 25,
                     MinOrderQuantity = 1,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                    DeliveryType = DeliveryType.Delivery,
+                    MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
                 },
                 new Meal
                 {
-                    MealID = 6,
                     MealName = "Biko",
                     MealPrice = 75,
                     Description = "Sweet sticky rice with coconut caramel",
                     ImageSourceString = "ms-appx:///Assets/Images/biko.jpg",
                     StockQuantity = 35,
                     MinOrderQuantity = 1,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
+                    DeliveryType = DeliveryType.Delivery,
+                    MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
                 }
             };
+        }
+    }
 }
