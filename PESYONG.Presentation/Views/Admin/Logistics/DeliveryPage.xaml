@@ -199,9 +199,8 @@
 
                 <TextBlock>Put here if it actually suceedeed or not</TextBlock>
                 <TextBox Header="Recieved by" Margin="0,6,0,0"/>
-                <TextBox Header="Recieved at" Margin="0,6,0,0" Height="60"/>
-
-            </StackPanel>            
+                    <TextBox Header="Recieved at" Margin="0,6,0,0" Height="60"/>
+                </StackPanel>            
         </Grid>
     </Grid>
     </ScrollViewer>

@@ -23,7 +23,7 @@ namespace PESYONG.Domain.Entities.Meals.MealProduct;
 public class MealProduct
 {
     [Key]
-    public int MealProductID { get; set; }
+    public Guid MealProductID { get; set; }
 
     [ForeignKey(nameof(Owner))]
     public int OwnerID { get; set; }
@@ -33,6 +33,9 @@ public class MealProduct
 
     [Required]
     public AppUser? Owner { get; set; }
+
+    [Required]
+    public bool IsCateringPackage { get; set; }
 
     public ICollection<MealProductItem> MealProductItems { get; set; } = [];
 
@@ -55,5 +58,20 @@ public class MealProduct
 
     [NotMapped]
     public decimal FinalPrice => Promo?.ApplyDiscount(ProductBasePrice) ?? ProductBasePrice;
+
+    public bool IsValid()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+
+        return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
+    }
+    public IEnumerable<string> GetValidationErrors()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+        Validator.TryValidateObject(this, validationContext, validationResults, true);
+        return validationResults.Select(vr => vr.ErrorMessage);
+    }
 }
 
