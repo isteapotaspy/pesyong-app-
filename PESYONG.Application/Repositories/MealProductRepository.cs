@@ -6,95 +6,89 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Infrastructure;
-
-/// <summary>
-/// This serves as the quasi-controller from an frontend-based API.
-/// An ASP.NET backend wasn't implemented. Instead, the data doesn't 
-/// go through an API layer and goes directly to the database. 
-/// 
-/// Speficially, this handles the meals in the system. 
-/// </summary>
 
 namespace PESYONG.ApplicationLogic.Repositories;
 
-public class MealRepository
+
+public class MealProductRepository
 {
     private readonly AppDbContext _context;
 
-    public MealRepository(AppDbContext context)
+    public MealProductRepository(AppDbContext context)
     {
         _context = context;
     }
 
-    
+
     /// <summary>
     /// Creates a meal in the database.
     /// </summary>
-    /// <param name="meal"></param>
+    /// <param name="mealProduct"></param>
     /// <returns></returns>
-    public async Task CreateMealAsync(Meal meal)
+    public async Task CreateMealProductAsync(MealProduct mealProduct)
     {
         // Add exception handling for colliding meal ID
-        _context.Meals.Add(meal);
-        Debug.Write($"\n\n The meal has ID of {meal.MealID} and is named {meal.MealName} \n\n");
+        _context.MealProducts.Add(mealProduct);
+        Debug.Write($"\n\n The meal product has ID of {mealProduct.MealProductID} " +
+            $"and is named {mealProduct.ProductName} \n\n");
         await _context.SaveChangesAsync();
 
     }
 
     /// <summary>
-    /// Creates a meal in the database and returns the created meal with its assigned MealID.
+    /// This creates a meal product and returns itself after being recorded in the db.
     /// </summary>
-    /// <param name="meal"></param>
+    /// <param name="mealProduct"></param>
     /// <returns></returns>
-    public async Task<Meal> CreateMealAsyncReturnSelf(Meal meal)
+    public async Task<MealProduct> CreateMealProductAsyncReturnSelf(MealProduct mealProduct)
     {
-        _context.Meals.Add(meal);
+        _context.MealProducts.Add(mealProduct);
         await _context.SaveChangesAsync();
-
-
-        Debug.Write($"\n\n The meal has ID of {meal.MealID} and is named {meal.MealName} \n\n");
+        Debug.Write($"\n\n The meal product has ID of {mealProduct.MealProductID} " +
+            $"and is named {mealProduct.ProductName} \n\n");
         // Check if this is valid
-        return meal;
+        return mealProduct;
     }
 
     /// <summary>
-    /// Grabs a meal by its ID. Returns null if not found.
+    /// Grabs a singular MealProduct by its ID
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<Meal> GetMealByIdAsync(int id)
+    public async Task<MealProduct> GetMealByIdAsync(Guid id)
     {
         try
         {
             // Try without including navigation properties first
-            return await _context.Meals
+            return await _context.MealProducts
                 .AsNoTracking() // Avoid change tracking issues
-                .FirstOrDefaultAsync(m => m.MealID == id);
+                .FirstOrDefaultAsync(m => m.MealProductID == id);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"GetMealByIdAsync error: {ex.Message}");
+            Debug.WriteLine($"\n\nGetMealProductByIdAsync error: {ex.Message}");
             return null;
         }
     }
 
     /// <summary>
-    /// Returns all the meals in the table.
+    /// This returns all meal products in the database
     /// </summary>
     /// <returns></returns>
-    public async Task<List<Meal>> GetAllMealsAsync()
+    public async Task<List<MealProduct>> GetAllMealProductsAsync()
     {
-        var meals = await _context.Meals.ToListAsync();
+        var mealProducts = await _context.MealProducts.ToListAsync();
 
-        if (meals == null || !meals.Any())
+        if (mealProducts == null || !mealProducts.Any())
         {
             Debug.WriteLine("No meals found in database");
-            return new List<Meal>(); // Return empty list instead of null
+            return new List<MealProduct>(); // Return empty list instead of null
         }
 
-        Debug.WriteLine($"Retrieved {meals.Count} meals from database");
-        return meals;
+        Debug.WriteLine($"Retrieved {mealProducts.Count} meals from database");
+        return mealProducts;
     }
 
     // Know the IQueryable pattern. This is a more potent implemention
@@ -116,33 +110,33 @@ public class MealRepository
     /// Allows for complex query to occur.
     /// </summary>
     /// <param name="query"></param>
-    public async Task<List<Meal>> GetMealsAsync(IQueryable<Meal> query)
+    public async Task<List<MealProduct>> GetMealProductsAsync(IQueryable<MealProduct> query)
     {
         return await query.ToListAsync();
     }
 
     /// <summary>
-    /// Updates a meal. Pass through the entire meal object and update by its delta.
+    /// This updates a meal product.
     /// </summary>
-    /// <param name="meal"></param>
+    /// <param name="mealProduct"></param>
     /// <returns></returns>
-    public async Task UpdateMealAsync(Meal meal)
+    public async Task UpdateMealAsync(MealProduct mealProduct)
     {
-        _context.Meals.Update(meal);
+        _context.MealProducts.Update(mealProduct);
         await _context.SaveChangesAsync();
     }
 
     /// <summary>
-    /// Deletes a meal in the database.
+    /// Deletes a meal product in the database.
     /// </summary>
-    /// <param name="mealId"></param>
+    /// <param name="mealProductID"></param>
     /// <returns></returns>
-    public async Task DeleteMealAsync(int mealId)
+    public async Task DeleteMealAsync(Guid mealProductID)
     {
-        var meal = await _context.Meals.FindAsync(mealId);
-        if (meal != null)
+        var mealProduct = await _context.MealProducts.FindAsync(mealProductID);
+        if (mealProduct != null)
         {
-            _context.Meals.Remove(meal);
+            _context.MealProducts.Remove(mealProduct);
             await _context.SaveChangesAsync();
         }
     }

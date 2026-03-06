@@ -28,7 +28,7 @@ namespace PESYONG.Presentation.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public int MealID => _meal.MealID;
+        public int MealID => _meal.MealID.Value;
         public string MealName => _meal.MealName;
         public string? Description => _meal.Description;
         public decimal MealPrice => _meal.MealPrice;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Formats.Asn1;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -11,9 +12,11 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.Windows.Storage.Pickers;
 using PESYONG.ApplicationLogic.DTOs;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Utilities;
+using PESYONG.ApplicationLogic.ViewModels.ObjectModels;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
 using PESYONG.Presentation.ViewModels.Admin;
@@ -27,198 +30,206 @@ namespace PESYONG.Presentation.Views.Admin.Meals;
 
 public sealed partial class MealPage : Page
 {
-    private AdminMealListViewModel _viewModel;
-    private MealViewModel _newMeal;
+    private readonly MealRepository MealRepository;
+    private MealViewModel MealViewModel;
+    private ObservableCollection<MealViewModel> MealListViewModels = new();
 
     public MealPage()
     {
         InitializeComponent();
-        Loaded += MealPage_Loaded;
     }
 
-    public MealPage(AdminMealListViewModel viewModel) : this()
+    public MealPage(MealViewModel MealViewModel, MealRepository MealRepository) : this()
     {
-        _viewModel = viewModel;
-        DataContext = _viewModel; // Set DataContext for binding
+        this.MealRepository = MealRepository;
+        this.MealViewModel = MealViewModel;
+        DataContext = MealViewModel;
 
-        if (_viewModel != null)
+        this.Loaded += async (s, e) => await InitializeMealListViewModels();
+    }
+
+    private async Task InitializeMealListViewModels()
+    {
+        foreach (Meal meal in meals)
         {
-            _ = _viewModel.InitializeExistingMealsAsync();
+            Debug.WriteLine($"\n\nMealPage.xaml.cs tried to add meal {meal.MealName} in the database");
+            await MealRepository.CreateMealAsync(meal);
         }
 
-    }
-
-    private async void MealPage_Loaded(object sender, RoutedEventArgs e)
-    {
-        await InitializePageAsync();
-    }
-
-    private async Task InitializePageAsync()
-    {
-        UpdateVisibility();
-
-        if (_viewModel?.Meals.Count == 0)
+        var allMeals = await MealRepository.GetAllMealsAsync();
+        Debug.WriteLine($"Total meals in database: {allMeals.Count}");
+        
+        foreach (var meal in allMeals)
         {
-            await _viewModel.InitializeExistingMealsAsync();
-        }
+            Debug.WriteLine($"Meal ID: {meal.MealID}, Name: {meal.MealName}");
 
-        UpdateBindings();
-    }
-
-
-    private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(AdminMealListViewModel.SelectedMeal))
-        {
-            UpdateVisibility();
-            UpdateBindings();
+            var mealViewModel = MealViewModel.CreateFromEntity(meal, MealRepository);
+            MealListViewModels.Add(mealViewModel);
         }
     }
 
-    private void UpdateVisibility()
+    private void AddMealButton_Click(object sender, RoutedEventArgs e)
     {
-        var hasSelection = _viewModel?.SelectedMeal != null;
-        MainPanel.Visibility = Visibility.Visible;
+        this.MealViewModel = new MealViewModel(MealRepository);
+        DataContext = MealViewModel;
     }
 
-    private void UpdateBindings()
+    private void DeleteButton_Click(object sender, RoutedEventArgs e)
     {
-        var currentMeal = _viewModel?.SelectedMeal ?? _newMeal;
-
-        if (currentMeal != null)
+        if (this.MealViewModel?.MealID != null)
         {
-            StockStatusBorder.Background = new SolidColorBrush(
-                currentMeal.IsAvailable ? Colors.Green : Colors.Red);
-
-            SaveButton.Background = new SolidColorBrush(
-                currentMeal.HasChanges ? Colors.Green : Colors.Gray);
-            SaveButton.IsEnabled = currentMeal.HasChanges;
-
-            if (!string.IsNullOrEmpty(currentMeal.ImageSourceString))
-            {
-                MealImageControl.Source = new BitmapImage(new Uri(currentMeal.ImageSourceString));
-            }
+            this.MealViewModel.DeleteCommand.Execute(null);
+            MealListViewModels.Remove(this.MealViewModel);
         }
-        else
-        {
-            StockStatusBorder.Background = new SolidColorBrush(Colors.Gray);
-            SaveButton.Background = new SolidColorBrush(Colors.Gray);
-            SaveButton.IsEnabled = false;
-            MealImageControl.Source = null;
-        }
-    }
 
-    private void DeliveryTypeComboBox_Loaded(object sender, RoutedEventArgs e)
-    {
-        var comboBox = (ComboBox)sender;
-        var selectedMeal = _viewModel?.SelectedMeal;
-
-        if (selectedMeal != null)
-        {
-            comboBox.SelectedIndex = (int)selectedMeal.DeliveryType;
-        }
-    }
-
-    private void DeliveryTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        var comboBox = (ComboBox)sender;
-        var currentMeal = _viewModel?.SelectedMeal ?? _newMeal;
-
-        if (currentMeal != null)
-        {
-            currentMeal.DeliveryType = (DeliveryType)comboBox.SelectedIndex;
-            UpdateBindings(); 
-        }
-    }
-
-
-
-    // Your existing methods integrated below:
-
-    private async void OnPageLoaded(object sender, RoutedEventArgs e)
-    {
-        await _viewModel.InitializeExistingMealsAsync();
-        UpdateBindings();
-    }
-
-    private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (sender is ListView lv)
-        {
-            _viewModel.SelectedMeal = lv.SelectedItem as MealViewModel;
-        }
-    }
-    
-
-    private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        var currentMeal = _viewModel?.SelectedMeal ?? _newMeal;
-
-        if (currentMeal != null)
-        {
-            currentMeal.HasChanges = true;
-            UpdateBindings();
-        }
-    }
-
-    private void NumberBox_ValueChanged(object sender, NumberBoxValueChangedEventArgs e)
-    {
-        var currentMeal = _viewModel?.SelectedMeal ?? _newMeal;
-
-        if (currentMeal != null)
-        {
-            currentMeal.HasChanges = true;
-            UpdateBindings();
-        }
-    }
-
-    // If you press the add new meal item button, then you switch out to the newMeal model.
-    // Then, data is passed there. Then fed to its parent, which will return an acceptable viewmodel.
-    private void AddMealButton_Clicked(object sender, RoutedEventArgs e)
-    {
-        _newMeal = new MealViewModel(_viewModel);
-        _viewModel.SelectedMeal = null;
-        MealFormsPanel.DataContext = _newMeal;
-        UpdateBindings();
-    }
-
-    private async void DeleteButton_Click(object sender, RoutedEventArgs e)
-    {
-        var selectedMeal = _viewModel?.SelectedMeal;
-        if (selectedMeal != null)
-        {
-            await _viewModel.DeleteMeal(selectedMeal);
-            UpdateVisibility();
-        }
+        this.MealViewModel = new MealViewModel(MealRepository);
+        DataContext = MealViewModel;
     }
 
     private async void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        // Create a new item
-        if (_viewModel?.SelectedMeal == null && _newMeal.MealID == null)
+        if (this.MealViewModel.HasValidationErrors)
         {
-            // Add validation here to complain if the datas aren't correct
-            if (_viewModel != null)
-            {
-                await _viewModel.CreateMeal(_newMeal);
-                UpdateBindings();
-            } // handle exceptions here            
+            ContentDialog dialog = new ContentDialog();
+            dialog.XamlRoot = this.XamlRoot;
+            dialog.Title ="There are errors ";
+            dialog.PrimaryButtonText = "Keep editing";
+            dialog.SecondaryButtonText = "Clear form";
+            dialog.CloseButtonText = "Cancel";
+            dialog.DefaultButton = ContentDialogButton.None;
+
+            var result = await dialog.ShowAsync();
         }
-        // Update existing item in the stack
-        else if (_viewModel?.SelectedMeal != null)
+        else if (this.MealViewModel.MealID == null)
         {
-            _viewModel.UpdateSelectedMealCommand.Execute(_viewModel.SelectedMeal);
-            UpdateBindings();
+            Meal Self = await MealRepository.CreateMealAsyncReturnSelf(this.MealViewModel.ToEntity());
+            this.MealViewModel.LoadFromEntity(Self);
+            MealListViewModels.Add(this.MealViewModel);
+        }
+        else
+        {
+            this.MealViewModel.SaveCommand.Execute(null);
+
+            int index = MealListViewModels.IndexOf(this.MealViewModel);
+            if (index >= 0)
+            {
+                MealListViewModels[index] = this.MealViewModel;
+            }
         }
     }
 
-    private void ShowQueryPopupButton_Clicked(object sender, RoutedEventArgs e)
+    private async void ChangePhoto_Click(object sender, RoutedEventArgs e) 
+    {
+        if (sender is Button button)
+        {
+            button.IsEnabled = false;
+
+            var picker = new FileOpenPicker(button.XamlRoot.ContentIslandEnvironment.AppWindowId);
+            picker.CommitButtonText = "Pick File";
+                        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            picker.ViewMode = PickerViewMode.List;
+
+            var file = await picker.PickSingleFileAsync();
+            //PickedSingleFileTextBlock.Text = file != null
+            //    ? "Picked: " + file.Path
+            //    : "No file selected.";
+
+            //re-enable the button
+            button.IsEnabled = true;
+        }
+
+    }
+
+    private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var listView = (ListView)sender;
+        if (listView.SelectedItem is MealViewModel selectedMeal)
+        {
+            this.MealViewModel = selectedMeal;
+            DataContext = MealViewModel;
+        }
+    }
+
+    private void ShowQueryPopupButton_Click(object sender, RoutedEventArgs e)
     {
         if (!QueryPopup.IsOpen) { QueryPopup.IsOpen = true; }
     }
 
-    private void CloseQueryPopupButton_Clicked(object sender, RoutedEventArgs e)
+    private void CloseQueryPopupButton_Click(object sender, RoutedEventArgs e)
     {
         if (QueryPopup.IsOpen) { QueryPopup.IsOpen = false; }
     }
+
+    private void TextBox_TextChanged(object sender, TextChangedEventArgs e) { }
+
+    private void NumberBox_ValueChanged(object sender, NumberBoxValueChangedEventArgs e) { }
+
+    List<Meal> meals = new List<Meal>
+            {
+                new Meal
+                {
+                    MealID = 1,
+                    MealName = "Puto",
+                    MealPrice = 60,
+                    Description = "Soft and fluffy steamed rice cake",
+                    ImageSourceString = "ms-appx:///Assets/Images/puto.jpg",
+                    StockQuantity = 50,
+                    MinOrderQuantity = 6, // Sold by dozens
+                    MealTags = new List<String> { "Halal", "Kosher" }
+                },
+                new Meal
+                {
+                    MealName = "Kutsinta",
+                    MealPrice = 50,
+                    Description = "Brown rice cake with coconut topping",
+                    ImageSourceString = "ms-appx:///Assets/Images/kutsinta.jpg",
+                    StockQuantity = 45,
+                    MinOrderQuantity = 6,
+                    MealTags = new List<String> { "Halal", "Kosher" }
+                },
+                new Meal
+                {
+                    MealID = 3,
+                    MealName = "Bibingka",
+                    MealPrice = 80,
+                    Description = "Traditional baked rice cake",
+                    ImageSourceString = "ms-appx:///Assets/Images/bibingka.jpg",
+                    StockQuantity = 30,
+                    MinOrderQuantity = 1,
+                    MealTags = new List<String> { "Halal", "Kosher" }
+                },
+                new Meal
+                {
+                    MealID = 4,
+                    MealName = "Suman",
+                    MealPrice = 70,
+                    Description = "Sticky rice wrapped in banana leaves",
+                    ImageSourceString = "ms-appx:///Assets/Images/suman.jpg",
+                    StockQuantity = 40,
+                    MinOrderQuantity = 6,
+                    MealTags = new List<String> { "Halal", "Kosher" }
+                },
+                new Meal
+                {
+                    MealID = 5,
+                    MealName = "Sapin-Sapin",
+                    MealPrice = 90,
+                    Description = "Multi-layered sweet rice cake",
+                    ImageSourceString = "ms-appx:///Assets/Images/sapin-sapin.jpg",
+                    StockQuantity = 25,
+                    MinOrderQuantity = 1,
+                    MealTags = new List<String> { "Halal", "Kosher" }
+                },
+                new Meal
+                {
+                    MealID = 6,
+                    MealName = "Biko",
+                    MealPrice = 75,
+                    Description = "Sweet sticky rice with coconut caramel",
+                    ImageSourceString = "ms-appx:///Assets/Images/biko.jpg",
+                    StockQuantity = 35,
+                    MinOrderQuantity = 1,
+                    MealTags = new List<String> { "Halal", "Kosher" }
+                }
+            };
 }

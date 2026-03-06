@@ -5,6 +5,7 @@ using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,9 @@ public class AppUser : IdentityUser<int>
 {
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
+
+    [Required]
+    public string Password { get; set; }
     public AuthorizationType AuthorizationType { get; set; }
     public virtual ICollection<MealProduct> UserMealProducts { get; set; } = [];
     public virtual ICollection<Order> UserOrders { get; set; } = [];

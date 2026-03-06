@@ -1,15 +1,18 @@
 using System;
+using System.Linq;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
-using PESYONG.Domain.Entities.Meals.MealItem;
-using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Audits;
 using PESYONG.Domain.Entities.Financial;
 using PESYONG.Domain.Entities.Financial.AcknowledgementReceipts;
 using PESYONG.Domain.Entities.Financial.Promos;
 using PESYONG.Domain.Entities.Logistics;
+using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Domain.Entities.Meals.MealProduct;
+using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Users.Identity;
-
+using PESYONG.Domain.Utilities;
 namespace PESYONG.Infrastructure;
 
 public class AppDbContext : DbContext
@@ -20,7 +23,8 @@ public class AppDbContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseInMemoryDatabase("TestDatabase"); // FIXED: removed underscore
+            optionsBuilder.UseInMemoryDatabase("TestDatabase");
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
         base.OnConfiguring(optionsBuilder);
     }
@@ -29,6 +33,8 @@ public class AppDbContext : DbContext
     public DbSet<Meal> Meals => Set<Meal>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<MealProduct> MealProducts => Set<MealProduct>();
+    public DbSet<MealProductItem> MealProductItems => Set<MealProductItem>();
     public DbSet<AcknowledgementReceipt> AcknowledgementReceipts => Set<AcknowledgementReceipt>();
     public DbSet<Promo> Promos => Set<Promo>();
     public DbSet<Payment> Payments => Set<Payment>();
@@ -81,6 +87,16 @@ public class AppDbContext : DbContext
                   .HasForeignKey(e => e.ReceiptID)
                   .OnDelete(DeleteBehavior.SetNull);
         });
+
+        modelBuilder.Entity<Meal>()
+                  .Property(m => m.MealTags)
+                  .HasConversion(
+                  v => string.Join(",", v), 
+                  v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
+
+        modelBuilder.Entity<MealProduct>()
+                .Property(mp => mp.MealProductItems)
+                .HasConversion<MealProductItemsConverter>();
 
         // OrderMealProduct configuration
         modelBuilder.Entity<OrderMealProduct>(entity =>
