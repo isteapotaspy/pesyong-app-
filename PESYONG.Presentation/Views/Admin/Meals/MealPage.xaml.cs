@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using PESYONG.ApplicationLogic.Repositories;
+using PESYONG.ApplicationLogic.Services;
 using PESYONG.ApplicationLogic.ViewModels.ObjectModels;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
@@ -24,11 +25,13 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 
         private MealViewModel? SelectedMealViewModel => DataContext as MealViewModel;
 
+        private readonly MealSyncService _mealSyncService;
         public MealPage()
         {
             this.InitializeComponent();
 
             _mealRepository = App.Current.Services.GetRequiredService<MealRepository>();
+            _mealSyncService = App.Current.Services.GetRequiredService<MealSyncService>();
 
             this.Loaded += MealPage_Loaded;
         }
@@ -142,6 +145,7 @@ namespace PESYONG.Presentation.Views.Admin.Meals
                     MealsListView.SelectedItem = refreshedVm;
                     DataContext = refreshedVm;
                 }
+                _mealSyncService.NotifyMealsChanged();
 
                 Debug.WriteLine("Meal saved successfully.");
             }
@@ -165,6 +169,9 @@ namespace PESYONG.Presentation.Views.Admin.Meals
                 await _mealRepository.DeleteMealAsync(vm.MealID.Value);
 
                 await RefreshMealListAsync();
+
+                _mealSyncService.NotifyMealsChanged();
+
 
                 Debug.WriteLine("Meal deleted successfully.");
             }

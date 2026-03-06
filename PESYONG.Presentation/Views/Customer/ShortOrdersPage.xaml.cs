@@ -1,19 +1,19 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
 using PESYONG.Domain.Entities.Meals.MealItem;
-using PESYONG.Domain.Entities.Orders;
-using PESYONG.Domain.Enums;
 using PESYONG.Presentation.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using Windows.UI;
+using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.Views.Customer
 {
@@ -23,135 +23,107 @@ namespace PESYONG.Presentation.Views.Customer
     /// </summary>
     public sealed partial class ShortOrdersPage : Page
     {
-        private ObservableCollection<ShortOrderViewModel> ShortOrders { get; set; }
-        private CartService _cartService;
+        private readonly MealRepository _mealRepository;
+        private readonly MealSyncService _mealSyncService;
+        private readonly CartService _cartService;
+
+        private ObservableCollection<ShortOrderViewModel> ShortOrders { get; set; } = new();
 
         public ShortOrdersPage()
         {
             this.InitializeComponent();
 
-            // Initialize cart service without depending on AppUser
+            _mealRepository = App.Current.Services.GetRequiredService<MealRepository>();
+            _mealSyncService = App.Current.Services.GetRequiredService<MealSyncService>();
             _cartService = CartService.Instance;
 
-            LoadShortOrders();
-            UpdateCartQuantities();
+            this.Loaded += ShortOrdersPage_Loaded;
+            this.Unloaded += Page_Unloaded;
 
-            // Subscribe to cart changes
             if (_cartService.Cart != null)
             {
-                _cartService.Cart.CollectionChanged += (s, e) => UpdateCartQuantities();
+                _cartService.Cart.CollectionChanged += Cart_CollectionChanged;
             }
+
+            _mealSyncService.MealsChanged += OnMealsChanged;
         }
 
-        /// <summary>
-        /// Loads the available short orders (individual viands) using Meal entities.
-        /// </summary>
-        private void LoadShortOrders()
+        private async void ShortOrdersPage_Loaded(object sender, RoutedEventArgs e)
         {
-            // Create sample Meal entities based on your domain model
-            var meals = new List<Meal>
-            {
-                new Meal
-                {
-                    MealID = 1,
-                    MealName = "Battered Chicken",
-                    MealPrice = 150,
-                    Description = "Crispy golden fried chicken",
-                    ImageSourceString = "ms-appx:///Assets/Images/battered-chicken.jpg",
-                    StockQuantity = 50,
-                    MinOrderQuantity = 1,
-                    DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 2,
-                    MealName = "Buttered Shrimp",
-                    MealPrice = 200,
-                    Description = "Succulent shrimp in garlic butter sauce",
-                    ImageSourceString = "ms-appx:///Assets/Images/buttered-shrimp.jpg",
-                    StockQuantity = 30,
-                    MinOrderQuantity = 1,
-                    DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 3,
-                    MealName = "Bihon Guisado",
-                    MealPrice = 120,
-                    Description = "Filipino stir-fried rice noodles",
-                    ImageSourceString = "ms-appx:///Assets/Images/bihon-guisado.jpg",
-                    StockQuantity = 40,
-                    MinOrderQuantity = 1,
-                    DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 4,
-                    MealName = "Fish Fillet",
-                    MealPrice = 180,
-                    Description = "Perfectly seasoned fried fish fillet",
-                    ImageSourceString = "ms-appx:///Assets/Images/fish-fillet.jpg",
-                    StockQuantity = 25,
-                    MinOrderQuantity = 1,
-                    DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 5,
-                    MealName = "Tuna Kinilaw",
-                    MealPrice = 220,
-                    Description = "Fresh tuna ceviche Filipino-style",
-                    ImageSourceString = "ms-appx:///Assets/Images/tuna-kinilaw.jpg",
-                    StockQuantity = 15,
-                    MinOrderQuantity = 1,
-                    DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 6,
-                    MealName = "Pork Menudo",
-                    MealPrice = 160,
-                    Description = "Savory pork and vegetable stew",
-                    ImageSourceString = "ms-appx:///Assets/Images/pork-menudo.jpg",
-                    StockQuantity = 35,
-                    MinOrderQuantity = 1,
-                    DeliveryType = DeliveryType.Delivery,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                }
-            };
-
-            // Convert Meal entities to ShortOrderViewModels
-            ShortOrders = new ObservableCollection<ShortOrderViewModel>(
-                meals.Select(meal => new ShortOrderViewModel(meal, GetCartQuantityForMeal(meal.MealID.Value)))
-            );
-
-            // Subscribe to property changes for UI updates
-            foreach (var item in ShortOrders)
-            {
-                item.PropertyChanged += (s, e) =>
-                {
-                    if (e.PropertyName == nameof(ShortOrderViewModel.SelectedQuantity))
-                    {
-                        // Quantity changed - update UI state if needed
-                        // The TotalPrice is automatically updated in the ViewModel
-                    }
-                };
-            }
-
-            ShortOrdersItemsControl.ItemsSource = ShortOrders;
+            await LoadShortOrdersAsync();
+            UpdateCartQuantities();
         }
 
         /// <summary>
-        /// Gets the current cart quantity for a specific meal
+        /// Loads meals from the real SQL-backed repository.
+        /// </summary>
+        private async Task LoadShortOrdersAsync()
+        {
+            try
+            {
+                var meals = await _mealRepository.GetAllMealsAsync();
+
+                // if you want only short orders, add filters here later
+                // for now this loads all meals
+                var availableMeals = meals
+                    .Where(m => m.MealID.HasValue)
+                    .OrderBy(m => m.MealName)
+                    .ToList();
+
+                foreach (var existing in ShortOrders)
+                {
+                    existing.PropertyChanged -= ShortOrder_PropertyChanged;
+                }
+
+                ShortOrders.Clear();
+
+                foreach (var meal in availableMeals)
+                {
+                    var vm = new ShortOrderViewModel(
+                        meal,
+                        GetCartQuantityForMeal(meal.MealID!.Value)
+                    );
+
+                    vm.PropertyChanged += ShortOrder_PropertyChanged;
+                    ShortOrders.Add(vm);
+                }
+
+                ShortOrdersItemsControl.ItemsSource = ShortOrders;
+
+                UpdateCartQuantities();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load short orders: {ex.Message}");
+            }
+        }
+
+        private async void OnMealsChanged()
+        {
+            await LoadShortOrdersAsync();
+        }
+
+        private void Cart_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdateCartQuantities();
+        }
+
+        private void ShortOrder_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ShortOrderViewModel.SelectedQuantity))
+            {
+                // optional extra UI behavior later
+            }
+        }
+
+        /// <summary>
+        /// Gets the current cart quantity for a specific meal.
         /// </summary>
         private int GetCartQuantityForMeal(int mealId)
         {
-            if (_cartService?.Cart == null) return 0;
+            if (_cartService?.Cart == null)
+                return 0;
+
             var cartItem = _cartService.Cart.FirstOrDefault(c => c.ProductId == mealId);
             return cartItem?.Quantity ?? 0;
         }
@@ -161,7 +133,8 @@ namespace PESYONG.Presentation.Views.Customer
         /// </summary>
         private void UpdateCartQuantities()
         {
-            if (ShortOrders == null || _cartService?.Cart == null) return;
+            if (ShortOrders == null || _cartService?.Cart == null)
+                return;
 
             foreach (var item in ShortOrders)
             {
@@ -174,15 +147,14 @@ namespace PESYONG.Presentation.Views.Customer
         /// </summary>
         private void DecreaseQuantity_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            if (button?.Tag == null) return;
+            if (sender is not Button button || button.Tag == null)
+                return;
 
             int mealId = Convert.ToInt32(button.Tag);
             var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
 
             if (item != null)
             {
-                // Use the ViewModel's method which includes validation
                 item.DecrementQuantity();
             }
         }
@@ -192,15 +164,14 @@ namespace PESYONG.Presentation.Views.Customer
         /// </summary>
         private void IncreaseQuantity_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            if (button?.Tag == null) return;
+            if (sender is not Button button || button.Tag == null)
+                return;
 
             int mealId = Convert.ToInt32(button.Tag);
             var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
 
             if (item != null)
             {
-                // Use the ViewModel's method which includes validation
                 item.IncrementQuantity();
             }
         }
@@ -210,8 +181,8 @@ namespace PESYONG.Presentation.Views.Customer
         /// </summary>
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-            if (button?.Tag == null) return;
+            if (sender is not Button button || button.Tag == null)
+                return;
 
             int mealId = Convert.ToInt32(button.Tag);
             var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
@@ -220,7 +191,6 @@ namespace PESYONG.Presentation.Views.Customer
             {
                 int quantity = item.SelectedQuantity;
 
-                // Create cart item
                 var cartItem = new CartItem
                 {
                     Id = $"shortorder_{mealId}",
@@ -233,13 +203,10 @@ namespace PESYONG.Presentation.Views.Customer
 
                 _cartService.AddToCart(cartItem);
 
-                // Show success message
                 ShowSuccessDialog($"{quantity} {item.MealName} added to cart!");
 
                 item.SelectedQuantity = 1;
-
-                // The ViewModel's AddToCart method already resets the quantity
-                // and updates cart quantity, so we don't need to do it here
+                item.CartQuantity = GetCartQuantityForMeal(item.MealID);
             }
             else if (item != null && !item.IsAvailable)
             {
@@ -259,6 +226,7 @@ namespace PESYONG.Presentation.Views.Customer
                 CloseButtonText = "OK",
                 XamlRoot = this.XamlRoot
             };
+
             await dialog.ShowAsync();
         }
 
@@ -274,19 +242,27 @@ namespace PESYONG.Presentation.Views.Customer
                 CloseButtonText = "OK",
                 XamlRoot = this.XamlRoot
             };
+
             await dialog.ShowAsync();
         }
 
         /// <summary>
-        /// Handles page unloading to clean up event handlers
+        /// Handles page unloading to clean up event handlers.
         /// </summary>
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
+            _mealSyncService.MealsChanged -= OnMealsChanged;
+
+            if (_cartService.Cart != null)
+            {
+                _cartService.Cart.CollectionChanged -= Cart_CollectionChanged;
+            }
+
             if (ShortOrders != null)
             {
                 foreach (var item in ShortOrders)
                 {
-                    item.PropertyChanged -= (s, e) => { }; // Remove event handlers if any were added
+                    item.PropertyChanged -= ShortOrder_PropertyChanged;
                 }
             }
         }
@@ -295,7 +271,15 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                border.RenderTransform = new ScaleTransform { ScaleX = 1.04, ScaleY = 1.04 };
+                var st = border.RenderTransform as ScaleTransform;
+                if (st != null)
+                {
+                    AnimateScale(st, 1.04);
+                }
+                else
+                {
+                    border.RenderTransform = new ScaleTransform { ScaleX = 1.04, ScaleY = 1.04 };
+                }
             }
         }
 
@@ -303,14 +287,31 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                border.RenderTransform = new ScaleTransform { ScaleX = 1.0, ScaleY = 1.0 };
+                var st = border.RenderTransform as ScaleTransform;
+                if (st != null)
+                {
+                    AnimateScale(st, 1.0);
+                }
+                else
+                {
+                    border.RenderTransform = new ScaleTransform { ScaleX = 1.0, ScaleY = 1.0 };
+                }
             }
         }
 
         private void AnimateScale(ScaleTransform st, double target)
         {
-            DoubleAnimation animX = new DoubleAnimation { To = target, Duration = new Duration(TimeSpan.FromMilliseconds(150)) };
-            DoubleAnimation animY = new DoubleAnimation { To = target, Duration = new Duration(TimeSpan.FromMilliseconds(150)) };
+            DoubleAnimation animX = new DoubleAnimation
+            {
+                To = target,
+                Duration = new Duration(TimeSpan.FromMilliseconds(150))
+            };
+
+            DoubleAnimation animY = new DoubleAnimation
+            {
+                To = target,
+                Duration = new Duration(TimeSpan.FromMilliseconds(150))
+            };
 
             Storyboard sb = new Storyboard();
             Storyboard.SetTarget(animX, st);
