@@ -30,9 +30,8 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-
-        // Define this later with authorization service
-        SetLayoutBasedOnUserRole(isAdmin: true);
+        // This will determine what layout your user goes.
+        SetLayoutBasedOnUserRole(isAdmin: false);
         this.Content.KeyDown += OnKeyDown;
     }
 
