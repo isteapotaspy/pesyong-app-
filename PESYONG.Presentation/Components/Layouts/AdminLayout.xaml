@@ -9,6 +9,39 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d">
 
+    <Grid>
+    <!--
+    <Grid.RowDefinitions>
+        <RowDefinition Height="*" />
+        <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    -->
+    
+    <!--
+    <TitleBar x:Name="TitleBar"
+        Title="PESYONG Catering Service"
+        Subtitle="Admin View"
+        IsBackButtonVisible="True"
+        IsPaneToggleButtonVisible="False">
+        <TitleBar.IconSource>
+            <ImageIconSource ImageSource="/Assets/Tiles/GalleryIcon.ico" />
+        </TitleBar.IconSource>
+        <TitleBar.Content>
+            <AutoSuggestBox
+            Width="360"
+            VerticalAlignment="Center"
+            PlaceholderText="Search.."
+            QueryIcon="Find" />
+        </TitleBar.Content>
+        <TitleBar.RightHeader>
+            <PersonPicture
+            Width="30"
+            Height="30"
+            Initials="JD" />
+        </TitleBar.RightHeader>
+    </TitleBar>
+    -->
+
     <NavigationView x:Name="AdminLayoutNavView" 
                     Grid.Row="0" 
                     Height="Auto"
@@ -67,5 +100,6 @@
         <Frame x:Name="MainContentFrame" 
                Grid.Column="1"               
                VerticalAlignment="Stretch"/>
-    </NavigationView>
+        </NavigationView>
+    </Grid>
 </UserControl>
