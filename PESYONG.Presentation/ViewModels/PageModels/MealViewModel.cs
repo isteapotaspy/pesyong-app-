@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ using PESYONG.Domain.Enums;
 
 namespace PESYONG.ApplicationLogic.ViewModels.ObjectModels;
 
-public partial class MealViewModel : ObservableObject
+public partial class MealViewModel : ObservableValidator
 {
     private readonly MealRepository? _mealRepository;
 
@@ -26,6 +27,7 @@ public partial class MealViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<string> mealTags = new();
 
+    [Required]
     [ObservableProperty]
     private string mealName = string.Empty;
 
@@ -103,7 +105,7 @@ public partial class MealViewModel : ObservableObject
         AvailableTags = new ObservableCollection<string>
         {
             "Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Spicy",
-            "Low-Carb", "High-Protein", "Keto", "Paleo", "Organic"
+            "Low-Carb", "High-Protein", "Keto", "Paleo", "Organic", "Kosher", "Halal"
         };
 
         PropertyChanged += async (s, e) =>

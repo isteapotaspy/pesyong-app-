@@ -15,6 +15,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="ViewModels\ObjectModels\**" />
+    <EmbeddedResource Remove="ViewModels\ObjectModels\**" />
+    <None Remove="ViewModels\ObjectModels\**" />
+    <Page Remove="ViewModels\ObjectModels\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Remove="Assets\SampleMeal.png" />
   </ItemGroup>
   <ItemGroup>
@@ -139,7 +145,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Themes\" />
-    <Folder Include="ViewModels\ObjectModels\" />
     <Folder Include="Views\Admin\Administration\" />
     <Folder Include="Views\Admin\Transactions\" />
   </ItemGroup>
@@ -210,4 +215,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
   </PropertyGroup>
+  <ItemGroup>
+    <PRIResource Remove="ViewModels\ObjectModels\**" />
+  </ItemGroup>
 </Project>

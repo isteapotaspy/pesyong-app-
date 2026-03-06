@@ -6,6 +6,7 @@ using PESYONG.Domain.Entities.Financial.AcknowledgementReceipts;
 using PESYONG.Domain.Entities.Financial.Promos;
 using PESYONG.Domain.Entities.Logistics;
 using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using System;
 using System.Collections.Generic;

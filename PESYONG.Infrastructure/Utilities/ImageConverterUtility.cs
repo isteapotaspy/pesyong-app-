@@ -8,7 +8,7 @@ using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
-namespace PESYONG.ApplicationLogic.Utilities;
+namespace PESYONG.Domain.Utilities;
 
 /// <summary>
 /// This service ensures seamless transaction between the backend and the frontend image transmission.
