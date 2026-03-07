@@ -6,7 +6,7 @@ using PESYONG.ApplicationLogic.ViewModels.ObjectModels;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 
-namespace PESYONG.Presentation.ViewModels.PageModels;
+namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
 public partial class MealProductItemViewModel : ObservableValidator
 {

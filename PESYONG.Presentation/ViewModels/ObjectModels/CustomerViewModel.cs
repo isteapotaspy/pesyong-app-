@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
+using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.Domain.Entities.Users;
 using Windows.Networking;
 
@@ -16,6 +20,8 @@ namespace PESYONG.Presentation.ViewModels.ObjectModels;
 /// </summary>
 public partial class CustomerViewModel : ObservableValidator
 {
+    private readonly CustomerRepository _customerRepository;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FullName))]
     [NotifyPropertyChangedFor(nameof(DisplayName))]
@@ -63,9 +69,26 @@ public partial class CustomerViewModel : ObservableValidator
     [NotifyPropertyChangedFor(nameof(IsActiveDisplay))]
     private bool _isActive = true;
 
+    // Computed properties
+    public string FullName => $"{FirstName} {LastName}".Trim();
+    public string DisplayName => !string.IsNullOrWhiteSpace(FullName) ? FullName : "New Customer";
+    public string StatusText => IsActive ? "Active" : "Inactive";
+    public string IsActiveDisplay => IsActive ? "Yes" : "No";
+    public bool IsNewCustomer => CustomerID == Guid.Empty;
+    public bool CanSave => !HasErrors && !string.IsNullOrWhiteSpace(FirstName) && !string.IsNullOrWhiteSpace(LastName) && !string.IsNullOrWhiteSpace(Email);
+
+
+    public IAsyncRelayCommand SaveCommand { get; }
+    public IAsyncRelayCommand LoadCommand { get; }
+    public IAsyncRelayCommand DeleteCommand { get; }
     public CustomerViewModel()
     {
-        // Validate all properties when changes occur
+        _customerRepository =  App.Instance.Services.GetRequiredService<CustomerRepository>();
+
+        SaveCommand = new AsyncRelayCommand(SaveCustomerAsync, () => CanSave);
+        LoadCommand = new AsyncRelayCommand(LoadCustomerAsync);
+        DeleteCommand = new AsyncRelayCommand(DeleteCustomerAsync, () => !IsNewCustomer);
+
         PropertyChanged += (sender, args) =>
         {
             if (args.PropertyName != nameof(HasErrors) && args.PropertyName != nameof(CanSave))
@@ -76,19 +99,6 @@ public partial class CustomerViewModel : ObservableValidator
 
         ValidateAllProperties();
     }
-
-    // Computed properties
-    public string FullName => $"{FirstName} {LastName}".Trim();
-
-    public string DisplayName => !string.IsNullOrWhiteSpace(FullName) ? FullName : "New Customer";
-
-    public string StatusText => IsActive ? "Active" : "Inactive";
-
-    public string IsActiveDisplay => IsActive ? "Yes" : "No";
-
-    public bool IsNewCustomer => CustomerID == Guid.Empty;
-
-    public bool CanSave => !HasErrors && !string.IsNullOrWhiteSpace(FirstName) && !string.IsNullOrWhiteSpace(LastName) && !string.IsNullOrWhiteSpace(Email);
 
     // Entity Mappers
     public static CustomerViewModel FromEntity(Customer entity)
@@ -207,5 +217,73 @@ public partial class CustomerViewModel : ObservableValidator
                Email != entity.Email ||
                Address != (entity.Address ?? string.Empty) ||
                IsActive != entity.IsActive;
+    }
+
+    public void LoadFromEntity(Customer customer)
+    {
+        CustomerID = customer.CustomerID;
+        FirstName = customer.FirstName;
+        LastName = customer.LastName;
+        Email = customer.Email;
+        CreatedDate = customer.CreatedDate;
+        IsActive = customer.IsActive;
+    }
+
+    private async Task SaveCustomerAsync()
+    {
+        if (!CanSave || _customerRepository == null) return;
+
+        try
+        {
+            if (CustomerID != Guid.Empty)
+            {
+                await _customerRepository.UpdateCustomerAsync(ToEntity());
+            }
+            else
+            {
+                await _customerRepository.CreateCustomerAsync(ToEntity());
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowEventOnDebugConsole("Error", $"An error occurred while saving customer: {ex.Message}", "OK");
+        }
+    }
+
+    private async Task LoadCustomerAsync()
+    {
+        if (CustomerID == Guid.Empty || _customerRepository == null) return;
+
+        try
+        {
+            Customer customer = await _customerRepository.GetCustomerByIdAsync(CustomerID);
+            if (customer != null)
+            {
+                LoadFromEntity(customer);
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowEventOnDebugConsole("Error", $"Failed to load customer: {ex.Message}", "OK");
+        }
+    }
+
+    private async Task DeleteCustomerAsync()
+    {
+        if (CustomerID == Guid.Empty || _customerRepository == null) return;
+
+        try
+        {
+            await _customerRepository.DeleteCustomerAsync(CustomerID);
+        }
+        catch (Exception ex)
+        {
+            ShowEventOnDebugConsole("Error", $"An error occurred while deleting customer: {ex.Message}", "OK");
+        }
+    }
+
+    private void ShowEventOnDebugConsole(string a, string b, string c)
+    {
+        Debug.Write($"[{a}] {c} : {b}");
     }
 }

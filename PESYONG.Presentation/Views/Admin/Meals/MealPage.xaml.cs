@@ -24,15 +24,14 @@ namespace PESYONG.Presentation.Views.Admin.Meals
     {
         private readonly MealSyncService _mealSyncService;
         private readonly MealRepository _mealRepository;
+        private byte[]? _selectedImageBytes;
 
         public ObservableCollection<MealViewModel> MealListViewModels { get; } = new();
         private MealViewModel? SelectedMealViewModel => DataContext as MealViewModel;
 
         public Array DeliveryTypes { get; } = Enum.GetValues(typeof(DeliveryType));
 
-        private MealViewModel? SelectedMealViewModel => DataContext as MealViewModel;
 
-        private readonly MealSyncService _mealSyncService;
         public MealPage()
         {
             this.InitializeComponent();
@@ -142,7 +141,7 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 
                 if (_selectedImageBytes != null)
                 {
-                    entity.ImageBytes = _selectedImageBytes;
+                    entity.ImageBytes = (byte[]?)_selectedImageBytes;
                 }
                 else if (vm.MealID.HasValue)
                 {
@@ -358,7 +357,7 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 
                 if (DataContext is MealViewModel vm)
                 {
-                    vm.ImageBytes = _selectedImageBytes;
+                    vm.ImageBytes = (byte[]?)_selectedImageBytes;
                 }
 
                 Debug.WriteLine("Image selected successfully.");

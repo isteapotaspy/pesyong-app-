@@ -19,7 +19,7 @@ using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Users.Identity;
 
-namespace PESYONG.Presentation.ViewModels.PageModels;
+namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
 public partial class MealProductViewModel : ObservableValidator
 {
