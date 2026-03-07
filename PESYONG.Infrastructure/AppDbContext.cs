@@ -61,6 +61,11 @@ namespace PESYONG.Infrastructure
                               c =>
                                   (ICollection<string>)(c == null ? new List<string>() : c.ToList())
                           ));
+
+                entity.HasOne(e => e.Operator)
+                      .WithMany()
+                      .HasForeignKey(e => e.OperatorID)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             // -----------------------------

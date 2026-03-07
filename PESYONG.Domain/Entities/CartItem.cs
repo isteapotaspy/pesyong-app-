@@ -6,7 +6,7 @@ public class CartItem
     public string Name { get; set; } = string.Empty;
     public double Price { get; set; }
     public int Quantity { get; set; }
-    public string Image { get; set; } = string.Empty;
+    public byte[] ImageBytes { get; set; } 
     public string Type { get; set; } // package, short-order, kakanin
     public int? Pax { get; set; }
     public int ProductId { get; set; }

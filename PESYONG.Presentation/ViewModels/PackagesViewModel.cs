@@ -196,7 +196,7 @@ public partial class PackagesViewModel : ObservableObject
             var selected = SelectedViands.ToList();
             var order = _service.CreateOrderFromSelection(selected, 1);
 
-            if (App.Current.MainWindow.Content is Frame rootFrame)
+            if (App.MainWindow.Content is Frame rootFrame)
             {
                 rootFrame.Navigate(typeof(CheckoutPage), order);
             }

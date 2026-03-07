@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -52,13 +53,10 @@ public partial class MealViewModel : ObservableValidator
     private DateTime creationDate = DateTime.UtcNow;
 
     [ObservableProperty]
-    private int lastModifiedByOperatorID;
+    private int? lastModifiedByOperatorID;
 
     [ObservableProperty]
     private DateTime lastModifiedDate = DateTime.UtcNow;
-
-    [ObservableProperty]
-    private string imageSourceString = string.Empty;
 
     private BitmapImage _mealImage = new BitmapImage();
     public BitmapImage MealImage
@@ -67,18 +65,24 @@ public partial class MealViewModel : ObservableValidator
         set => SetProperty(ref _mealImage, value);
     }
 
+    private byte[]? imageBytes;
+    public byte[]? ImageBytes
+    {
+        get => imageBytes;
+        set
+        {
+            if (SetProperty(ref imageBytes, value))
+            {
+                _ = LoadMealImageFromBytesAsync(value);
+            }
+        }
+    }
+
     [ObservableProperty]
     private ObservableCollection<string> selectedTags = new();
 
     [ObservableProperty]
     private ObservableCollection<string> availableTags = new();
-
-    private byte[]? imageBytes;
-    public byte[]? ImageBytes
-    {
-        get => imageBytes;
-        set => SetProperty(ref imageBytes, value);
-    }
 
     [ObservableProperty]
     private bool hasValidationErrors;
@@ -110,18 +114,14 @@ public partial class MealViewModel : ObservableValidator
             "Low-Carb", "High-Protein", "Keto", "Paleo", "Organic", "Kosher", "Halal"
         };
 
-        PropertyChanged += async (s, e) =>
+        PropertyChanged += (s, e) =>
         {
             if (e.PropertyName != nameof(HasValidationErrors) &&
-                e.PropertyName != nameof(ValidationErrors))
+                e.PropertyName != nameof(ValidationErrors) &&
+                e.PropertyName != nameof(MealImage))
             {
                 Validate();
                 SaveCommand.NotifyCanExecuteChanged();
-            }
-
-            if (e.PropertyName == nameof(ImageSourceString))
-            {
-                await LoadMealImageAsync();
             }
         };
     }
@@ -146,12 +146,12 @@ public partial class MealViewModel : ObservableValidator
         CreationDate = meal.CreationDate;
         LastModifiedByOperatorID = meal.LastModifiedByOperatorID;
         LastModifiedDate = meal.LastModifiedDate;
-        ImageSourceString = meal.ImageSourceString;
+        ImageBytes = meal.ImageBytes;
 
-        mealTags.Clear();
+        MealTags.Clear();
         foreach (var tag in meal.MealTags)
         {
-            mealTags.Add(tag);
+            MealTags.Add(tag);
         }
     }
 
@@ -160,7 +160,7 @@ public partial class MealViewModel : ObservableValidator
         return new Meal
         {
             MealID = MealID,
-            OperatorID = OperatorID ?? 0,
+            OperatorID = OperatorID,
             MealName = MealName,
             Description = string.IsNullOrWhiteSpace(Description) ? null : Description,
             MealPrice = MealPrice,
@@ -170,7 +170,7 @@ public partial class MealViewModel : ObservableValidator
             CreationDate = CreationDate,
             LastModifiedByOperatorID = LastModifiedByOperatorID,
             LastModifiedDate = LastModifiedDate,
-            ImageSourceString = ImageSourceString,
+            ImageBytes = ImageBytes,
             MealTags = MealTags.ToList()
         };
     }
@@ -201,22 +201,24 @@ public partial class MealViewModel : ObservableValidator
     {
         MealID = null;
         OperatorID = null;
-        MealName = String.Empty;
-        Description = String.Empty;
+        MealName = string.Empty;
+        Description = string.Empty;
         MealPrice = 0;
         StockQuantity = 0;
-        MinOrderQuantity = 0;
+        MinOrderQuantity = 1;
         DeliveryType = DeliveryType.Delivery;
         CreationDate = DateTime.UtcNow;
-        LastModifiedByOperatorID = 0;
+        LastModifiedByOperatorID = null;
         LastModifiedDate = DateTime.UtcNow;
-        ImageSourceString = String.Empty;
-        MealTags = new();
+        ImageBytes = null;
+        MealImage = new BitmapImage();
+        MealTags = new ObservableCollection<string>();
     }
 
     private async Task UploadImageAsync()
     {
-        // Image upload logic
+        // keep empty for now if page code-behind handles image picking
+        await Task.CompletedTask;
     }
 
     private async Task SaveMealAsync()
@@ -225,7 +227,6 @@ public partial class MealViewModel : ObservableValidator
 
         try
         {
-            var currentOperatorId = GetCurrentOperatorId();
             if (MealID.HasValue)
             {
                 await _mealRepository.UpdateMealAsync(ToEntity());
@@ -237,7 +238,7 @@ public partial class MealViewModel : ObservableValidator
         }
         catch (Exception ex)
         {
-            ShowEventOnDebugConsole("Error", "An error occurred while saving meal", "OK");
+            ShowEventOnDebugConsole("Error", $"An error occurred while saving meal: {ex.Message}", "OK");
         }
     }
 
@@ -255,7 +256,7 @@ public partial class MealViewModel : ObservableValidator
         }
         catch (Exception ex)
         {
-            ShowEventOnDebugConsole("Error", "Failed to load meal", "OK");
+            ShowEventOnDebugConsole("Error", $"Failed to load meal: {ex.Message}", "OK");
         }
     }
 
@@ -263,41 +264,39 @@ public partial class MealViewModel : ObservableValidator
     {
         if (!MealID.HasValue || _mealRepository == null) return;
 
-        bool confirmed = true;
-
-        if (confirmed)
-        {
-            try
-            {
-                var currentOperatorId = GetCurrentOperatorId();
-                await _mealRepository.DeleteMealAsync(MealID.Value);
-            }
-            catch (Exception ex)
-            {
-                ShowEventOnDebugConsole("Error", "An error occurred while deleting meal", "OK");
-            }
-        }
-    }
-
-    private async Task LoadMealImageAsync()
-    {
-        if (string.IsNullOrEmpty(ImageSourceString))
-            return;
-
         try
         {
-            MealImage = new BitmapImage(new Uri(ImageSourceString));
+            await _mealRepository.DeleteMealAsync(MealID.Value);
         }
         catch (Exception ex)
         {
-            // Handle invalid URI or loading errors
-            Debug.WriteLine($"Failed to load image: {ex.Message}");
+            ShowEventOnDebugConsole("Error", $"An error occurred while deleting meal: {ex.Message}", "OK");
         }
     }
 
-    private int GetCurrentOperatorId()
+    private async Task LoadMealImageFromBytesAsync(byte[]? bytes)
     {
-        return 1;
+        if (bytes == null || bytes.Length == 0)
+        {
+            MealImage = new BitmapImage();
+            return;
+        }
+
+        try
+        {
+            var bitmap = new BitmapImage();
+
+            using var stream = new MemoryStream(bytes);
+            using var randomAccessStream = stream.AsRandomAccessStream();
+            await bitmap.SetSourceAsync(randomAccessStream);
+
+            MealImage = bitmap;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to load image from bytes: {ex.Message}");
+            MealImage = new BitmapImage();
+        }
     }
 
     private void Validate()
@@ -308,7 +307,7 @@ public partial class MealViewModel : ObservableValidator
         ValidationErrors.Clear();
         foreach (var error in errors)
         {
-            ValidationErrors.Add(error);
+            ValidationErrors.Add(error ?? "Validation error");
         }
 
         HasValidationErrors = errors.Any();
@@ -317,5 +316,49 @@ public partial class MealViewModel : ObservableValidator
     private void ShowEventOnDebugConsole(string a, string b, string c)
     {
         Debug.Write($"[{a}] {c} : {b}");
+    }
+
+    public string RelativeCreationTime
+    {
+        get
+        {
+            var span = DateTime.UtcNow - CreationDate;
+
+            if (span.TotalMinutes < 1) return "Just created";
+            if (span.TotalHours < 1) return $"{(int)span.TotalMinutes} minute(s) ago";
+            if (span.TotalDays < 1) return $"{(int)span.TotalHours} hour(s) ago";
+            return $"{(int)span.TotalDays} day(s) ago";
+        }
+    }
+
+    public string FormattedPrice => $"₱{MealPrice:N2}";
+
+    public string StockStatus
+    {
+        get
+        {
+            if (StockQuantity <= 0) return "Out of Stock";
+            if (StockQuantity <= 10) return "Low Stock";
+            return "In Stock";
+        }
+    }
+
+    public string StockQuantityText => $"{StockQuantity} units";
+
+
+    partial void OnMealPriceChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(FormattedPrice));
+    }
+
+    partial void OnStockQuantityChanged(int value)
+    {
+        OnPropertyChanged(nameof(StockStatus));
+        OnPropertyChanged(nameof(StockQuantityText));
+    }
+
+    partial void OnCreationDateChanged(DateTime value)
+    {
+        OnPropertyChanged(nameof(RelativeCreationTime));
     }
 }
