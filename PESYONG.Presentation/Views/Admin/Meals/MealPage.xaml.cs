@@ -22,17 +22,17 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 {
     public sealed partial class MealPage : Page
     {
+        private readonly MealSyncService _mealSyncService;
         private readonly MealRepository _mealRepository;
 
         public ObservableCollection<MealViewModel> MealListViewModels { get; } = new();
+        private MealViewModel? SelectedMealViewModel => DataContext as MealViewModel;
 
         public Array DeliveryTypes { get; } = Enum.GetValues(typeof(DeliveryType));
 
         private MealViewModel? SelectedMealViewModel => DataContext as MealViewModel;
 
         private readonly MealSyncService _mealSyncService;
-
-        private byte[]? _selectedImageBytes;
         public MealPage()
         {
             this.InitializeComponent();
@@ -183,6 +183,9 @@ namespace PESYONG.Presentation.Views.Admin.Meals
                 Debug.WriteLine($"Save failed: {ex.Message}");
             }
         }
+
+        private async void ChangePhoto_Click(object sender, RoutedEventArgs e)
+        { }
 
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
