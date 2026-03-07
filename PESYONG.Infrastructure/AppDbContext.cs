@@ -19,7 +19,6 @@ namespace PESYONG.Infrastructure
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Meal> Meals => Set<Meal>();
-        public DbSet<MealProduct> MealProducts => Set<MealProduct>();
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<AcknowledgementReceipt> AcknowledgementReceipts => Set<AcknowledgementReceipt>();
