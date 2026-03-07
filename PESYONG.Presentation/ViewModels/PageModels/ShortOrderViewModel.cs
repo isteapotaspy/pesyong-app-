@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace PESYONG.Presentation.ViewModels;
+namespace PESYONG.Presentation.ViewModels.PageModels;
 
 /// <summary>
 /// View model for short order items with UI-specific properties, mapping to updated Meal entity.

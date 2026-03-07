@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PESYONG.Presentation.ViewModels.Admin;
+namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
-public class AdminMealPackageViewModel
+internal class DeliveryViewModel
 {
 }

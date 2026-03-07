@@ -7,16 +7,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Media.Imaging;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
+using PESYONG.Presentation;
 
 namespace PESYONG.ApplicationLogic.ViewModels.ObjectModels;
 
 public partial class MealViewModel : ObservableValidator
 {
-    private readonly MealRepository? _mealRepository;
+    private MealRepository _mealRepository;
 
     [ObservableProperty]
     private int? mealID;
@@ -91,9 +93,9 @@ public partial class MealViewModel : ObservableValidator
     public IRelayCommand RemoveTagCommand { get; }
     public IAsyncRelayCommand UploadImageCommand { get; }
 
-    public MealViewModel(MealRepository mealService)
+    public MealViewModel()
     {
-        _mealRepository = mealService;
+        _mealRepository = App.Instance.Services.GetRequiredService<MealRepository>();
 
         SaveCommand = new AsyncRelayCommand(SaveMealAsync, CanSaveMeal);
         AddTagCommand = new RelayCommand<string>(AddTag, CanAddTag);
@@ -124,9 +126,9 @@ public partial class MealViewModel : ObservableValidator
         };
     }
 
-    public static MealViewModel CreateFromEntity(Meal meal, MealRepository repository)
+    public static MealViewModel CreateFromEntity(Meal meal)
     {
-        var vm = new MealViewModel(repository);
+        var vm = new MealViewModel();
         vm.LoadFromEntity(meal);
         return vm;
     }

@@ -23,7 +23,7 @@ namespace PESYONG.Domain.Entities.Meals.MealProduct;
 public class MealProduct
 {
     [Key]
-    public Guid MealProductID { get; set; }
+    public int MealProductID { get; set; }
 
     [ForeignKey(nameof(Owner))]
     public int OwnerID { get; set; }

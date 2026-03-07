@@ -26,7 +26,6 @@ using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Infrastructure;
 using PESYONG.Presentation.Profiler;
 using PESYONG.Presentation.ViewModels;
-using PESYONG.Presentation.ViewModels.Admin;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -67,7 +66,8 @@ public partial class App : Microsoft.UI.Xaml.Application
             );
 
         var connectionString =
-                @"Server=(localdb)\MSSQLLocalDB;Database=PesyongDb;Trusted_Connection=True;TrustServerCertificate=True;";
+                @"Server=(localdb)\MSSQLLocalDB;Database=PesyongDb;" + 
+                "Trusted_Connection=True;TrustServerCertificate=True;";
 
         services.AddDbContextFactory<AppDbContext>(options =>
         {
@@ -80,12 +80,12 @@ public partial class App : Microsoft.UI.Xaml.Application
 
 
         // Register repository accessors
-        services.AddTransient<MealRepository>(provider =>
-         new MealRepository(provider.GetRequiredService<IDbContextFactory<AppDbContext>>()));
+        services.AddTransient<MealRepository>();
         services.AddScoped<OrderRepository>();
 
         services.AddScoped<CateringService>();
-        services.AddSingleton<MealSyncService>();
+        services.AddScoped<MealSyncService>();
+        services.AddScoped<AcknowledgementReceiptService>();
 
         // Customer ViewModels
         services.AddTransient<PackagesViewModel>();
@@ -95,14 +95,6 @@ public partial class App : Microsoft.UI.Xaml.Application
         // Admin ViewModels
         // THIS IS WHY WE FREAKING USE DEPENDENCY INJECTION 
         // I LITERALLY SAID TO LEARN THIS JUD BA UNYA WA GINA TAKE SERIOUSLY ISTG
-        services.AddTransient<MealViewModel>(provider =>
-        {
-            var mealRepo = provider.GetRequiredService<MealRepository>();
-            return new MealViewModel(mealRepo);
-        });
-
-        services.AddTransient<AdminMealPackageViewModel>();
-
 
         Services = services.BuildServiceProvider();
 

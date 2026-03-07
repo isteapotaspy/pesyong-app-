@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PESYONG.Presentation.ViewModels
+namespace PESYONG.Presentation.ViewModels.PageModels
 {
     /// <summary>
     /// Manages the presentation logic for individual Kakanin products.

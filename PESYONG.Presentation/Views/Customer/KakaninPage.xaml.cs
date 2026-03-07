@@ -6,7 +6,7 @@ using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
-using PESYONG.Presentation.ViewModels;
+using PESYONG.Presentation.ViewModels.PageModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
