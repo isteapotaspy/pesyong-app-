@@ -6,6 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:objectmodels="using:PESYONG.ApplicationLogic.ViewModels.ObjectModels"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:ui="using:CommunityToolkit.WinUI"
     d:DataContext="{d:DesignInstance objectmodels:MealViewModel}"
     mc:Ignorable="d">
 
@@ -184,11 +186,15 @@
                         </StackPanel>
                     </Grid>
 
+
+                    <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}">
+                        Meal Details
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                        Manage the details presented in customer kiosk view.
+                    </TextBlock>
                     <StackPanel Orientation="Vertical"
-                                Margin="0,6,0,0">
-                        <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}">
-                                Meal Details
-                        </TextBlock>
+                                Margin="0,6,0,0">                        
                         <!-- Meal Name -->
                         <TextBox Header="Meal Title" 
                                          Text="{Binding MealName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -225,7 +231,7 @@
                             </TextBox>
 
                             <!-- Formatted Price Display -->
-                            <TextBlock Text="{Binding FormattedPrice, FallbackValue='$0.00'}" 
+                            <TextBlock Text="{Binding FormattedPrice, FallbackValue='PHP0.00'}" 
                                 FontSize="24" VerticalAlignment="Bottom"
                                 Foreground="DarkGreen" 
                                 FontWeight="SemiBold"/>
@@ -236,9 +242,14 @@
                                    Margin="0,24,0,0">
                                 Stock Management
                         </TextBlock>
+                        <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                            Manage the inventory of meals for the kiosk catalogue.
+                        </TextBlock>
+                                   
                         <!-- Stock Management -->
-                        <StackPanel Orientation="Horizontal" Spacing="16">
-
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="16"
+                                    Margin="0,6,0,0">
                             <NumberBox Header="Stock Quantity" 
                                        Value="{Binding StockQuantity, Mode=TwoWay}"
                                        MinWidth="36"
@@ -265,21 +276,6 @@
 
                         </StackPanel>
 
-                        <!-- Stock Status Indicator -->
-                        <Border x:Name="StockStatusBorder" 
-                                HorizontalAlignment="Left"
-                                Background="LightGray" 
-                                CornerRadius="2" 
-                                Margin="0,6,8,8"
-                                Padding="8,4" >
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBlock Text="{Binding StockStatus, FallbackValue='Loading...'}" 
-                                   Foreground="White" FontWeight="Bold"/>
-                                <TextBlock Text="{Binding StockQuantityText, FallbackValue='0 units'}" 
-                                   Foreground="White" Opacity="0.9"/>
-                            </StackPanel>
-                        </Border>
-
                         <!-- Delivery Type -->
                         <ComboBox Header="Delivery Type"
                          ItemsSource="{x:Bind DeliveryTypes, Mode=OneWay}"
@@ -292,7 +288,50 @@
                         </TextBlock>
                         <!-- Mealtags -->
                         <StackPanel Orientation="Vertical" Spacing="16">
-                            <TextBlock>Add a tokenizing textbar here to automatically generate and bind meal tags, then add auto searching</TextBlock>
+                            <controls:TokenizingTextBox x:Name="TokenBox"
+                                    MaxWidth="620"
+                                    HorizontalAlignment="Left"
+                                    ItemsSource="{Binding MealTags, Mode=TwoWay}"
+                                    MaximumTokens="5"
+                                    PlaceholderText="Add actions"
+                                    QueryIcon="{ui:FontIconSource Glyph=&#xE721;,
+                                                                  FontSize=12}"
+                                    SuggestedItemsSource="{Binding AvailableTags, Mode=OneWay}"
+                                    TextMemberPath="Text"
+                                    TokenDelimiter=",">
+                                <controls:TokenizingTextBox.Header>
+                                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                                        <Run Text="Manage meal tags with a limit of" />
+                                        <Run FontWeight="SemiBold"
+                                             Text="{Binding MaximumTokens, ElementName=TokenBox, Mode=OneWay}" />
+                                        <Run Text="actions" />
+                                    </TextBlock>
+                                </controls:TokenizingTextBox.Header>
+                                <controls:TokenizingTextBox.SuggestedItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Viewbox Width="16">
+                                                <SymbolIcon Symbol="{Binding Icon}" />
+                                            </Viewbox>
+                                            <TextBlock Padding="8,0,0,0"
+                                                Text="{Binding Text}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </controls:TokenizingTextBox.SuggestedItemTemplate>
+                                <controls:TokenizingTextBox.TokenItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Viewbox Width="16">
+                                                <SymbolIcon Symbol="{Binding Icon}" />
+                                            </Viewbox>
+                                            <TextBlock Padding="8,0,0,0"
+                                                Text="{Binding Text}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </controls:TokenizingTextBox.TokenItemTemplate>
+                            </controls:TokenizingTextBox>
+
+
                         </StackPanel>
                     </StackPanel>
 
@@ -310,7 +349,6 @@
                                 Foreground="White"
                                 Click="SaveButton_Click"/>
                     </StackPanel>
-
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

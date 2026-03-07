@@ -74,6 +74,10 @@ public partial class App : Microsoft.UI.Xaml.Application
             options.UseSqlServer(connectionString);
         });
 
+        // To be implemented
+        services.AddSingleton<AuthenticationService>();
+        services.AddSingleton<AuthorizationService>();
+
 
         // Register repository accessors
         services.AddTransient<MealRepository>(provider =>
@@ -123,15 +127,12 @@ public partial class App : Microsoft.UI.Xaml.Application
         {
             Debug.WriteLine("\n\n=== Testing Dependency Injection ===");
 
-            // Test 1: Can resolve MealRepository?
             var mealRepo = Services.GetService<MealRepository>();
             Debug.WriteLine($"MealRepository: {(mealRepo != null ? "[/] Resolved" : "[X] Failed")}");
 
-            // Test 2: Can resolve MealViewModel?
             var mealVM = Services.GetService<MealViewModel>();
             Debug.WriteLine($"MealViewModel: {(mealVM != null ? "[/] Resolved" : "[X] Failed")}");
 
-            // Test 3: Test database connection
             var dbContext = Services.GetService<AppDbContext>();
             Debug.WriteLine($"DbContext: {(dbContext != null ? "[/] Resolved" : "[X] Failed")}");
 

@@ -177,13 +177,18 @@
 
 
 
-            <StackPanel Grid.Row="3" Margin="0,12,0,0">
+            <StackPanel Grid.Row="3" 
+                            Margin="0,12,0,0"
+                            Width="Auto">
                 <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}"
-                           Margin="0,6,0,0">
-                           Delivery History
+                               Margin="0,6,0,0">
+                               Delivery History
                 </TextBlock>
-                
-                <!-- Add a list here-->
+                    <ListBox 
+                         CornerRadius="4"
+                         Height="240" 
+                         Margin="0,12,0,0" 
+                         />
             </StackPanel>
 
             <StackPanel Grid.Row="4" Margin="0,12,0,0">
@@ -194,9 +199,8 @@
 
                 <TextBlock>Put here if it actually suceedeed or not</TextBlock>
                 <TextBox Header="Recieved by" Margin="0,6,0,0"/>
-                <TextBox Header="Recieved at" Margin="0,6,0,0" Height="60"/>
-
-            </StackPanel>            
+                    <TextBox Header="Recieved at" Margin="0,6,0,0" Height="60"/>
+                </StackPanel>            
         </Grid>
     </Grid>
     </ScrollViewer>
