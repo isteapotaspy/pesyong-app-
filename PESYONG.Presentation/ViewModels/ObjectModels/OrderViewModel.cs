@@ -25,7 +25,7 @@ public partial class OrderViewModel : ObservableValidator
     private int? _receiptID;
 
     [ObservableProperty]
-    private int? _recipientID;
+    private Guid? _customerID;
 
     [ObservableProperty]
     private AppUserViewModel? _recipient;
@@ -96,7 +96,7 @@ public partial class OrderViewModel : ObservableValidator
         {
             OrderID = entity.OrderID;
             ReceiptID = entity.ReceiptID;
-            RecipientID = entity.RecipientID;
+            CustomerID = entity.CustomerID;
             OrderDate = entity.OrderDate;
             EstimatedDeliveryDate = entity.EstimatedDeliveryDate;
             ActualDeliveryDate = entity.ActualDeliveryDate;
@@ -185,7 +185,7 @@ public partial class OrderViewModel : ObservableValidator
         {
             OrderID = entity.OrderID,
             ReceiptID = entity.ReceiptID,
-            RecipientID = entity.RecipientID,
+            CustomerID = entity.CustomerID,
             OrderDate = entity.OrderDate,
             EstimatedDeliveryDate = entity.EstimatedDeliveryDate,
             ActualDeliveryDate = entity.ActualDeliveryDate,
@@ -213,7 +213,7 @@ public partial class OrderViewModel : ObservableValidator
         {
             OrderID = OrderID != Guid.Empty ? OrderID : Guid.NewGuid(),
             ReceiptID = ReceiptID,
-            RecipientID = RecipientID,
+            CustomerID = CustomerID,
             OrderDate = OrderDate,
             EstimatedDeliveryDate = EstimatedDeliveryDate,
             ActualDeliveryDate = ActualDeliveryDate,
@@ -318,7 +318,7 @@ public partial class OrderViewModel : ObservableValidator
     {
         OrderID = Guid.Empty;
         ReceiptID = null;
-        RecipientID = null;
+        CustomerID = null;
         OrderItems.Clear();
         OrderDate = DateTime.Now;
         EstimatedDeliveryDate = null;
@@ -338,7 +338,7 @@ public partial class OrderViewModel : ObservableValidator
     {
         var copy = new OrderViewModel
         {
-            RecipientID = RecipientID,
+            CustomerID = CustomerID,
             Address = Address,
             CustomerNotes = CustomerNotes,
             SpecialInstructions = SpecialInstructions,

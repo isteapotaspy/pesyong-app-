@@ -1,5 +1,4 @@
 ﻿using PESYONG.Domain.Entities;
-using PESYONG.Domain.Entities.Logistics;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,13 +11,12 @@ namespace PESYONG.ApplicationLogic.Services
         public static CartService Instance => _instance ??= new CartService();
 
         public ObservableCollection<CartItem> Cart { get; } = new ObservableCollection<CartItem>();
-        public DeliveryInfo Delivery { get; set; }
+        public DeliveryInfo? Delivery { get; set; }
 
         private CartService()
         {
             Delivery = new DeliveryInfo();
         }
-            // Private constructor for singleton
 
         public void AddToCart(CartItem item)
         {
@@ -41,6 +39,7 @@ namespace PESYONG.ApplicationLogic.Services
             if (item != null)
             {
                 Cart.Remove(item);
+                CartUpdated?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -57,6 +56,8 @@ namespace PESYONG.ApplicationLogic.Services
                 {
                     item.Quantity = newQuantity;
                 }
+
+                CartUpdated?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -64,6 +65,7 @@ namespace PESYONG.ApplicationLogic.Services
         {
             Cart.Clear();
             Delivery = null;
+            CartUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         public double GetSubtotal()
@@ -81,6 +83,6 @@ namespace PESYONG.ApplicationLogic.Services
             Delivery = deliveryInfo;
         }
 
-        public event EventHandler CartUpdated;
+        public event EventHandler? CartUpdated;
     }
 }

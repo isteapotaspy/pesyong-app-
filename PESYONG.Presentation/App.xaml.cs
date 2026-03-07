@@ -81,7 +81,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         // Register repository accessors
         services.AddTransient<MealRepository>(provider =>
          new MealRepository(provider.GetRequiredService<IDbContextFactory<AppDbContext>>()));
-        services.AddScoped<OrderRepository>();
+        services.AddTransient<OrderRepository>();
 
         services.AddScoped<CateringService>();
         services.AddSingleton<MealSyncService>();

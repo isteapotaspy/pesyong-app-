@@ -198,7 +198,8 @@ namespace PESYONG.Presentation.Views.Customer
                     Price = (double)item.MealPrice,
                     Quantity = quantity,
                     Type = "shortorder",
-                    ProductId = mealId
+                    ProductId = mealId,
+                    ImageBytes = item.ImageBytes
                 };
 
                 _cartService.AddToCart(cartItem);

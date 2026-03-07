@@ -5,33 +5,20 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PESYONG.Domain.Entities.Meals.MealProduct;
 
-/// <summary>
-/// This is a composite of [MealProductItem]s that a user can create.
-/// This is also a base class implementation of CATERING MEAL table.
-/// The difference is that catering meals are on a separate table,
-/// with RBAC (operators can only make catering meals) and 
-/// users can custom make their own meal product packs.
-/// 
-/// The computed properties below aren't logged because it will be
-/// constantly validated throughout the frontend and backend per transaction.
-/// </summary>
 public class MealProduct
 {
     [Key]
     public int MealProductID { get; set; }
 
     [ForeignKey(nameof(Owner))]
-    public int OwnerID { get; set; }
+    public int? OwnerID { get; set; }
 
     [ForeignKey(nameof(Promo))]
     public int? PromoID { get; set; }
 
-    [Required]
     public AppUser? Owner { get; set; }
 
     [Required]
@@ -48,8 +35,6 @@ public class MealProduct
     [StringLength(100)]
     public string? ProductDescription { get; set; }
 
-
-    // Computed properties for pricing
     [NotMapped]
     public decimal ProductBasePrice => MealProductItems.Sum(item => item.ItemPrice);
 
@@ -66,12 +51,12 @@ public class MealProduct
 
         return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
     }
+
     public IEnumerable<string> GetValidationErrors()
     {
         var validationContext = new ValidationContext(this);
         var validationResults = new List<ValidationResult>();
         Validator.TryValidateObject(this, validationContext, validationResults, true);
-        return validationResults.Select(vr => vr.ErrorMessage);
+        return validationResults.Select(vr => vr.ErrorMessage ?? string.Empty);
     }
 }
-

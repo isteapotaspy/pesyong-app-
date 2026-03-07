@@ -194,11 +194,44 @@ public partial class PackagesViewModel : ObservableObject
         try
         {
             var selected = SelectedViands.ToList();
-            var order = _service.CreateOrderFromSelection(selected, 1);
+
+            if (selected.Count == 0)
+            {
+                ShowNotification("Please select at least one viand.");
+                return;
+            }
+
+            if (selected.Count > 8)
+            {
+                ShowNotification("A custom package cannot exceed 8 viands.");
+                return;
+            }
+
+            decimal totalPrice = selected.Sum(v => v.Price);
+
+            var cartItem = new CartItem
+            {
+                Id = $"catering_{Guid.NewGuid()}",
+                Name = $"Custom Package ({selected.Count} viands)",
+                Price = (double)totalPrice,
+                Quantity = 1,
+                Type = "catering",
+                ProductId = 0,
+                CateringSelections = selected.Select(v => new CateringCartSelection
+                {
+                    MealId = v.MealId,
+                    MealName = v.MealName,
+                    Price = v.Price
+                }).ToList()
+            };
+
+            CartService.Instance.AddToCart(cartItem);
+
+            ShowNotification("Custom catering package added to cart.");
 
             if (App.MainWindow.Content is Frame rootFrame)
             {
-                rootFrame.Navigate(typeof(CheckoutPage), order);
+                rootFrame.Navigate(typeof(CartPage));
             }
         }
         catch (Exception ex)
