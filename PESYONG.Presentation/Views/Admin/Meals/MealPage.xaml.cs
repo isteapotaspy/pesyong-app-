@@ -68,7 +68,7 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 
             foreach (var meal in allMeals.OrderBy(m => m.MealID))
             {
-                var mealViewModel = MealViewModel.CreateFromEntity(meal, _mealRepository);
+                var mealViewModel = MealViewModel.CreateFromEntity(meal);
                 MealListViewModels.Add(mealViewModel);
             }
 
@@ -90,7 +90,7 @@ namespace PESYONG.Presentation.Views.Admin.Meals
             }
             else
             {
-                var emptyVm = new MealViewModel(_mealRepository);
+                var emptyVm = new MealViewModel();
                 emptyVm.ClearMealViewModel();
                 emptyVm.MinOrderQuantity = 1;
                 emptyVm.DeliveryType = DeliveryType.Delivery;
@@ -101,7 +101,7 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 
         private void AddMealButton_Click(object sender, RoutedEventArgs e)
         {
-            var newMealVm = new MealViewModel(_mealRepository);
+            var newMealVm = new MealViewModel();
             newMealVm.ClearMealViewModel();
             newMealVm.MinOrderQuantity = 1;
             newMealVm.StockQuantity = 0;
