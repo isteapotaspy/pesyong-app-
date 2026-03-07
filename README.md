@@ -85,7 +85,7 @@ dotnet tool install --global dotnet-ef
 
 ## Getting Started
 
-#### Clone
+### Clone
 Clone the repository and switch to the active branch:
 ```bash
 git clone https://github.com/isteapotaspy/pesyong-app-.git
@@ -93,7 +93,7 @@ cd pesyong-app-
 git checkout main
 ```
 
-#### Configuration
+### Configuration
 - Open the solution file in Visual Studio.
 - Set PESYONG.Presentation as the startup project.
 - Configure the database connection string depending on your project setup.
@@ -114,7 +114,7 @@ services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 ```
 
-#### Database
+### Database
 PESYONG uses Microsoft SQL Server Express (SQLEXPRESS) through Entity Framework Core.
 
 Before running the application:
@@ -132,7 +132,7 @@ dotnet ef migrations add MigrationName --project PESYONG.Infrastructure --startu
 dotnet ef database update --project PESYONG.Infrastructure --startup-project PESYONG.Presentation
 ```
 
-#### Build and Run
+### Build and Run
 
 From Visual Studio:
 - Build the solution
@@ -144,23 +144,23 @@ dotnet build
 dotnet run --project PESYONG.Presentation
 ```
 
-#### Development Notes
+## Development Notes
 - Keep UI-specific behavior in the presentation layer and move reusable business logic into view models or services where possible.
 - XAML converters should be placed in the correct namespace and referenced properly in XAML.
 - Missing resources, incorrect bindings, or invalid namespaces may cause runtime XAML parse exceptions.
 - Since the customer side is kiosk-based, the interface should remain simple, guided, and touch-friendly.
 - Admin pages are intended for operational management such as maintaining offerings, promos, and order handling.
 
-#### Troubleshooting
+## Troubleshooting
 
-#### App crashes during navigation
+### App crashes during navigation
 Check the Visual Studio Output window for XAML parse exceptions. Common causes include:
 - Missing `StaticResource` keys
 - Incorrect `xmlns` mappings
 - Binding paths that do not match the data context
 - Invalid control template references
 
-#### Database connection issues
+### Database connection issues
 If the app cannot connect to the database:
 - Verify that SQL Server Express is installed
 - Verify that the `SQLEXPRESS` instance is running
@@ -168,23 +168,23 @@ If the app cannot connect to the database:
 - Verify that your Windows account has access to the SQL Server instance
 - Verify that migrations have been applied successfully
 
-#### Build Issues
+### Build Issues
 If the solution fails to build:
 - Check that all projects target compatible frameworks
 - Restore NuGet packages
 - Clean and rebuild the solution
 
-#### Contributing
+## Contributing
 - Fork the repository
 - Create a feature branch
 - Commit focused changes
 - Submit a pull request against `main`
 Follow the existing naming conventions and keep changes consistent with the project structure.
 
-#### License
+## License
 This repository does not currently include a license file by default. Add a `LICENSE` file if you intend to distribute it as open source.
 
-#### Contact
+## Contact
 For questions, issues, or development concerns, open an issue in the repository or contact the project maintainers.
 
   
