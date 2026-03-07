@@ -140,8 +140,22 @@
   <ItemGroup>
     <Folder Include="Themes\" />
     <Folder Include="ViewModels\PageModels\" />
-    <Folder Include="Views\Admin\Administration\" />
     <Folder Include="Views\Admin\Transactions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Administration\AuditLogPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Administration\AppUserPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Administration\CustomerPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Admin\Logistics\DeliveryUpdatePage.xaml">

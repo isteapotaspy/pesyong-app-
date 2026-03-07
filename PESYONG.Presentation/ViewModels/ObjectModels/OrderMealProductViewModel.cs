@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Presentation.ViewModels.PageModels;
+using PESYONG.Presentation.Views.Admin.Meals;
 
 namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
@@ -45,6 +46,27 @@ public partial class OrderMealProductViewModel : ObservableValidator
     {
         ValidateAllProperties();
     }
+
+
+    public OrderMealProductViewModel(OrderMealProduct entity)
+    {
+        if (entity != null)
+        {
+            OrderID = entity.OrderID;
+            MealProductID = entity.MealProductID;
+            ItemPrice = entity.ItemPrice;
+            MealProductOrderQty = entity.MealProductOrderQty;
+
+            // Convert MealProduct to MealProductViewModel if it exists
+            if (entity.MealProduct != null)
+            {
+                MealProduct = MealProductViewModel.CreateFromEntity(entity.MealProduct);
+            }
+        }
+
+        ValidateAllProperties();
+    }
+
 
     // Computed properties
     public decimal SubTotal => MealProductOrderQty * ItemPrice;

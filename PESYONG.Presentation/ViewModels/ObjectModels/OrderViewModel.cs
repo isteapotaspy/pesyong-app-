@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
+using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Enums;
 using PESYONG.Presentation.ViewModels.ObjectModels;
@@ -97,6 +98,36 @@ public partial class OrderViewModel : ObservableValidator
                 OnPropertyChanged(nameof(ItemCount));
             }
         };
+
+        ValidateAllProperties();
+    }
+
+    public OrderViewModel(Order entity)
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
+
+        // Map properties from entity to ViewModel
+        OrderID = entity.OrderID;
+        ReceiptID = entity.ReceiptID;
+        RecipientID = entity.RecipientID;
+        OrderDate = entity.OrderDate;
+        EstimatedDeliveryDate = entity.EstimatedDeliveryDate;
+        ActualDeliveryDate = entity.ActualDeliveryDate;
+        DeliveryType = entity.DeliveryType;
+        DeliveryStatus = entity.DeliveryStatus;
+        Address = entity.Address;
+        TrackingNumber = entity.TrackingNumber;
+        CustomerNotes = entity.CustomerNotes;
+        SpecialInstructions = entity.SpecialInstructions;
+
+        // Convert OrderItems collection
+        if (entity.OrderItems != null && entity.OrderItems.Any())
+        {
+            OrderItems = new ObservableCollection<OrderMealProductViewModel>(
+                entity.OrderItems.Select(item => new OrderMealProductViewModel(item))
+            );
+        }
 
         ValidateAllProperties();
     }
