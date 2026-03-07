@@ -26,7 +26,6 @@ using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Infrastructure;
 using PESYONG.Presentation.Profiler;
 using PESYONG.Presentation.ViewModels;
-using PESYONG.Presentation.ViewModels.Admin;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -95,13 +94,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         // Admin ViewModels
         // THIS IS WHY WE FREAKING USE DEPENDENCY INJECTION 
         // I LITERALLY SAID TO LEARN THIS JUD BA UNYA WA GINA TAKE SERIOUSLY ISTG
-        services.AddTransient<MealViewModel>(provider =>
-        {
-            var mealRepo = provider.GetRequiredService<MealRepository>();
-            return new MealViewModel(mealRepo);
-        });
-
-        services.AddTransient<AdminMealPackageViewModel>();
+        services.AddTransient<MealViewModel>();
 
 
         Services = services.BuildServiceProvider();

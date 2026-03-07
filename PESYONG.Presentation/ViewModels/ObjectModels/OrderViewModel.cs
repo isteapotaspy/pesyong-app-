@@ -37,6 +37,14 @@ public partial class OrderViewModel : ObservableValidator
     private ObservableCollection<OrderMealProductViewModel> _orderItems = new();
 
     [ObservableProperty]
+    [StringLength(100)]
+    private string _productName;
+
+    [ObservableProperty]
+    [StringLength(100)]
+    private string _productDescription;
+
+    [ObservableProperty]
     [Required(ErrorMessage = "Order date is required")]
     [NotifyPropertyChangedFor(nameof(OrderDateDisplay))]
     private DateTime _orderDate = DateTime.Now;
@@ -81,6 +89,49 @@ public partial class OrderViewModel : ObservableValidator
     [StringLength(300, ErrorMessage = "Special instructions cannot exceed 300 characters")]
     [NotifyDataErrorInfo]
     private string? _specialInstructions;
+
+    public OrderViewModel(Order entity)
+    {
+        if (entity != null)
+        {
+            OrderID = entity.OrderID;
+            ReceiptID = entity.ReceiptID;
+            RecipientID = entity.RecipientID;
+            OrderDate = entity.OrderDate;
+            EstimatedDeliveryDate = entity.EstimatedDeliveryDate;
+            ActualDeliveryDate = entity.ActualDeliveryDate;
+            DeliveryType = entity.DeliveryType;
+            DeliveryStatus = entity.DeliveryStatus;
+            Address = entity.Address;
+            TrackingNumber = entity.TrackingNumber;
+            CustomerNotes = entity.CustomerNotes;
+            SpecialInstructions = entity.SpecialInstructions;
+
+            // Convert OrderItems
+            if (entity.OrderItems != null && entity.OrderItems.Any())
+            {
+                OrderItems = new ObservableCollection<OrderMealProductViewModel>(
+                    entity.OrderItems.Select(OrderMealProductViewModel.FromEntity)
+                );
+            }
+        }
+
+        // Initialize property change handling
+        PropertyChanged += (sender, args) =>
+        {
+            if (args.PropertyName != nameof(HasErrors) &&
+                args.PropertyName != nameof(CanSave) &&
+                args.PropertyName != nameof(OrderTotalAmount) &&
+                args.PropertyName != nameof(ItemCount))
+            {
+                OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(OrderTotalAmount));
+                OnPropertyChanged(nameof(ItemCount));
+            }
+        };
+
+        ValidateAllProperties();
+    }
 
     public OrderViewModel()
     {

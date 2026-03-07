@@ -41,6 +41,28 @@ public partial class OrderMealProductViewModel : ObservableValidator
     [NotifyDataErrorInfo]
     private int _mealProductOrderQty = 1;
 
+    public OrderMealProductViewModel(OrderMealProduct entity)
+    {
+        if (entity != null)
+        {
+            OrderID = entity.OrderID;
+            MealProductID = entity.MealProductID;
+            ItemPrice = entity.ItemPrice;
+            MealProductOrderQty = entity.MealProductOrderQty;
+
+            // Instead of using constructor, create and assign properties manually
+            if (entity.MealProduct != null)
+            {
+                MealProduct = new MealProductViewModel
+                {
+                    MealProductID = entity.MealProduct.MealProductID,
+                    ProductName = entity.MealProduct.ProductName ?? string.Empty,
+                    //Price = entity.MealProduct.Price
+                };
+            }
+        }
+    }
+
     public OrderMealProductViewModel()
     {
         ValidateAllProperties();
