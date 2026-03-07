@@ -22,7 +22,7 @@ PESYONG is a desktop catering and ordering application built with WinUI 3 and .N
 
 ## Features
 - Browse meals and catering packages
-- Add items to cart and checkout
+- Add items to the cart and checkout
 - Order history with tracking and status indicators
 - Leave reviews for delivered orders
 - Administrative and repository layers for data access
@@ -30,9 +30,8 @@ PESYONG is a desktop catering and ordering application built with WinUI 3 and .N
 ## Project Structure
 - `PESYONG.Presentation` — WinUI 3 desktop UI projects (Pages, XAML, presentation view models).
 - `PESYONG.Application` / `PESYONG.ApplicationLogic` — Application-level services, converters, repositories, and utilities.
-- `PESYONG.Domain` — Domain entities, enums and types (orders, meals, users, receipts).
+- `PESYONG.Domain` — Domain entities, enums, and types (orders, meals, users, receipts).
 - `PESYONG.Infrastructure` — Database context (`AppDbContext`) and EF Core configuration.
-- `PESYONG.Service` — Supporting service project (background services or hosting helpers if present).
 
 Note: Project and folder names are case-sensitive on some systems; follow the repository layout in the solution file.
 
@@ -109,5 +108,3 @@ This repository does not include a license file by default. Add a `LICENSE` file
 For questions about the codebase, open an issue in the repository or contact the maintainers listed in the project.
 
 ---
-
-Generated README for developer onboarding and local development. Update any database/provider-specific instructions to match the actual infra used in `PESYONG.Infrastructure`.
