@@ -8,6 +8,7 @@ using PESYONG.Domain.Entities.Logistics;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
+using PESYONG.Domain.Entities.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +23,13 @@ namespace PESYONG.Infrastructure
         public DbSet<MealProduct> MealProducts => Set<MealProduct>();   
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
-        public DbSet<AcknowledgementReceipt> AcknowledgementReceipts => Set<AcknowledgementReceipt>();
         public DbSet<Promo> Promos => Set<Promo>();
+        public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<Delivery> Deliveries => Set<Delivery>();
         public DbSet<DeliveryUpdate> DeliveryUpdates => Set<DeliveryUpdate>();
         public DbSet<OrderMealProduct> OrderMealProducts => Set<OrderMealProduct>();
+        public DbSet<AcknowledgementReceipt> AcknowledgementReceipts => Set<AcknowledgementReceipt>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
