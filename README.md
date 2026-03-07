@@ -153,14 +153,14 @@ dotnet run --project PESYONG.Presentation
 
 #### Troubleshooting
 
-##### App crashes during navigation
+#### App crashes during navigation
 Check the Visual Studio Output window for XAML parse exceptions. Common causes include:
 - Missing `StaticResource` keys
 - Incorrect `xmlns` mappings
 - Binding paths that do not match the data context
 - Invalid control template references
 
-##### Database connection issues
+#### Database connection issues
 If the app cannot connect to the database:
 - Verify that SQL Server Express is installed
 - Verify that the `SQLEXPRESS` instance is running
@@ -168,7 +168,7 @@ If the app cannot connect to the database:
 - Verify that your Windows account has access to the SQL Server instance
 - Verify that migrations have been applied successfully
 
-##### Build Issues
+#### Build Issues
 If the solution fails to build:
 - Check that all projects target compatible frameworks
 - Restore NuGet packages
