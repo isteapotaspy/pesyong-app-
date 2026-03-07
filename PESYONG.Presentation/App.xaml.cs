@@ -42,7 +42,7 @@ namespace PESYONG.Presentation;
 /// </summary>
 public partial class App : Microsoft.UI.Xaml.Application
 {
-    public Window MainWindow { get; private set; }
+    public static Window MainWindow { get; private set; }
     public IServiceProvider Services { get; }
 
     private static App _instance;
@@ -67,7 +67,7 @@ public partial class App : Microsoft.UI.Xaml.Application
             );
 
         var connectionString =
-                @"Server=(localdb)\MSSQLLocalDB;Database=PesyongDb;Trusted_Connection=True;TrustServerCertificate=True;";
+                  @"Server=localhost\SQLEXPRESS;Database=PesyongDb;Trusted_Connection=True;TrustServerCertificate=True;";
 
         services.AddDbContextFactory<AppDbContext>(options =>
         {

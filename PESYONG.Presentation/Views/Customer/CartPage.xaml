@@ -21,6 +21,7 @@
             <Setter Property="Margin" Value="0,0,0,10"/>
             <Setter Property="Padding" Value="12"/>
         </Style>
+        
 
         <Style x:Key="QuantityButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="32"/>
@@ -173,6 +174,50 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="DeliveryLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF6600"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="DeliveryInputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="PlaceholderForeground" Value="#A67C52"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFCC99"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <Style x:Key="DeliveryRadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#444444"/>
+        </Style>
+
+        <Style x:Key="DeliveryDatePickerStyle" TargetType="CalendarDatePicker">
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="Background" Value="#FFFDFB"/>
+            <Setter Property="BorderBrush" Value="#FFCC99"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,6"/>
+        </Style>
+
+        <Style x:Key="DeliveryTimePickerStyle" TargetType="TimePicker">
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="Background" Value="#FFFDFB"/>
+            <Setter Property="BorderBrush" Value="#FFCC99"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="6,4"/>
+        </Style>
+
+        <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#A67C52"/>
+        <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#A67C52"/>
+        <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#A67C52"/>
+
+        <SolidColorBrush x:Key="DatePickerPlaceholderForeground" Color="#A67C52"/>
+        <SolidColorBrush x:Key="DatePickerPlaceholderForegroundPointerOver" Color="#A67C52"/>
+        <SolidColorBrush x:Key="TimePickerPlaceholderForeground" Color="#A67C52"/>
+
     </Page.Resources>
 
     <Grid>
@@ -437,29 +482,30 @@
             </ScrollViewer>
 
             <!-- Delivery Form View -->
-            <ScrollViewer x:Name="DeliveryView" 
-                         VerticalScrollBarVisibility="Auto"
-                         Visibility="Collapsed">
+            <ScrollViewer x:Name="DeliveryView"
+              VerticalScrollBarVisibility="Auto"
+              Visibility="Collapsed">
                 <Grid MaxWidth="600" HorizontalAlignment="Center">
                     <Border Background="#FFF5E5"
-                            BorderBrush="#FFB266"
-                            BorderThickness="2"
-                            CornerRadius="12"
-                            Padding="30">
+                        BorderBrush="#FFB266"
+                        BorderThickness="2"
+                        CornerRadius="12"
+                        Padding="30">
                         <StackPanel Spacing="24">
-                            <TextBlock Text="Delivery Details" 
-                                      FontSize="28" 
-                                      FontWeight="Bold" 
-                                      Foreground="#FF6600"/>
-                            <TextBlock Text="Where should we deliver your order?" 
-                                      Foreground="#666666"/>
+                            <TextBlock Text="Delivery Details"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="#FF6600"/>
+
+                            <TextBlock Text="Where should we deliver your order?"
+                                            Foreground="#666666"/>
 
                             <!-- Address -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Delivery Address *" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
-                                <TextBox x:Name="AddressTextBox" 
+                                <TextBlock Text="Delivery Address *"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <TextBox x:Name="AddressTextBox"
+                                         Style="{StaticResource DeliveryInputTextBoxStyle}"
                                          PlaceholderText="e.g., 123 Main St, Barangay, City"
                                          TextWrapping="Wrap"
                                          AcceptsReturn="True"
@@ -468,48 +514,56 @@
 
                             <!-- Location Type -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Location Type *" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
+                                <TextBlock Text="Location Type *"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
                                 <RadioButtons x:Name="LocationRadioButtons"
                                               SelectedIndex="0"
                                               SelectionChanged="LocationRadioButtons_SelectionChanged">
-                                    <RadioButton Content="Within Poblacion (₱15 flat rate)"/>
-                                    <RadioButton Content="Outside Poblacion (₱25+ based on distance)"/>
+                                    <RadioButton Style="{StaticResource DeliveryRadioButtonStyle}"
+                                                 Content="Within Poblacion (₱15 flat rate)"/>
+                                    <RadioButton Style="{StaticResource DeliveryRadioButtonStyle}"
+                                                 Content="Outside Poblacion (₱25+ based on distance)"/>
                                 </RadioButtons>
                             </StackPanel>
 
-                            <!-- Distance (shown only for outside) -->
-                            <StackPanel x:Name="DistancePanel" 
+                            <!-- Distance -->
+                            <StackPanel x:Name="DistancePanel"
                                         Visibility="Collapsed"
                                         Spacing="8">
-                                <TextBlock Text="Distance from Poblacion (km) *" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
-                                <TextBox x:Name="DistanceTextBox" 
+                                <TextBlock Text="Distance from Poblacion (km) *"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <TextBox x:Name="DistanceTextBox"
+                                         Style="{StaticResource DeliveryInputTextBoxStyle}"
                                          PlaceholderText="e.g., 5"
                                          InputScope="Number"/>
-                                <TextBlock x:Name="EstimatedFeeText" 
-                                          Foreground="#FF6600"
-                                          FontSize="12"/>
+                                <TextBlock x:Name="EstimatedFeeText"
+                                           Foreground="#FF6600"
+                                           FontSize="12"/>
                             </StackPanel>
 
                             <!-- Delivery Date -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Delivery Date and Time" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
-                                <CalendarDatePicker x:Name="DeliveryDatePicker" 
-                                                    PlaceholderText="Select date"/>
-                                <TimePicker x:Name="DeliveryTimePicker"/>
+                                <StackPanel.Resources>
+                                    <SolidColorBrush x:Key="DatePickerPlaceholderForeground" Color="#A67C52"/>
+                                    <SolidColorBrush x:Key="DatePickerPlaceholderForegroundPointerOver" Color="#A67C52"/>
+                                </StackPanel.Resources>
+
+                                <TextBlock Text="Delivery Date and Time"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <CalendarDatePicker x:Name="DeliveryDatePicker"
+                                        Style="{StaticResource DeliveryDatePickerStyle}"
+                                        PlaceholderText="Select date" 
+                                        RequestedTheme="Light"/>
+                                <TimePicker x:Name="DeliveryTimePicker"
+                                        Style="{StaticResource DeliveryTimePickerStyle}"/>
                             </StackPanel>
 
                             <!-- Special Instructions -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Special Instructions (Optional)" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
-                                <TextBox x:Name="NotesTextBox" 
+                                <TextBlock Text="Special Instructions (Optional)"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <TextBox x:Name="NotesTextBox"
+                                         Style="{StaticResource DeliveryInputTextBoxStyle}"
                                          PlaceholderText="e.g., No spicy, For birthday celebration, etc."
                                          TextWrapping="Wrap"
                                          AcceptsReturn="True"
@@ -523,12 +577,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Button Grid.Column="0" 
+                                <Button Grid.Column="0"
                                         Style="{StaticResource SecondaryButtonStyle}"
                                         Content="Back to Cart"
                                         Click="BackToCart_Click"/>
 
-                                <Button Grid.Column="1" 
+                                <Button Grid.Column="1"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Content="Continue to Payment"
                                         Click="ContinueToPayment_Click"/>

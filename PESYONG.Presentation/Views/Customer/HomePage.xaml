@@ -21,7 +21,7 @@
                             </Border>
                         </StackPanel>
 
-                        <TextBlock Text="Welcome to Orange Catering!" FontSize="42" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Welcome to PESYONG!" FontSize="42" FontWeight="Bold" Foreground="White"/>
                         <TextBlock Text="Authentic Filipino flavors delivered to your doorstep. Fresh, delicious, and perfect for any occasion." 
                                   FontSize="18" Foreground="White" Opacity="0.9" TextWrapping="Wrap"/>
 
@@ -58,7 +58,7 @@
                                 </Border>
                             </StackPanel>
                             <TextBlock Text="15% off on all catering packages" Foreground="#CC5200" FontSize="14"/>
-                            <TextBlock Text="Valid until December 31, 2024" Foreground="#666666" FontSize="12"/>
+                            <TextBlock Text="Valid until March 31, 2026" Foreground="#666666" FontSize="12"/>
                         </StackPanel>
                     </Grid>
                 </Border>

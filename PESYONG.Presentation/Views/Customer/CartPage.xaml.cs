@@ -1,5 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
 using System;
@@ -269,7 +271,7 @@ namespace PESYONG.Presentation.Views.Customer
                 _ => "cod"
             };
 
-            // Create order (in a real app, this would call a service)
+            // Create order (this would call a service)
             var orderData = new
             {
                 Id = $"ORD-{DateTime.Now.Ticks}",
@@ -319,7 +321,8 @@ namespace PESYONG.Presentation.Views.Customer
             };
             _ = dialog.ShowAsync();
         }
+
+
     }
 
-    
 }

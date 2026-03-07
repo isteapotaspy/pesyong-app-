@@ -1,10 +1,14 @@
-﻿using Microsoft.UI.Xaml.Data;
+﻿using Microsoft.UI.Xaml.Media.Imaging;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.ViewModels;
 
@@ -14,34 +18,39 @@ namespace PESYONG.Presentation.ViewModels;
 public class ShortOrderViewModel : INotifyPropertyChanged
 {
     private int _mealId;
-    private string _mealName;
+    private string _mealName = string.Empty;
     private decimal _mealPrice;
-    private string _imageSourceString;
     private int _selectedQuantity = 1;
     private int _cartQuantity;
     private decimal _totalPrice;
-    private string _description;
+    private string _description = string.Empty;
     private int _stockQuantity;
     private int _minOrderQuantity = 1;
     private DeliveryType _deliveryType;
-    private List<string> _mealTags = new List<string>();
+    private List<string> _mealTags = new();
+    private byte[]? _imageBytes;
+
+    public BitmapImage MealImage { get; } = new BitmapImage();
 
     /// <summary>
     /// Constructor to create ViewModel from Meal entity
     /// </summary>
     public ShortOrderViewModel(Meal meal, int cartQuantity = 0)
     {
-        _mealId = meal.MealID.Value;
+        _mealId = meal.MealID ?? 0;
         _mealName = meal.MealName;
         _mealPrice = meal.MealPrice;
-        _imageSourceString = meal.ImageSourceString ?? string.Empty;
+        _imageBytes = meal.ImageBytes;
         _description = meal.Description ?? string.Empty;
         _stockQuantity = meal.StockQuantity;
         _minOrderQuantity = meal.MinOrderQuantity;
         _deliveryType = meal.DeliveryType;
-        _mealTags = meal.MealTags?.ToList();
+        _mealTags = meal.MealTags?.ToList() ?? new List<string>();
         _cartQuantity = cartQuantity;
+        _selectedQuantity = _minOrderQuantity > 0 ? _minOrderQuantity : 1;
         _totalPrice = _mealPrice * _selectedQuantity;
+
+        _ = LoadMealImageAsync();
     }
 
     /// <summary>
@@ -49,9 +58,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
     /// </summary>
     public ShortOrderViewModel() { }
 
-    /// <summary>
-    /// Meal ID from the domain model.
-    /// </summary>
     public int MealID
     {
         get => _mealId;
@@ -65,9 +71,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Name of the meal.
-    /// </summary>
     public string MealName
     {
         get => _mealName;
@@ -81,9 +84,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Price of the meal.
-    /// </summary>
     public decimal MealPrice
     {
         get => _mealPrice;
@@ -93,41 +93,34 @@ public class ShortOrderViewModel : INotifyPropertyChanged
             {
                 _mealPrice = value;
                 OnPropertyChanged();
-                // Recalculate total price when base price changes
                 TotalPrice = _mealPrice * _selectedQuantity;
             }
         }
     }
 
-    /// <summary>
-    /// Image source string for the meal.
-    /// </summary>
-    public string ImageSourceString
+    public byte[]? ImageBytes
     {
-        get => _imageSourceString;
+        get => _imageBytes;
         set
         {
-            if (_imageSourceString != value)
+            if (_imageBytes != value)
             {
-                _imageSourceString = value;
+                _imageBytes = value;
                 OnPropertyChanged();
+                _ = LoadMealImageAsync();
             }
         }
     }
 
-    /// <summary>
-    /// Quantity selected by user for this item.
-    /// </summary>
     public int SelectedQuantity
     {
         get => _selectedQuantity;
         set
         {
-            if (_selectedQuantity != value && value >= 0 && value <= _stockQuantity)
+            if (_selectedQuantity != value && value >= _minOrderQuantity && value <= _stockQuantity)
             {
                 _selectedQuantity = value;
                 OnPropertyChanged();
-                // Update total price when quantity changes
                 TotalPrice = MealPrice * _selectedQuantity;
                 OnPropertyChanged(nameof(CanIncreaseQuantity));
                 OnPropertyChanged(nameof(CanDecreaseQuantity));
@@ -135,9 +128,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Quantity of this item currently in cart.
-    /// </summary>
     public int CartQuantity
     {
         get => _cartQuantity;
@@ -152,9 +142,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Total price for selected quantity.
-    /// </summary>
     public decimal TotalPrice
     {
         get => _totalPrice;
@@ -168,9 +155,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Description of the short order item.
-    /// </summary>
     public string Description
     {
         get => _description;
@@ -184,9 +168,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Available stock quantity from domain model.
-    /// </summary>
     public int StockQuantity
     {
         get => _stockQuantity;
@@ -196,11 +177,12 @@ public class ShortOrderViewModel : INotifyPropertyChanged
             {
                 _stockQuantity = value;
                 OnPropertyChanged();
-                // Ensure SelectedQuantity doesn't exceed stock
+
                 if (_selectedQuantity > _stockQuantity)
                 {
                     SelectedQuantity = _stockQuantity;
                 }
+
                 OnPropertyChanged(nameof(IsAvailable));
                 OnPropertyChanged(nameof(AvailabilityStatus));
                 OnPropertyChanged(nameof(CanIncreaseQuantity));
@@ -208,9 +190,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Minimum order quantity from domain model.
-    /// </summary>
     public int MinOrderQuantity
     {
         get => _minOrderQuantity;
@@ -220,19 +199,17 @@ public class ShortOrderViewModel : INotifyPropertyChanged
             {
                 _minOrderQuantity = value;
                 OnPropertyChanged();
-                // Ensure SelectedQuantity meets minimum requirement
+
                 if (_selectedQuantity < _minOrderQuantity)
                 {
                     SelectedQuantity = _minOrderQuantity;
                 }
+
                 OnPropertyChanged(nameof(CanDecreaseQuantity));
             }
         }
     }
 
-    /// <summary>
-    /// Delivery type for the meal.
-    /// </summary>
     public DeliveryType DeliveryType
     {
         get => _deliveryType;
@@ -247,9 +224,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Meal tags for categorization.
-    /// </summary>
     public List<string> MealTags
     {
         get => _mealTags;
@@ -264,51 +238,21 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Helper property to check if item is available (has stock)
-    /// </summary>
     public bool IsAvailable => StockQuantity > 0;
-
-    /// <summary>
-    /// Helper property to check if item has items in cart
-    /// </summary>
     public bool HasItemsInCart => CartQuantity > 0;
-
-    /// <summary>
-    /// Helper property to show availability status
-    /// </summary>
     public string AvailabilityStatus => IsAvailable ? $"In Stock ({StockQuantity} available)" : "Out of Stock";
-
-    /// <summary>
-    /// Helper property for quantity validation
-    /// </summary>
     public bool CanIncreaseQuantity => SelectedQuantity < StockQuantity;
-
-    /// <summary>
-    /// Helper property for quantity validation
-    /// </summary>
     public bool CanDecreaseQuantity => SelectedQuantity > MinOrderQuantity;
-
-    /// <summary>
-    /// Display text for delivery type
-    /// </summary>
     public string DeliveryTypeDisplay => DeliveryType.ToString();
+    public string TagsDisplay => string.Join(", ", MealTags);
 
-    /// <summary>
-    /// Display text for meal tags
-    /// </summary>
-    public string TagsDisplay => string.Join(", ", MealTags.Select(t => t.ToString()));
-
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void OnPropertyChanged([CallerMemberName] string propertyName = "")
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    /// <summary>
-    /// Method to increment quantity with validation
-    /// </summary>
     public void IncrementQuantity()
     {
         if (CanIncreaseQuantity)
@@ -317,9 +261,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Method to decrement quantity with validation
-    /// </summary>
     public void DecrementQuantity()
     {
         if (CanDecreaseQuantity)
@@ -328,18 +269,12 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Method to update cart quantity and reset selected quantity
-    /// </summary>
     public void AddToCart()
     {
         CartQuantity += SelectedQuantity;
-        SelectedQuantity = MinOrderQuantity; // Reset to minimum after adding to cart
+        SelectedQuantity = MinOrderQuantity;
     }
 
-    /// <summary>
-    /// Method to remove items from cart
-    /// </summary>
     public void RemoveFromCart(int quantity)
     {
         if (quantity <= CartQuantity)
@@ -348,19 +283,31 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         }
     }
 
-    /// <summary>
-    /// Method to check if meal has specific tag
-    /// </summary>
     public bool HasTag(string tag)
     {
         return MealTags.Contains(tag);
     }
 
-    /// <summary>
-    /// Method to get badge-style display for tags
-    /// </summary>
     public string GetTagBadges()
     {
-        return string.Join(" • ", MealTags.Select(t => t.ToString()));
+        return string.Join(" • ", MealTags);
+    }
+
+    private async Task LoadMealImageAsync()
+    {
+        if (_imageBytes == null || _imageBytes.Length == 0)
+            return;
+
+        try
+        {
+            using var stream = new MemoryStream(_imageBytes);
+            using var randomAccessStream = stream.AsRandomAccessStream();
+            await MealImage.SetSourceAsync(randomAccessStream);
+            OnPropertyChanged(nameof(MealImage));
+        }
+        catch
+        {
+            // leave image empty if loading fails
+        }
     }
 }

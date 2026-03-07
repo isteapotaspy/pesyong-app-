@@ -253,7 +253,7 @@
                                             <Border Grid.Column="0"
                                                     Style="{StaticResource ProgressStepStyle}"
                                                     Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=0}">
-                                                <FontIcon Glyph="&#xE916;" 
+                                                <FontIcon Glyph="&#xE121;" 
                                                          FontSize="14" 
                                                          Foreground="White"/>
                                             </Border>
@@ -293,7 +293,7 @@
                                             <Border Grid.Column="0"
                                                     Style="{StaticResource ProgressStepStyle}"
                                                     Background="{Binding DeliveryStatus, Converter={StaticResource OrderStatusToColorConverter}, ConverterParameter=2}">
-                                                <FontIcon Glyph="&#xE7C4;" 
+                                                <FontIcon Glyph="&#xE804;" 
                                                          FontSize="14" 
                                                          Foreground="White"/>
                                             </Border>

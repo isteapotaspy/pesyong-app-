@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PESYONG.Infrastructure;
 
@@ -11,9 +12,11 @@ using PESYONG.Infrastructure;
 namespace PESYONG.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307080635_UpdateMealImageToBytes")]
+    partial class UpdateMealImageToBytes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -383,7 +386,7 @@ namespace PESYONG.Infrastructure.Migrations
                     b.Property<byte[]>("ImageBytes")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<int?>("LastModifiedByOperatorID")
+                    b.Property<int>("LastModifiedByOperatorID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("LastModifiedDate")
@@ -405,7 +408,7 @@ namespace PESYONG.Infrastructure.Migrations
                     b.Property<int>("MinOrderQuantity")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OperatorID")
+                    b.Property<int>("OperatorID")
                         .HasColumnType("int");
 
                     b.Property<int>("StockQuantity")
@@ -691,7 +694,8 @@ namespace PESYONG.Infrastructure.Migrations
                     b.HasOne("PESYONG.Domain.Entities.Users.Identity.AppUser", "Operator")
                         .WithMany()
                         .HasForeignKey("OperatorID")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Operator");
                 });

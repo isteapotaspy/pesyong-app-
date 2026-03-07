@@ -32,7 +32,7 @@ namespace PESYONG.Presentation.ViewModels
         public string MealName => _meal.MealName;
         public string? Description => _meal.Description;
         public decimal MealPrice => _meal.MealPrice;
-        public string ImageSourceString => _meal.ImageSourceString;
+        public byte[] ImageBytes => _meal.ImageBytes;
         public int StockQuantity => _meal.StockQuantity;
         public int MinOrderQuantity => _meal.MinOrderQuantity;
 
@@ -142,7 +142,7 @@ namespace PESYONG.Presentation.ViewModels
                     Name = MealName,
                     Price = (double)MealPrice,
                     Quantity = SelectedQuantity,
-                    Image = ImageSourceString,
+                    ImageBytes = ImageBytes,
                     Type = "kakanin",
                     ProductId = MealID
                 };

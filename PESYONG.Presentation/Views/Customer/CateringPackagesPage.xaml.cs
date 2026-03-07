@@ -13,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.Views.Customer
 {
@@ -60,8 +62,8 @@ namespace PESYONG.Presentation.Views.Customer
 
                 _cartService = CartService.Instance;
 
-                LoadPackages();
-                LoadAvailableViands();
+                this.Loaded += async (_, _) => await LoadPackagesAsync();
+                this.Loaded += async (_, _) => await LoadAvailableViandsAsync();
             }
             catch (Exception ex)
             {
@@ -117,117 +119,138 @@ namespace PESYONG.Presentation.Views.Customer
         /// Loads sample catering packages into the Packages collection.
         /// In a production environment, this would fetch data from a database or service.
         /// </summary>
-        private void LoadPackages()
+        private async Task LoadPackagesAsync()
         {
             try
             {
-                // edit later with database data, this is just for testing
+                var sampleImageBytes = await LoadImageBytesAsync("Assets/SampleMeal.png");
+
                 Packages = new ObservableCollection<MealProduct>
+        {
+            new MealProduct
+            {
+                MealProductID = 1,
+                ProductName = "Package 1 - 3 Viands",
+                ProductDescription = "Perfect for small gatherings and family meals",
+                MealProductItems = new List<MealProductItem>
                 {
-                    new MealProduct
-                    {
-                        MealProductID = 1,
-                        ProductName = "Package 1 - 3 Viands",
-                        ProductDescription = "Perfect for small gatherings and family meals",
-                        MealProductItems = new List<MealProductItem>
-                        {
-                            new MealProductItem {
-                                Meal = new Meal {
-                                    MealID = 1,
-                                    MealName = "Battered Chicken",
-                                    MealPrice = 450,
-                                    ImageSourceString = "ms-appx:///Assets/SampleMeal.png"
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem {
-                                Meal = new Meal {
-                                    MealID = 2,
-                                    MealName = "Bihon Guisado",
-                                    MealPrice = 350,
-                                    ImageSourceString = "ms-appx:///Assets/SampleMeal.png"
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem {
-                                Meal = new Meal {
-                                    MealID = 3,
-                                    MealName = "Fish Fillet",
-                                    MealPrice = 400,
-                                    ImageSourceString = "ms-appx:///Assets/SampleMeal.png"
-                                },
-                                Quantity = 1
-                            }
-                        }
+                    new MealProductItem {
+                        Meal = new Meal {
+                            MealID = 1,
+                            MealName = "Battered Chicken",
+                            MealPrice = 450,
+                            ImageBytes = sampleImageBytes
+                        },
+                        Quantity = 1
                     },
-                    new MealProduct
-                    {
-                        MealProductID = 2,
-                        ProductName = "Package 2 - 5 Viands",
-                        ProductDescription = "Great for medium-sized celebrations",
-                        MealProductItems = new List<MealProductItem>
-                        {
-                            new MealProductItem {
-                                Meal = new Meal {
-                                    MealID = 1,
-                                    MealName = "Battered Chicken",
-                                    MealPrice = 450,
-                                    ImageSourceString = "ms-appx:///Assets/SampleMeal.png"
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem {
-                                Meal = new Meal {
-                                    MealID = 4,
-                                    MealName = "Buttered Shrimp",
-                                    MealPrice = 550,
-                                    ImageSourceString = "ms-appx:///Assets/SampleMeal.png"
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem {
-                                Meal = new Meal {
-                                    MealID = 2,
-                                    MealName = "Bihon Guisado",
-                                    MealPrice = 350,
-                                    ImageSourceString = "ms-appx:///Assets/SampleMeal.png"
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem {
-                                Meal = new Meal {
-                                    MealID = 5,
-                                    MealName = "Tuna Kinilaw",
-                                    MealPrice = 400,
-                                    ImageSourceString = "ms-appx:///Assets/SampleMeal.png"
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem {
-                                Meal = new Meal {
-                                    MealID = 3,
-                                    MealName = "Fish Fillet",
-                                    MealPrice = 400,
-                                    ImageSourceString = "ms-appx:///Assets/SampleMeal.png"
-                                },
-                                Quantity = 1
-                            }
-                        }
+                    new MealProductItem {
+                        Meal = new Meal {
+                            MealID = 2,
+                            MealName = "Bihon Guisado",
+                            MealPrice = 350,
+                            ImageBytes = sampleImageBytes
+                        },
+                        Quantity = 1
                     },
-                    new MealProduct
-                    {
-                        MealProductID = 3,
-                        ProductName = "Package 3 - 8 Viands + Free Dessert",
-                        ProductDescription = "Our most popular package! Choose your favorite viands",
-                        MealProductItems = new List<MealProductItem>() // Empty for selectable
+                    new MealProductItem {
+                        Meal = new Meal {
+                            MealID = 3,
+                            MealName = "Fish Fillet",
+                            MealPrice = 400,
+                            ImageBytes = sampleImageBytes
+                        },
+                        Quantity = 1
                     }
-                };
+                }
+            },
+            new MealProduct
+            {
+                MealProductID = 2,
+                ProductName = "Package 2 - 5 Viands",
+                ProductDescription = "Great for medium-sized celebrations",
+                MealProductItems = new List<MealProductItem>
+                {
+                    new MealProductItem {
+                        Meal = new Meal {
+                            MealID = 1,
+                            MealName = "Battered Chicken",
+                            MealPrice = 450,
+                            ImageBytes = sampleImageBytes
+                        },
+                        Quantity = 1
+                    },
+                    new MealProductItem {
+                        Meal = new Meal {
+                            MealID = 4,
+                            MealName = "Buttered Shrimp",
+                            MealPrice = 550,
+                            ImageBytes = sampleImageBytes
+                        },
+                        Quantity = 1
+                    },
+                    new MealProductItem {
+                        Meal = new Meal {
+                            MealID = 2,
+                            MealName = "Bihon Guisado",
+                            MealPrice = 350,
+                            ImageBytes = sampleImageBytes
+                        },
+                        Quantity = 1
+                    },
+                    new MealProductItem {
+                        Meal = new Meal {
+                            MealID = 5,
+                            MealName = "Tuna Kinilaw",
+                            MealPrice = 400,
+                            ImageBytes = sampleImageBytes
+                        },
+                        Quantity = 1
+                    },
+                    new MealProductItem {
+                        Meal = new Meal {
+                            MealID = 3,
+                            MealName = "Fish Fillet",
+                            MealPrice = 400,
+                            ImageBytes = sampleImageBytes
+                        },
+                        Quantity = 1
+                    }
+                }
+            },
+            new MealProduct
+            {
+                MealProductID = 3,
+                ProductName = "Package 3 - 8 Viands + Free Dessert",
+                ProductDescription = "Our most popular package! Choose your favorite viands",
+                MealProductItems = new List<MealProductItem>()
+            }
+        };
 
                 PackagesItemsControl.ItemsSource = Packages;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in LoadPackages: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error in LoadPackagesAsync: {ex.Message}");
+            }
+        }
+
+        private async Task<byte[]?> LoadImageBytesAsync(string relativePath)
+        {
+            try
+            {
+                var file = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(
+                    new Uri($"ms-appx:///{relativePath}"));
+
+                using var stream = await file.OpenReadAsync();
+                byte[] bytes = new byte[stream.Size];
+                await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, Windows.Storage.Streams.InputStreamOptions.None);
+
+                return bytes;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load image bytes: {ex.Message}");
+                return null;
             }
         }
 
@@ -235,26 +258,27 @@ namespace PESYONG.Presentation.Views.Customer
         /// Loads sample available viands into the AvailableViands collection.
         /// In a production environment, this would fetch data from a database or service.
         /// </summary>
-        private void LoadAvailableViands()
+        private async Task LoadAvailableViandsAsync()
         {
             try
             {
-                // This would normally come from your database
+                var sampleImageBytes = await LoadImageBytesAsync("Assets/SampleMeal.png");
+
                 AvailableViands = new ObservableCollection<Meal>
-                {
-                    new Meal { MealID = 1, MealName = "Battered Chicken", MealPrice = 450, ImageSourceString = "ms-appx:///Assets/SampleMeal.png" },
-                    new Meal { MealID = 4, MealName = "Buttered Shrimp", MealPrice = 550, ImageSourceString = "ms-appx:///Assets/SampleMeal.png" },
-                    new Meal { MealID = 2, MealName = "Bihon Guisado", MealPrice = 350, ImageSourceString = "ms-appx:///Assets/SampleMeal.png" },
-                    new Meal { MealID = 5, MealName = "Tuna Kinilaw", MealPrice = 400, ImageSourceString = "ms-appx:///Assets/SampleMeal.png" },
-                    new Meal { MealID = 3, MealName = "Fish Fillet", MealPrice = 400, ImageSourceString = "ms-appx:///Assets/SampleMeal.png" },
-                    new Meal { MealID = 6, MealName = "Pork Menudo", MealPrice = 450, ImageSourceString = "ms-appx:///Assets/SampleMeal.png" },
-                    new Meal { MealID = 7, MealName = "Chicken Adobo", MealPrice = 400, ImageSourceString = "ms-appx:///Assets/SampleMeal.png" },
-                    new Meal { MealID = 8, MealName = "Beef Caldereta", MealPrice = 500, ImageSourceString = "ms-appx:///Assets/SampleMeal.png" }
-                };
+        {
+            new Meal { MealID = 1, MealName = "Battered Chicken", MealPrice = 450, ImageBytes = sampleImageBytes },
+            new Meal { MealID = 4, MealName = "Buttered Shrimp", MealPrice = 550, ImageBytes = sampleImageBytes },
+            new Meal { MealID = 2, MealName = "Bihon Guisado", MealPrice = 350, ImageBytes = sampleImageBytes },
+            new Meal { MealID = 5, MealName = "Tuna Kinilaw", MealPrice = 400, ImageBytes = sampleImageBytes },
+            new Meal { MealID = 3, MealName = "Fish Fillet", MealPrice = 400, ImageBytes = sampleImageBytes },
+            new Meal { MealID = 6, MealName = "Pork Menudo", MealPrice = 450, ImageBytes = sampleImageBytes },
+            new Meal { MealID = 7, MealName = "Chicken Adobo", MealPrice = 400, ImageBytes = sampleImageBytes },
+            new Meal { MealID = 8, MealName = "Beef Caldereta", MealPrice = 500, ImageBytes = sampleImageBytes }
+        };
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in LoadAvailableViands: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error in LoadAvailableViandsAsync: {ex.Message}");
             }
         }
 
