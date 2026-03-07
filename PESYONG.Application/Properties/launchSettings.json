@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PESYONG.ApplicationLogic": {
+      "commandName": "Project"
+    },
+    "Profile 1": {
+      "commandName": "Executable"
+    }
+  }
+}
