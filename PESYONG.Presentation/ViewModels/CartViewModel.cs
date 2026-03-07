@@ -81,12 +81,12 @@ public partial class CartViewModel : ObservableObject
         // Logic to save to DB via Service...
     }
 
-    public void InitializeNewOrder(int userId)
+    public void InitializeNewOrder(Guid userId)
     {
         CurrentOrder = new Order
         {
             OrderID = Guid.NewGuid(), // Correct: Order uses Guid
-            RecipientID = userId,     // Correct: User ID is int
+            CustomerID = userId,     // Correct: User ID is int
             DeliveryStatus = DeliveryStatus.OnCart
         };
     }

@@ -16,8 +16,8 @@ namespace PESYONG.ApplicationLogic.DTOs;
 
 public partial class MealSelectionDto : ObservableObject
 {
-    public int Id { get; init; }
-    public string Name { get; init; } = string.Empty;
+    public int MealId { get; init; }
+    public string MealName { get; init; } = string.Empty;
     public decimal Price { get; init; }
 
     [ObservableProperty]

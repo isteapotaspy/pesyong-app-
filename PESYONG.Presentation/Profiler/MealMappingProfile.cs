@@ -29,7 +29,7 @@ public class MealMappingProfile : Profile
             .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => src.CreationDate))
             .ForMember(dest => dest.LastModifiedByOperatorID, opt => opt.MapFrom(src => src.LastModifiedByOperatorID))
             .ForMember(dest => dest.LastModifiedDate, opt => opt.MapFrom(src => src.LastModifiedDate))
-            .ForMember(dest => dest.ImageSourceString, opt => opt.MapFrom(src => src.ImageSourceString))
+            .ForMember(dest => dest.ImageBytes, opt => opt.MapFrom(src => src.ImageBytes))
             // Ignore properties that shouldn't come from entity
             .ForMember(dest => dest.SelectedTags, opt => opt.Ignore())
             .ForMember(dest => dest.AvailableTags, opt => opt.Ignore())
@@ -59,7 +59,7 @@ public class MealMappingProfile : Profile
             .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => src.CreationDate))
             .ForMember(dest => dest.LastModifiedByOperatorID, opt => opt.MapFrom(src => src.LastModifiedByOperatorID))
             .ForMember(dest => dest.LastModifiedDate, opt => opt.MapFrom(src => src.LastModifiedDate))
-            .ForMember(dest => dest.ImageSourceString, opt => opt.MapFrom(src => src.ImageSourceString))
+            .ForMember(dest => dest.ImageBytes, opt => opt.MapFrom(src => src.ImageBytes))
             // Ignore navigation properties and methods
             //.ForMember(dest => dest.Operator, opt => opt.Ignore())
             //.ForMember(dest => dest.ModifiedByOperator, opt => opt.Ignore())

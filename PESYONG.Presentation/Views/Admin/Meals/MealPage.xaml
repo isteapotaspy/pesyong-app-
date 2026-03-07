@@ -138,7 +138,7 @@
                                     Margin="0,12,12,12"
                                     Style="{StaticResource DefaultButtonStyle}" 
                                     Foreground="White"
-                                    Click="ChangePhoto_Click"/>
+                                    Click="PickImageButton_Click"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1"

@@ -58,8 +58,7 @@
                 <NavigationViewItem.MenuItems>
                 <NavigationViewItem Content="Catering Meals" 
                                         Icon="Mail" ToolTipService.ToolTip="Individual Meals" 
-                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage"/>
-                    
+                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage"/>                    
                 <NavigationViewItem Content="Catering Packages" 
                                         Icon="Calendar" ToolTipService.ToolTip="Meal Packages" 
                                         Tag="PESYONG.Presentation.Views.Admin.Meals.MealPackagePage"/>
@@ -81,14 +80,15 @@
             <NavigationViewItem Content="Transactions" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
                 <NavigationViewItem.MenuItems>
                     <NavigationViewItem Content="Orders" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
-                    <NavigationViewItem Content="Receipts" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                    <NavigationViewItem Content="Acknowledgement Receipts" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
 
             <NavigationViewItem Content="Administration" Icon="Page2" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
                 <NavigationViewItem.MenuItems>
-                    <NavigationViewItem Content="Accounts" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
-                    <NavigationViewItem Content="Audits" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
+                        <NavigationViewItem Content="Accounts" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                        <NavigationViewItem Content="Customers" Icon="OpenLocal" ToolTipService.ToolTip="Upload file" Tag="SamplePage6"/>
+                        <NavigationViewItem Content="System Logs" Icon="NewFolder" ToolTipService.ToolTip="Create new" Tag="SamplePage5"/>
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
         </NavigationView.MenuItems>
