@@ -8,7 +8,7 @@ using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
 using PESYONG.Domain.Entities.Meals.MealItem;
-using PESYONG.Presentation.ViewModels.PageModels;
+using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
