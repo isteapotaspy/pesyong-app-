@@ -130,6 +130,21 @@ namespace PESYONG.Presentation.Views.Customer
             _ = ReviewDialog.ShowAsync();
         }
 
+        private T? FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(child);
+
+            while (parent != null)
+            {
+                if (parent is T typedParent)
+                    return typedParent;
+
+                parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
+            }
+
+            return null;
+        }
+
         private void ReorderButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -137,7 +152,6 @@ namespace PESYONG.Presentation.Views.Customer
 
             if (order != null)
             {
-                // In a real app, this would add items to cart
                 var dialog = new ContentDialog
                 {
                     Title = "Reorder",
@@ -147,8 +161,8 @@ namespace PESYONG.Presentation.Views.Customer
                 };
                 _ = dialog.ShowAsync();
 
-                // Navigate to cart
-                Frame.Navigate(typeof(CartPage));
+                var layout = FindParent<PESYONG.Presentation.Components.Layouts.CustomerLayout>(this);
+                layout?.NavigateByTag("CartPage");
             }
         }
 

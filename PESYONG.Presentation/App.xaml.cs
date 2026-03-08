@@ -26,7 +26,6 @@ using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Infrastructure;
 using PESYONG.Presentation.Profiler;
 using PESYONG.Presentation.ViewModels;
-using PESYONG.Presentation.ViewModels.ObjectModels;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -96,6 +95,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddScoped<AcknowledgementReceiptService>();
         services.AddScoped<CateringService>();
         services.AddSingleton<MealSyncService>();
+        services.AddSingleton<CartStateService>();
 
         // Customer ViewModels
         services.AddTransient<PackagesViewModel>();

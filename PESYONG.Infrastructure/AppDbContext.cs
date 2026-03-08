@@ -18,6 +18,10 @@ namespace PESYONG.Infrastructure
 {
     public class AppDbContext : DbContext
     {
+        public AppDbContext()
+        {
+        }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Meal> Meals => Set<Meal>();
@@ -77,9 +81,9 @@ namespace PESYONG.Infrastructure
             {
                 entity.HasKey(e => e.OrderID);
 
-                entity.HasOne(e => e.Recipient)
-                      .WithMany()
-                      .HasForeignKey(e => e.RecipientID)
+                entity.HasOne(e => e.Customer)
+                      .WithMany(c => c.Orders)
+                      .HasForeignKey(e => e.CustomerID)
                       .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasOne(e => e.Receipt)

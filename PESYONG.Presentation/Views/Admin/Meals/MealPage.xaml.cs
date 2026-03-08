@@ -109,8 +109,11 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 
                 MealListViewModels.Clear();
 
-                var allMeals = await _mealRepository.GetAllMealsAsync();
-                Debug.WriteLine($"Loaded {allMeals.Count} meals from database.");
+            foreach (var meal in allMeals.OrderBy(m => m.MealID))
+            {
+                var mealViewModel = MealViewModel.CreateFromEntity(meal);
+                MealListViewModels.Add(mealViewModel);
+            }
 
                 foreach (var meal in allMeals.OrderBy(m => m.MealID))
                 {
@@ -172,22 +175,22 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 
         private void AddMealButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                var newMealVm = CreateDefaultMealViewModel();
-                _selectedImageBytes = null;
+            var newMealVm = new MealViewModel();
+            newMealVm.ClearMealViewModel();
+            newMealVm.MinOrderQuantity = 1;
+            newMealVm.StockQuantity = 0;
+            newMealVm.DeliveryType = DeliveryType.Delivery;
+            newMealVm.CreationDate = DateTime.UtcNow;
+            newMealVm.LastModifiedDate = DateTime.UtcNow;
+            newMealVm.OperatorID = null;
+            newMealVm.LastModifiedByOperatorID = null;
 
-                DataContext = newMealVm;
-                MealsListView.SelectedItem = null;
+            _selectedImageBytes = null;
 
-                newMealVm.StatusMessage = "New draft meal created.";
-                Debug.WriteLine("Created new draft meal.");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Add draft failed: {ex}");
-                SetStatus("Unable to create a new meal draft.");
-            }
+            DataContext = newMealVm;
+            MealsListView.SelectedItem = null;
+
+            Debug.WriteLine("Created new draft meal.");
         }
 
         private async void SaveButton_Click(object sender, RoutedEventArgs e)

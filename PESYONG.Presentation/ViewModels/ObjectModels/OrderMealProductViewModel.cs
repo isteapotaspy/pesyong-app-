@@ -52,8 +52,29 @@ public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
         }
     }
 
-    [Range(1, 1000, ErrorMessage = "Quantity must be between 1 and 1000.")]
-    public int MealProductOrderQty
+    public OrderMealProductViewModel(OrderMealProduct entity)
+    {
+        if (entity != null)
+        {
+            OrderID = entity.OrderID;
+            MealProductID = entity.MealProductID;
+            ItemPrice = entity.ItemPrice;
+            MealProductOrderQty = entity.MealProductOrderQty;
+
+            // Instead of using constructor, create and assign properties manually
+            if (entity.MealProduct != null)
+            {
+                MealProduct = new MealProductViewModel
+                {
+                    MealProductID = entity.MealProduct.MealProductID,
+                    ProductName = entity.MealProduct.ProductName ?? string.Empty,
+                    //Price = entity.MealProduct.Price
+                };
+            }
+        }
+    }
+
+    public OrderMealProductViewModel()
     {
         get => _mealProductOrderQty;
         set

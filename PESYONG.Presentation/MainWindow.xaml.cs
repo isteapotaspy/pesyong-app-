@@ -1,9 +1,12 @@
+
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
-using PESYONG.ApplicationLogic.Services;
 using PESYONG.Presentation.Interfaces;
 using System;
 using Windows.System;
+using WinRT.Interop;
+using System.Runtime.InteropServices;
 
 namespace PESYONG.Presentation;
 
@@ -77,10 +80,15 @@ public sealed partial class MainWindow : Window
 
     private void OnKeyDown(object sender, KeyRoutedEventArgs e)
     {
-        if (e.Key == VirtualKey.F11)
+        switch (e.Key)
         {
-            ToggleFullscreen();
-            e.Handled = true;
+            // F11 may be intercepted by Visual Studio / host environment,
+            // so F12 is kept as a fallback during development.
+            case Windows.System.VirtualKey.F11: // intended kiosk key
+            case Windows.System.VirtualKey.F12: // dev fallback
+                ToggleFullscreen();
+                e.Handled = true;
+                break;
         }
     }
 
@@ -90,21 +98,17 @@ public sealed partial class MainWindow : Window
 
         if (presenter.Kind == Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen)
         {
-            // Exit fullscreen
             this.AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.Overlapped);
         }
         else
         {
-            // Enter fullscreen
             this.AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);
         }
     }
-
-
-
-    // IMPLEMENT THIS ON LOGIN PAGE
-    // private void OnLoginSuccessful(bool isAdminUser)
-    // {  
-    //     (Application.Current as App)?.MainWindow?.SetLayoutBasedOnUserRole(isAdminUser);
-    // }
 }
+
+// IMPLEMENT THIS ON LOGIN PAGE
+// private void OnLoginSuccessful(bool isAdminUser)
+// {  
+//     (Application.Current as App)?.MainWindow?.SetLayoutBasedOnUserRole(isAdminUser);
+// }

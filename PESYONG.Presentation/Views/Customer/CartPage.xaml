@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:PESYONG.ApplicationLogic.Converters"
+    xmlns:converters="using:PESYONG.Presentation.Converters"
     xmlns:models="using:PESYONG.Domain.Entities"
     mc:Ignorable="d"
     Background="#FFFDF5">
@@ -12,6 +13,7 @@
     <Page.Resources>
         <local:PriceFormatConverter x:Key="PriceFormatConverter"/>
         <local:CartItemTypeToDisplayConverter x:Key="CartItemTypeToDisplayConverter"/>
+        <converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
 
         <Style x:Key="CartItemCardStyle" TargetType="Border">
             <Setter Property="Background" Value="White"/>
@@ -310,9 +312,11 @@
                                                     Width="80" 
                                                     Height="80" 
                                                     CornerRadius="8"
-                                                    Margin="0,0,12,0">
+                                                    Margin="0,0,12,0"
+                                                    >
                                                 <Border.Background>
-                                                    <ImageBrush ImageSource="{Binding Image}" Stretch="UniformToFill"/>
+                                                    <ImageBrush ImageSource="{Binding ImageBytes, Converter={StaticResource ByteArrayToImageSourceConverter}}"
+                                                                Stretch="UniformToFill"/>
                                                 </Border.Background>
                                             </Border>
 
@@ -500,6 +504,57 @@
                             <TextBlock Text="Where should we deliver your order?"
                                             Foreground="#666666"/>
 
+                            <!-- Personal Details -->
+                            <StackPanel Spacing="16">
+                                <TextBlock Text="Personal Details"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Foreground="#FF6600"/>
+
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Spacing="8">
+                                        <TextBlock Text="First Name *"
+                                                   Style="{StaticResource DeliveryLabelStyle}"/>
+                                        <TextBox x:Name="FirstNameTextBox"
+                                                 Style="{StaticResource DeliveryInputTextBoxStyle}"
+                                                 PlaceholderText="Enter first name"
+                                                 Text="{Binding CheckoutVM.FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="8">
+                                        <TextBlock Text="Last Name *"
+                                                   Style="{StaticResource DeliveryLabelStyle}"/>
+                                        <TextBox x:Name="LastNameTextBox"
+                                                 Style="{StaticResource DeliveryInputTextBoxStyle}"
+                                                 PlaceholderText="Enter last name"
+                                                 Text="{Binding CheckoutVM.LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Phone Number *"
+                                               Style="{StaticResource DeliveryLabelStyle}"/>
+                                    <TextBox x:Name="PhoneNumberTextBox"
+                                             Style="{StaticResource DeliveryInputTextBoxStyle}"
+                                             PlaceholderText="Enter phone number"
+                                             Text="{Binding CheckoutVM.PhoneNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Email Address (Optional)"
+                                               Style="{StaticResource DeliveryLabelStyle}"/>
+                                    <TextBox x:Name="EmailTextBox"
+                                             Style="{StaticResource DeliveryInputTextBoxStyle}"
+                                             PlaceholderText="Enter email address"
+                                             Text="{Binding CheckoutVM.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </StackPanel>
+
                             <!-- Address -->
                             <StackPanel Spacing="8">
                                 <TextBlock Text="Delivery Address *"
@@ -509,7 +564,8 @@
                                          PlaceholderText="e.g., 123 Main St, Barangay, City"
                                          TextWrapping="Wrap"
                                          AcceptsReturn="True"
-                                         MinHeight="60"/>
+                                         MinHeight="60"
+                                         Text="{Binding CheckoutVM.ShippingAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
                             <!-- Location Type -->
@@ -517,7 +573,7 @@
                                 <TextBlock Text="Location Type *"
                                            Style="{StaticResource DeliveryLabelStyle}"/>
                                 <RadioButtons x:Name="LocationRadioButtons"
-                                              SelectedIndex="0"
+                                              SelectedIndex="{Binding CheckoutVM.SelectedLocationIndex, Mode=TwoWay}"
                                               SelectionChanged="LocationRadioButtons_SelectionChanged">
                                     <RadioButton Style="{StaticResource DeliveryRadioButtonStyle}"
                                                  Content="Within Poblacion (₱15 flat rate)"/>
@@ -535,7 +591,9 @@
                                 <TextBox x:Name="DistanceTextBox"
                                          Style="{StaticResource DeliveryInputTextBoxStyle}"
                                          PlaceholderText="e.g., 5"
-                                         InputScope="Number"/>
+                                         InputScope="Number"
+                                         TextChanged="DistanceTextBox_TextChanged"
+                                         Text="{Binding CheckoutVM.DistanceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 <TextBlock x:Name="EstimatedFeeText"
                                            Foreground="#FF6600"
                                            FontSize="12"/>
@@ -553,9 +611,11 @@
                                 <CalendarDatePicker x:Name="DeliveryDatePicker"
                                         Style="{StaticResource DeliveryDatePickerStyle}"
                                         PlaceholderText="Select date" 
-                                        RequestedTheme="Light"/>
+                                        RequestedTheme="Light"
+                                        Date="{Binding CheckoutVM.DeliveryDate, Mode=TwoWay}"/>
                                 <TimePicker x:Name="DeliveryTimePicker"
-                                        Style="{StaticResource DeliveryTimePickerStyle}"/>
+                                        Style="{StaticResource DeliveryTimePickerStyle}"
+                                        Time="{Binding CheckoutVM.DeliveryTime, Mode=TwoWay}"/>
                             </StackPanel>
 
                             <!-- Special Instructions -->
@@ -567,7 +627,8 @@
                                          PlaceholderText="e.g., No spicy, For birthday celebration, etc."
                                          TextWrapping="Wrap"
                                          AcceptsReturn="True"
-                                         MinHeight="80"/>
+                                         MinHeight="80"
+                                         Text="{Binding CheckoutVM.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
                             <!-- Navigation Buttons -->
@@ -612,7 +673,7 @@
 
                             <!-- Payment Methods -->
                             <RadioButtons x:Name="PaymentRadioButtons"
-                                          SelectedIndex="0"
+                                          SelectedIndex="{Binding CheckoutVM.SelectedPaymentIndex, Mode=TwoWay}"
                                           Header="Payment Method">
                                 <RadioButton Content="Cash on Delivery"/>
                                 <RadioButton Content="GCash / E-Wallet"/>
@@ -639,7 +700,8 @@
                                         <TextBlock Grid.Column="1" 
                                                    x:Name="PaymentSubtotalText"
                                                    FontWeight="SemiBold" 
-                                                   Foreground="#FF6600"/>
+                                                   Foreground="#FF6600"
+                                                   Text="{Binding CheckoutVM.SubtotalDisplay}"/>
                                     </Grid>
 
                                     <Grid>
@@ -652,7 +714,8 @@
                                         <TextBlock Grid.Column="1" 
                                                    x:Name="PaymentDeliveryFeeText"
                                                    FontWeight="SemiBold" 
-                                                   Foreground="#FF6600"/>
+                                                   Foreground="#FF6600"
+                                                   Text="{Binding CheckoutVM.DeliveryFeeDisplay}"/>
                                     </Grid>
 
                                     <Border Height="1" 
@@ -673,7 +736,8 @@
                                                    x:Name="PaymentTotalText"
                                                    FontSize="18" 
                                                    FontWeight="Bold" 
-                                                   Foreground="#FF6600"/>
+                                                   Foreground="#FF6600"
+                                                   Text="{Binding CheckoutVM.TotalDisplay}"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>

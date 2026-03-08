@@ -184,10 +184,10 @@
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapGrid Orientation="Horizontal" 
-                                 MaximumRowsOrColumns="5" 
-                                 ItemWidth="350"
-                                 ItemHeight="440"
-                                 HorizontalAlignment="Center"/>
+                                  MaximumRowsOrColumns="5" 
+                                  ItemWidth="350"
+                                  ItemHeight="450"
+                                  HorizontalAlignment="Center"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -238,7 +238,8 @@
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
 
                                         <!-- Name -->
@@ -269,7 +270,7 @@
                                                   Margin="0,0,0,4"/>
 
                                         <!-- Price -->
-                                        <TextBlock Grid.Row="3" 
+                                        <TextBlock Grid.Row="3"
                                                   FontSize="24" 
                                                   FontWeight="Bold" 
                                                   Foreground="#FF6600"
@@ -287,7 +288,7 @@
                                                   Margin="0,0,0,8"/>
 
                                         <!-- Quantity Selector -->
-                                        <Border Grid.Row="3" 
+                                        <Border Grid.Row="5" 
                                                 Background="#FFF5E5" 
                                                 CornerRadius="6" 
                                                 Padding="8"

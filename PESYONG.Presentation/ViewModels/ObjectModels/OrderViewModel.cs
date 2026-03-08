@@ -16,7 +16,30 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
 {
     private Guid _orderID;
     private int? _receiptID;
-    private int? _recipientID;
+
+    [ObservableProperty]
+    private Guid? _customerID;
+
+    [ObservableProperty]
+    private AppUserViewModel? _recipient;
+
+    [ObservableProperty]
+    private AcknowledgementReceiptViewModel? _receipt;
+
+    [ObservableProperty]
+    private ObservableCollection<OrderMealProductViewModel> _orderItems = new();
+
+    [ObservableProperty]
+    [StringLength(100)]
+    private string _productName;
+
+    [ObservableProperty]
+    [StringLength(100)]
+    private string _productDescription;
+
+    [ObservableProperty]
+    [Required(ErrorMessage = "Order date is required")]
+    [NotifyPropertyChangedFor(nameof(OrderDateDisplay))]
     private DateTime _orderDate = DateTime.Now;
     private DateTime? _estimatedDeliveryDate;
     private DateTime? _actualDeliveryDate;
@@ -29,11 +52,50 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
     private string _statusMessage = string.Empty;
     private string _validationSummary = string.Empty;
 
-    private ObservableCollection<OrderMealProductViewModel> _orderItems = new();
+    public OrderViewModel(Order entity)
+    {
+        if (entity != null)
+        {
+            OrderID = entity.OrderID;
+            ReceiptID = entity.ReceiptID;
+            CustomerID = entity.CustomerID;
+            OrderDate = entity.OrderDate;
+            EstimatedDeliveryDate = entity.EstimatedDeliveryDate;
+            ActualDeliveryDate = entity.ActualDeliveryDate;
+            DeliveryType = entity.DeliveryType;
+            DeliveryStatus = entity.DeliveryStatus;
+            Address = entity.Address;
+            TrackingNumber = entity.TrackingNumber;
+            CustomerNotes = entity.CustomerNotes;
+            SpecialInstructions = entity.SpecialInstructions;
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+            // Convert OrderItems
+            if (entity.OrderItems != null && entity.OrderItems.Any())
+            {
+                OrderItems = new ObservableCollection<OrderMealProductViewModel>(
+                    entity.OrderItems.Select(OrderMealProductViewModel.FromEntity)
+                );
+            }
+        }
 
-    public Guid OrderID
+        // Initialize property change handling
+        PropertyChanged += (sender, args) =>
+        {
+            if (args.PropertyName != nameof(HasErrors) &&
+                args.PropertyName != nameof(CanSave) &&
+                args.PropertyName != nameof(OrderTotalAmount) &&
+                args.PropertyName != nameof(ItemCount))
+            {
+                OnPropertyChanged(nameof(CanSave));
+                OnPropertyChanged(nameof(OrderTotalAmount));
+                OnPropertyChanged(nameof(ItemCount));
+            }
+        };
+
+        ValidateAllProperties();
+    }
+
+    public OrderViewModel()
     {
         get => _orderID;
         set
@@ -142,12 +204,19 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
         get => _orderItems;
         set
         {
-            if (SetProperty(ref _orderItems, value))
-            {
-                OnPropertyChanged(nameof(FormattedOrderTotalAmount));
-            }
-        }
-    }
+            OrderID = entity.OrderID,
+            ReceiptID = entity.ReceiptID,
+            CustomerID = entity.CustomerID,
+            OrderDate = entity.OrderDate,
+            EstimatedDeliveryDate = entity.EstimatedDeliveryDate,
+            ActualDeliveryDate = entity.ActualDeliveryDate,
+            DeliveryType = entity.DeliveryType,
+            DeliveryStatus = entity.DeliveryStatus,
+            Address = entity.Address,
+            TrackingNumber = entity.TrackingNumber,
+            CustomerNotes = entity.CustomerNotes,
+            SpecialInstructions = entity.SpecialInstructions
+        };
 
     public string StatusMessage
     {
@@ -179,14 +248,19 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
         get => OrderID == Guid.Empty ? string.Empty : OrderID.ToString();
         set
         {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                OrderID = Guid.Empty;
-            }
-            else if (Guid.TryParse(value.Trim(), out var parsed))
-            {
-                OrderID = parsed;
-            }
+            OrderID = OrderID != Guid.Empty ? OrderID : Guid.NewGuid(),
+            ReceiptID = ReceiptID,
+            CustomerID = CustomerID,
+            OrderDate = OrderDate,
+            EstimatedDeliveryDate = EstimatedDeliveryDate,
+            ActualDeliveryDate = ActualDeliveryDate,
+            DeliveryType = DeliveryType,
+            DeliveryStatus = DeliveryStatus,
+            Address = Address?.Trim(),
+            TrackingNumber = TrackingNumber?.Trim(),
+            CustomerNotes = CustomerNotes?.Trim(),
+            SpecialInstructions = SpecialInstructions?.Trim()
+        };
 
             OnPropertyChanged();
         }
@@ -351,7 +425,8 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         OrderID = Guid.Empty;
         ReceiptID = null;
-        RecipientID = null;
+        CustomerID = null;
+        OrderItems.Clear();
         OrderDate = DateTime.Now;
         EstimatedDeliveryDate = null;
         ActualDeliveryDate = null;
@@ -377,26 +452,12 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         try
         {
-            var results = new List<ValidationResult>();
-            var context = new ValidationContext(this);
-
-            var isValid = Validator.TryValidateObject(this, context, results, true);
-
-            foreach (var item in OrderItems)
-            {
-                if (!item.ValidateAll())
-                {
-                    isValid = false;
-                }
-            }
-
-            ValidationSummary = string.Join(Environment.NewLine,
-                results.Select(x => x.ErrorMessage).Where(x => !string.IsNullOrWhiteSpace(x)));
-
-            if (!ValidateBusinessRules())
-            {
-                isValid = false;
-            }
+            CustomerID = CustomerID,
+            Address = Address,
+            CustomerNotes = CustomerNotes,
+            SpecialInstructions = SpecialInstructions,
+            DeliveryType = DeliveryType
+        };
 
             OnPropertyChanged(string.Empty);
             return isValid;
