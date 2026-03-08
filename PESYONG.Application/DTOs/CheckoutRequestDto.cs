@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace PESYONG.ApplicationLogic.DTOs
 {
+    /// <summary>
+    /// Represents the full checkout request submitted by the customer.
+    /// </summary>
     public class CheckoutRequestDto
     {
         public string FirstName { get; set; } = string.Empty;

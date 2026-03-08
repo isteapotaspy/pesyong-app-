@@ -11,34 +11,23 @@ namespace PESYONG.ApplicationLogic.Repositories;
 
 public class MealRepository
 {
-    private readonly IDbContextFactory<AppDbContext> _contextFactory;
-
-    public MealRepository(IDbContextFactory<AppDbContext> contextFactory)
+    /// <summary>
+    /// Provides data access operations for meals, including creation,
+    /// retrieval, querying, updating, and deletion.
+    /// </summary>
+    public class MealRepository
     {
         _contextFactory = contextFactory;
     }
 
-    /// <summary>
-    /// Creates a meal in the database.
-    /// </summary>
-    public async Task CreateMealAsync(Meal meal)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-        context.Meals.Add(meal);
-        Debug.WriteLine($"\n\nThe meal has ID of {meal.MealID} and is named {meal.MealName}\n\n");
-        await context.SaveChangesAsync();
-    }
-
-    /// <summary>
-    /// Creates a meal in the database and returns the created meal with its assigned MealID.
-    /// </summary>
-    public async Task<Meal> CreateMealAsyncReturnSelf(Meal meal)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-        context.Meals.Add(meal);
-        await context.SaveChangesAsync();
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MealRepository"/> class.
+        /// </summary>
+        /// <param name="contextFactory">The database context factory used to create application database contexts.</param>
+        public MealRepository(IDbContextFactory<AppDbContext> contextFactory)
+        {
+            _contextFactory = contextFactory;
+        }
 
         Debug.WriteLine($"\n\nThe meal has ID of {meal.MealID} and is named {meal.MealName}\n\n");
         return meal;
