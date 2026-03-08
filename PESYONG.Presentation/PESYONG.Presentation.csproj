@@ -140,7 +140,21 @@
   <ItemGroup>
     <Folder Include="Themes\" />
     <Folder Include="ViewModels\PageModels\" />
-    <Folder Include="Views\Admin\Transactions\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Transactions\OrderPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Transactions\PaymentPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Transactions\AcknowledgementReceipt.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Admin\Administration\AuditLogPage.xaml">

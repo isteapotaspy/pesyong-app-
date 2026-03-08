@@ -84,7 +84,7 @@ public class Order
 
         return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
     }
-    public IEnumerable<string> GetValidationErrors()
+    public IEnumerable<string?> GetValidationErrors()
     {
         var validationContext = new ValidationContext(this);
         var validationResults = new List<ValidationResult>();

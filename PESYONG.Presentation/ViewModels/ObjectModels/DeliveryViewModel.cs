@@ -236,6 +236,8 @@ public partial class DeliveryViewModel : ObservableValidator
         ValidateAllProperties();
     }
 
+
+
     public string GetErrorMessages()
     {
         if (!HasErrors) return string.Empty;

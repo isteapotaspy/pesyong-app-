@@ -9,6 +9,56 @@
     mc:Ignorable="d">
 
     <Grid>
+        <Grid>
+            <TextBox Header="User ID" 
+                 Text="{Binding Id, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
 
+            <TextBox Header="Email Address" 
+                 Text="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBox Header="User ID" 
+                 Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBox Header="User Name" 
+                 Text="{Binding UserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBox Header="Phone Number" 
+                 Text="{Binding PhoneNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBox Header="First Name" 
+             Text="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBox Header="Last Name" 
+                 Text="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            
+            <ComboBox ItemsSource="{Binding AuthorizationTypeEnums}" SelectedValue="{Binding AuthorizationType}"/>
+        </Grid>
+
+        <Grid>
+            <CheckBox Content="Reveal password"></CheckBox>
+            <TextBox Header="Password" 
+                        Text="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+
+        <Grid>
+            <CheckBox Content="Is the user's email confirmed?"/>
+            <CheckBox Content="Is the user's phone number confirmed?" />
+            <CheckBox Content="Is two factor authentication enabled for this user?"/>
+            <CheckBox Content="Is the user lock-out enabled?" />
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+                                Margin="12,12,12,12"
+                                Spacing="8" >
+            <Button x:Name="DeleteButton" Content="Delete" 
+                                Style="{StaticResource DefaultButtonStyle}" Foreground="White"
+                                />
+            <Button x:Name="SaveButton" 
+                                Content="Save Changes" 
+                                Style="{StaticResource AccentButtonStyle}" 
+                                Foreground="White"
+                                />
+        </StackPanel>
     </Grid>
 </Page>

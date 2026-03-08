@@ -187,13 +187,14 @@ public partial class OrderViewModel : ObservableValidator
 
     private bool CanDeliverOrder() => CanBeDelivered && DeliveryStatus == DeliveryStatus.InTransit;
 
-    private bool CanShipOrder() => CanBeDelivered && DeliveryStatus == DeliveryStatus.;
+    private bool CanShipOrder() => CanBeDelivered && DeliveryStatus == DeliveryStatus.Confirmed;
 
     private bool CanCancelOrder() => CanBeDelivered;
 
     private bool CanAddOrderItem(OrderMealProductViewModel? item) => item != null;
 
-    private bool CanRemoveOrderItem(int mealProductId) => OrderItems.Any(i => i.MealProductID == mealProductId);
+    private bool CanRemoveOrderItem(int mealProductId) => OrderItems.Any(
+        i => i.MealProductID == mealProductId);
 
     private bool CanClearOrderItems() => OrderItems.Any();
 
@@ -470,3 +471,4 @@ public partial class OrderViewModel : ObservableValidator
         return copy;
     }
 }
+

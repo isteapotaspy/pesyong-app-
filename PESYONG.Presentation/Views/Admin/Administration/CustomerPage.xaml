@@ -29,52 +29,61 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-                <!-- CustomerID -->
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Customer ID:"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CustomerID}"/>
 
-                <!-- First Name -->
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="First Name:"/>
                 <TextBox Grid.Row="1" Grid.Column="1" 
                         Text="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <!-- Last Name -->
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Last Name:"/>
                 <TextBox Grid.Row="2" Grid.Column="1" 
                         Text="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <!-- Email -->
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="Email:"/>
                 <TextBox Grid.Row="3" Grid.Column="1" 
                         Text="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <!-- Address -->
                 <TextBlock Grid.Row="4" Grid.Column="0" Text="Address:"/>
                 <TextBox Grid.Row="4" Grid.Column="1" 
                         Text="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <!-- Created Date -->
                 <TextBlock Grid.Row="5" Grid.Column="0" Text="Created Date:"/>
                 <DatePicker Grid.Row="5" Grid.Column="1" 
                         Date="{Binding CreatedDate, Mode=TwoWay}"/>
 
-                <!-- Is Active -->
                 <TextBlock Grid.Row="6" Grid.Column="0" Text="Is Active:"/>
-                <CheckBox Grid.Row="6" Grid.Column="1" 
+            <CheckBox Grid.Row="6" Grid.Column="1" 
                         IsChecked="{Binding IsActive, Mode=TwoWay}"/>
-
-                <!-- Computed Properties Display -->
-                <TextBlock Grid.Row="7" Grid.Column="0" Text="Full Name:"/>
-                <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding FullName}"/>
-
-                <TextBlock Grid.Row="8" Grid.Column="0" Text="Status:"/>
-                <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding StatusText}"/>
-
-                <TextBlock Grid.Row="9" Grid.Column="0" Text="Can Save:"/>
-                <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding CanSave}"/>
-
-                <TextBlock Grid.Row="10" Grid.Column="0" Text="Is New Customer:"/>
-                <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding IsNewCustomer}"/>
         </Grid>
+
+        <Grid>
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Full Name:"/>
+            <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding FullName}"/>
+
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Status:"/>
+            <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding StatusText}"/>
+
+            <TextBlock Grid.Row="9" Grid.Column="0" Text="Can Save:"/>
+            <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding CanSave}"/>
+
+            <TextBlock Grid.Row="10" Grid.Column="0" Text="Is New Customer:"/>
+            <TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding IsNewCustomer}"/>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+                                Margin="12,12,12,12"
+                                Spacing="8" >
+            <Button x:Name="DeleteButton" Content="Delete" 
+                                Style="{StaticResource DefaultButtonStyle}" Foreground="White"
+                                />
+            <Button x:Name="SaveButton" 
+                                Content="Save Changes" 
+                                Style="{StaticResource AccentButtonStyle}" 
+                                Foreground="White"
+                                />
+        </StackPanel>
+
     </Grid>
 </Page>

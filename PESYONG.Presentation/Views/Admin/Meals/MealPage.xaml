@@ -287,7 +287,10 @@
                                     Meal Tags
                         </TextBlock>
                         <!-- Mealtags -->
-                        <StackPanel Orientation="Vertical" Spacing="16">
+                        <StackPanel 
+                            Orientation="Vertical" 
+                            Spacing="16"
+                            >
                             <controls:TokenizingTextBox x:Name="TokenBox"
                                     MaxWidth="620"
                                     HorizontalAlignment="Left"
@@ -330,8 +333,6 @@
                                     </DataTemplate>
                                 </controls:TokenizingTextBox.TokenItemTemplate>
                             </controls:TokenizingTextBox>
-
-
                         </StackPanel>
                     </StackPanel>
 

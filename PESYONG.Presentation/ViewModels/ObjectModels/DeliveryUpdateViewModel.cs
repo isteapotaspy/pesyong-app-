@@ -10,6 +10,7 @@ using PESYONG.Domain.Entities.Logistics;
 using PESYONG.Domain.Enums;
 using PESYONG.Presentation;
 using static Azure.Core.HttpHeader;
+using System.Linq;
 
 public partial class DeliveryUpdateViewModel : ObservableValidator
 {
@@ -173,7 +174,7 @@ public partial class DeliveryUpdateViewModel : ObservableValidator
     private void Validate()
     {
         var entity = ToEntity();
-        var errors = entity.ValidationErrors.ToList();
+        var errors = entity.GetValidationErrors().ToList();
 
         ValidationErrors.Clear();
         foreach (var error in errors)

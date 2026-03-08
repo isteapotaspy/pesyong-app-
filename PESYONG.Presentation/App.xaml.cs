@@ -146,7 +146,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         {
             Debug.WriteLine("\n\n=== Testing Dependency Injection ===");
             var appDb = Services.GetService<AppDbContext>();
-            Debug.WriteLine($"MealRepository: {(appDb != null ? "[/] Resolved" : "[X] Failed")}");
+            Debug.WriteLine($"\n\nMealRepository: {(appDb != null ? "[/] Resolved" : "[X] Failed")}");
 
             var mealRepo = Services.GetService<MealRepository>();
             Debug.WriteLine($"MealRepository: {(mealRepo != null ? "[/] Resolved" : "[X] Failed")}");
