@@ -1,85 +1,212 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using PESYONG.ApplicationLogic.Services;
 using PESYONG.Presentation.Interfaces;
 using PESYONG.Presentation.Views.Customer;
-using PESYONG.Presentation.Views.Shared;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Networking.NetworkOperators;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace PESYONG.Presentation.Components.Layouts;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class CustomerLayout : UserControl, ILayout
 {
+    private bool _isInternalSelectionChange;
+    private readonly CartService _cartService;
+
     public CustomerLayout()
     {
-        this.InitializeComponent();
+        InitializeComponent();
 
-        // Optional: Navigate to default page on load
-        // ContentFrame.Navigate(typeof(YourDefaultPage));
+        _cartService = CartService.Instance;
+        _cartService.CartUpdated += CartService_CartUpdated;
+
+        MainNavigationViewFrame.Navigated += MainNavigationViewFrame_Navigated;
+        Unloaded += CustomerLayout_Unloaded;
+
+        UpdateCartBadge();
+
+        ContentFrame.Navigate(typeof(HomePage));
     }
 
-    // ILayout implementation - now using the Frame inside NavigationView
     public Frame ContentFrame => MainNavigationViewFrame;
 
     public void NavigateToPage(Type pageType)
     {
-        ContentFrame.Navigate(pageType);
+        if (ContentFrame.CurrentSourcePageType != pageType)
+        {
+            ContentFrame.Navigate(pageType);
+        }
     }
 
-    // Event handler for NavigationView selection
+    public void NavigateByTag(string tag)
+    {
+        Type? pageType = GetPageTypeFromTag(tag);
+        if (pageType == null)
+            return;
+
+        if (ContentFrame.CurrentSourcePageType != pageType)
+        {
+            ContentFrame.Navigate(pageType);
+        }
+
+        if (IsTopMenuTag(tag))
+        {
+            UpdateSelectedNavigationItem(tag);
+        }
+        else
+        {
+            ClearSelectedNavigationItem();
+        }
+    }
+
+    private void CustomerLayout_Unloaded(object sender, RoutedEventArgs e)
+    {
+        _cartService.CartUpdated -= CartService_CartUpdated;
+        MainNavigationViewFrame.Navigated -= MainNavigationViewFrame_Navigated;
+        Unloaded -= CustomerLayout_Unloaded;
+    }
+
+    private void CartService_CartUpdated(object? sender, EventArgs e)
+    {
+        UpdateCartBadge();
+    }
+
+    private void UpdateCartBadge()
+    {
+        int count = _cartService.GetTotalItemCount();
+
+        if (count > 0)
+        {
+            HeaderCartBadge.Visibility = Visibility.Visible;
+            HeaderCartBadgeText.Text = count > 99 ? "99+" : count.ToString();
+        }
+        else
+        {
+            HeaderCartBadge.Visibility = Visibility.Collapsed;
+            HeaderCartBadgeText.Text = string.Empty;
+        }
+    }
+
+    private bool IsTopMenuTag(string tag)
+    {
+        return tag == "CateringPackagesPage"
+            || tag == "ShortOrdersPage"
+            || tag == "KakaninPage";
+    }
+
+    private Type? GetPageTypeFromTag(string tag)
+    {
+        return tag switch
+        {
+            "CateringPackagesPage" => typeof(CateringPackagesPage),
+            "ShortOrdersPage" => typeof(ShortOrdersPage),
+            "KakaninPage" => typeof(KakaninPage),
+            "CartPage" => typeof(CartPage),
+            "OrderHistoryPage" => typeof(OrderHistoryPage),
+            "HelpPage" => typeof(HelpPage),
+            "HomePage" => typeof(HomePage),
+            _ => null
+        };
+    }
+
+    private string? GetTopMenuTagFromPageType(Type pageType)
+    {
+        if (pageType == typeof(CateringPackagesPage))
+            return "CateringPackagesPage";
+
+        if (pageType == typeof(ShortOrdersPage))
+            return "ShortOrdersPage";
+
+        if (pageType == typeof(KakaninPage))
+            return "KakaninPage";
+
+        return null;
+    }
+
     private void MainNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (args.SelectedItem is NavigationViewItem selectedItem)
-        {
-            string tag = selectedItem.Tag.ToString();
+        if (_isInternalSelectionChange)
+            return;
 
-            switch (tag)
+        if (args.SelectedItem is NavigationViewItem selectedItem &&
+            selectedItem.Tag is string tag)
+        {
+            Type? pageType = GetPageTypeFromTag(tag);
+
+            if (pageType != null && ContentFrame.CurrentSourcePageType != pageType)
             {
-                case "CateringPackagesPage":
-                    ContentFrame.Navigate(typeof(CateringPackagesPage));
-                    break;
-                case "ShortOrdersPage":
-                    ContentFrame.Navigate(typeof(ShortOrdersPage));
-                    break;
-                case "KakaninPage":
-                    ContentFrame.Navigate(typeof(KakaninPage));
-                    break;
-                case "CartPage":
-                    ContentFrame.Navigate(typeof(CartPage));
-                    break;
-                case "OrderHistoryPage":
-                    ContentFrame.Navigate(typeof(OrderHistoryPage));
-                    break;
-                case "HelpPage":
-                    ContentFrame.Navigate(typeof(HelpPage));
-                    break;
-                default:
-                    // Handle unknown navigation
-                    break;
+                ContentFrame.Navigate(pageType);
             }
         }
     }
 
-    // Optional: Profile button click handler
-    private void ProfileButton_Click(object sender, RoutedEventArgs e)
+    private void MainNavigationViewFrame_Navigated(object sender, NavigationEventArgs e)
     {
-        ContentFrame.Navigate(typeof(ProfilePage));
+        if (e.SourcePageType == null)
+            return;
+
+        string? topMenuTag = GetTopMenuTagFromPageType(e.SourcePageType);
+
+        if (!string.IsNullOrWhiteSpace(topMenuTag))
+        {
+            UpdateSelectedNavigationItem(topMenuTag);
+        }
+        else
+        {
+            ClearSelectedNavigationItem();
+        }
+    }
+
+    private void UpdateSelectedNavigationItem(string tag)
+    {
+        _isInternalSelectionChange = true;
+
+        try
+        {
+            foreach (object item in MainNavigationView.MenuItems)
+            {
+                if (item is NavigationViewItem navItem &&
+                    navItem.Tag?.ToString() == tag)
+                {
+                    MainNavigationView.SelectedItem = navItem;
+                    return;
+                }
+            }
+
+            MainNavigationView.SelectedItem = null;
+        }
+        finally
+        {
+            _isInternalSelectionChange = false;
+        }
+    }
+
+    private void ClearSelectedNavigationItem()
+    {
+        _isInternalSelectionChange = true;
+
+        try
+        {
+            MainNavigationView.SelectedItem = null;
+        }
+        finally
+        {
+            _isInternalSelectionChange = false;
+        }
+    }
+
+    private void CartButton_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateByTag("CartPage");
+    }
+
+    private void OrderHistoryButton_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateByTag("OrderHistoryPage");
+    }
+
+    private void HelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateByTag("HelpPage");
     }
 }

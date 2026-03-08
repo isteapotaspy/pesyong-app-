@@ -1,27 +1,29 @@
+
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
+using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.Views.Customer
 {
-    /// <summary>
-    /// Manages the multi-step checkout process, including cart review, 
-    /// delivery information gathering, and payment method selection.
-    /// Coordinates between the <see cref="CartService"/> and the UI state 
-    /// to ensure accurate order totals and validation.
-    /// </summary>
-    /// 
     public sealed partial class CartPage : Page, INotifyPropertyChanged
     {
         private readonly CartService _cartService;
+        private readonly OrderRepository _orderRepository;
+
         private ObservableCollection<CartItem> Cart => _cartService.Cart;
         private DeliveryInfo? Delivery => _cartService.Delivery;
+
+        public CheckoutViewModel CheckoutVM { get; }
 
         private enum CheckoutStep { Cart, Delivery, Payment }
         private CheckoutStep _currentStep = CheckoutStep.Cart;
@@ -31,7 +33,13 @@ namespace PESYONG.Presentation.Views.Customer
         public CartPage()
         {
             this.InitializeComponent();
+
             _cartService = CartService.Instance;
+            _orderRepository = App.Current.Services.GetRequiredService<OrderRepository>();
+            CheckoutVM = new CheckoutViewModel(_orderRepository);
+
+            DataContext = this;
+
             LoadCart();
         }
 
@@ -40,27 +48,26 @@ namespace PESYONG.Presentation.Views.Customer
             UpdateCartDisplay();
             UpdateOrderSummary();
 
-            // Subscribe to cart changes
-            Cart.CollectionChanged += (s, e) => UpdateCartDisplay();
+            Cart.CollectionChanged += (s, e) =>
+            {
+                UpdateCartDisplay();
+                UpdateOrderSummary();
+                CheckoutVM.Initialize(Cart);
+            };
+
+            CheckoutVM.Initialize(Cart);
         }
 
-        /// <summary>
-        /// Synchronizes the UI elements with the current state of the cart, 
-        /// toggling visibility between the empty-state panel and the active items list.
-        /// </summary>
         private void UpdateCartDisplay()
         {
-            // Update header subtitle
             HeaderSubtitle.Text = Cart.Count == 0
                 ? "Your cart is empty"
                 : $"{Cart.Count} {(Cart.Count == 1 ? "item" : "items")} in your cart";
 
-            // Show/hide empty cart panel
             EmptyCartPanel.Visibility = Cart.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             CartItemsPanel.Visibility = Cart.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
             OrderSummaryPanel.Visibility = Cart.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
 
-            // Refresh cart items list
             CartItemsList.ItemsSource = null;
             CartItemsList.ItemsSource = Cart;
         }
@@ -73,13 +80,19 @@ namespace PESYONG.Presentation.Views.Customer
             SubtotalText.Text = $"₱{subtotal:F2}";
             TotalText.Text = $"₱{total:F2}";
 
-            PaymentSubtotalText.Text = $"₱{subtotal:F2}";
-            PaymentTotalText.Text = $"₱{total:F2}";
+            // Payment summary can now come from CheckoutVM bindings,
+            // but leaving this here is okay while transitioning.
+            PaymentSubtotalText.Text = CheckoutVM.SubtotalDisplay;
+            PaymentTotalText.Text = CheckoutVM.TotalDisplay;
+            PaymentDeliveryFeeText.Text = CheckoutVM.DeliveryFeeDisplay;
 
             if (Delivery != null)
             {
-                PaymentDeliveryFeeText.Text = $"₱{Delivery.DeliveryFee:F2}";
                 DeliveryFeeText.Text = $"₱{Delivery.DeliveryFee:F2}";
+            }
+            else
+            {
+                DeliveryFeeText.Text = "Calculated at checkout";
             }
         }
 
@@ -89,7 +102,6 @@ namespace PESYONG.Presentation.Views.Customer
             DeliveryView.Visibility = _currentStep == CheckoutStep.Delivery ? Visibility.Visible : Visibility.Collapsed;
             PaymentView.Visibility = _currentStep == CheckoutStep.Payment ? Visibility.Visible : Visibility.Collapsed;
 
-            // Update header based on step
             switch (_currentStep)
             {
                 case CheckoutStep.Cart:
@@ -109,7 +121,6 @@ namespace PESYONG.Presentation.Views.Customer
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        // Cart View Event Handlers
         private void IncreaseQuantity_Click(object sender, RoutedEventArgs e)
         {
             if ((sender as Button)?.Tag is string id)
@@ -118,6 +129,7 @@ namespace PESYONG.Presentation.Views.Customer
                 if (item != null)
                 {
                     _cartService.UpdateQuantity(id, item.Quantity + 1);
+                    CheckoutVM.Initialize(Cart);
                     UpdateOrderSummary();
                 }
             }
@@ -131,6 +143,7 @@ namespace PESYONG.Presentation.Views.Customer
                 if (item != null)
                 {
                     _cartService.UpdateQuantity(id, item.Quantity - 1);
+                    CheckoutVM.Initialize(Cart);
                     UpdateOrderSummary();
                 }
             }
@@ -141,6 +154,7 @@ namespace PESYONG.Presentation.Views.Customer
             if ((sender as Button)?.Tag is string id)
             {
                 _cartService.RemoveFromCart(id);
+                CheckoutVM.Initialize(Cart);
                 UpdateOrderSummary();
 
                 var dialog = new ContentDialog
@@ -156,43 +170,28 @@ namespace PESYONG.Presentation.Views.Customer
 
         private void BrowsePackages_Click(object sender, RoutedEventArgs e)
         {
-            // Navigate to packages page
             Frame.Navigate(typeof(CateringPackagesPage));
         }
 
         private void ProceedToCheckout_Click(object sender, RoutedEventArgs e)
         {
+            CheckoutVM.Initialize(Cart);
             _currentStep = CheckoutStep.Delivery;
             UpdateViewVisibility();
         }
 
-        // Delivery View Event Handlers
         private void LocationRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var radioButtons = sender as RadioButtons;
-            DistancePanel.Visibility = radioButtons?.SelectedIndex == 1
+            DistancePanel.Visibility = CheckoutVM.SelectedLocationIndex == 1
                 ? Visibility.Visible
                 : Visibility.Collapsed;
 
-            UpdateEstimatedFee();
+            EstimatedFeeText.Text = $"Estimated fee: {CheckoutVM.DeliveryFeeDisplay}";
         }
 
         private void DistanceTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            UpdateEstimatedFee();
-        }
-
-        private void UpdateEstimatedFee()
-        {
-            if (LocationRadioButtons.SelectedIndex == 0)
-            {
-                EstimatedFeeText.Text = "Estimated fee: ₱15.00";
-            }
-            else if (double.TryParse(DistanceTextBox.Text, out double distance))
-            {
-                double fee = Math.Max(25, Math.Floor(distance) * 5);
-                EstimatedFeeText.Text = $"Estimated fee: ₱{fee:F2}";
-            }
+            EstimatedFeeText.Text = $"Estimated fee: {CheckoutVM.DeliveryFeeDisplay}";
         }
 
         private void BackToCart_Click(object sender, RoutedEventArgs e)
@@ -201,44 +200,20 @@ namespace PESYONG.Presentation.Views.Customer
             UpdateViewVisibility();
         }
 
-        /// <summary>
-        /// Validates the delivery input fields and distance calculations 
-        /// before transitioning the UI to the payment selection step.
-        /// </summary>
         private void ContinueToPayment_Click(object sender, RoutedEventArgs e)
         {
-            // Validate delivery form
-            if (string.IsNullOrWhiteSpace(AddressTextBox.Text))
+            if (!CheckoutVM.Validate(out string errorMessage))
             {
-                ShowErrorDialog("Please enter a delivery address.");
+                ShowErrorDialog(errorMessage);
                 return;
             }
 
-            if (DeliveryDatePicker.Date == null)
-            {
-                ShowErrorDialog("Please select a delivery date.");
-                return;
-            }
-
-            if (LocationRadioButtons.SelectedIndex == 1 &&
-                !double.TryParse(DistanceTextBox.Text, out _))
-            {
-                ShowErrorDialog("Please enter a valid distance for outside Poblacion delivery.");
-                return;
-            }
-
-            // Calculate delivery fee
-            double deliveryFee = LocationRadioButtons.SelectedIndex == 0
-                ? 15
-                : Math.Max(25, Math.Floor(double.Parse(DistanceTextBox.Text)) * 5);
-
-            // Create delivery info
             var deliveryInfo = new DeliveryInfo
             {
-                Address = AddressTextBox.Text,
-                Location = LocationRadioButtons.SelectedIndex == 0 ? "poblacion" : "outside",
-                Distance = LocationRadioButtons.SelectedIndex == 1 ? double.Parse(DistanceTextBox.Text) : null,
-                DeliveryFee = deliveryFee
+                Address = CheckoutVM.ShippingAddress,
+                Location = CheckoutVM.Location,
+                Distance = double.TryParse(CheckoutVM.DistanceText, out double distance) ? distance : null,
+                DeliveryFee = CheckoutVM.DeliveryFee
             };
 
             _cartService.SetDelivery(deliveryInfo);
@@ -248,64 +223,80 @@ namespace PESYONG.Presentation.Views.Customer
             UpdateViewVisibility();
         }
 
-        // Payment View Event Handlers
         private void BackToDelivery_Click(object sender, RoutedEventArgs e)
         {
             _currentStep = CheckoutStep.Delivery;
             UpdateViewVisibility();
         }
 
-        /// <summary>
-        /// Finalizes the transaction by capturing the selected payment method, 
-        /// clearing the cart, and prompting the user for navigation to their order history.
-        /// </summary>
+
         private async void PlaceOrder_Click(object sender, RoutedEventArgs e)
         {
-            string paymentMethod = PaymentRadioButtons.SelectedIndex switch
+            try
             {
-                0 => "cod",
-                1 => "gcash",
-                2 => "reservation",
-                _ => "cod"
-            };
+                if (!CheckoutVM.Validate(out string errorMessage))
+                {
+                    ShowErrorDialog(errorMessage);
+                    return;
+                }
 
-            // Create order (in a real app, this would call a service)
-            var orderData = new
+                if (Cart.Count == 0)
+                {
+                    ShowErrorDialog("Your cart is empty.");
+                    return;
+                }
+
+                var orderId = await CheckoutVM.SubmitOrderAsync();
+
+                if (orderId == null)
+                {
+                    ShowErrorDialog("Failed to place order.");
+                    return;
+                }
+
+                var orderNumber = orderId.Value.ToString()[..8].ToUpper();
+
+                var dialog = new ContentDialog
+                {
+                    Title = "Order Placed Successfully! 🎉",
+                    Content = $"Order #{orderNumber} has been received.",
+                    PrimaryButtonText = "View Orders",
+                    CloseButtonText = "Continue Shopping",
+                    XamlRoot = this.XamlRoot
+                };
+
+                dialog.PrimaryButtonClick += (s, args) =>
+                {
+                    _cartService.ClearCart();
+                    CheckoutVM.ClearForm();
+                    Frame.Navigate(typeof(OrderHistoryPage));
+                };
+
+                dialog.CloseButtonClick += (s, args) =>
+                {
+                    _cartService.ClearCart();
+                    CheckoutVM.ClearForm();
+                    _currentStep = CheckoutStep.Cart;
+                    UpdateViewVisibility();
+                    UpdateCartDisplay();
+                    UpdateOrderSummary();
+                };
+
+                await dialog.ShowAsync();
+            }
+            catch (Exception ex)
             {
-                Id = $"ORD-{DateTime.Now.Ticks}",
-                Items = Cart.ToList(),
-                DeliveryInfo = Delivery,
-                PaymentMethod = paymentMethod,
-                Total = _cartService.GetTotal(),
-                Status = "pending",
-                Date = DateTime.Now
-            };
+                var root = ex.GetBaseException();
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
 
-            // Show success dialog
-            var dialog = new ContentDialog
-            {
-                Title = "Order Placed Successfully! 🎉",
-                Content = $"Order #{orderData.Id} has been received.",
-                PrimaryButtonText = "View Orders",
-                CloseButtonText = "Continue Shopping",
-                XamlRoot = this.XamlRoot
-            };
-
-            dialog.PrimaryButtonClick += (s, args) =>
-            {
-                // Navigate to orders page
-                Frame.Navigate(typeof(OrderHistoryPage));
-            };
-
-            dialog.CloseButtonClick += (s, args) =>
-            {
-                _cartService.ClearCart();
-                _currentStep = CheckoutStep.Cart;
-                UpdateViewVisibility();
-                UpdateCartDisplay();
-            };
-
-            await dialog.ShowAsync();
+                await new ContentDialog
+                {
+                    Title = "Error",
+                    Content = $"Failed to place order:\n{root.Message}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+            }
         }
 
         private void ShowErrorDialog(string message)
@@ -320,6 +311,4 @@ namespace PESYONG.Presentation.Views.Customer
             _ = dialog.ShowAsync();
         }
     }
-
-    
 }

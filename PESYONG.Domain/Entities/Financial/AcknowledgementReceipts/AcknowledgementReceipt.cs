@@ -10,7 +10,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 public class AcknowledgementReceipt
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int AcknowledgementReceiptID { get; private set; }
 
     [Required]
@@ -42,12 +41,24 @@ public class AcknowledgementReceipt
     [Required]
     public PaymentStatus Status { get; set; }
 
+    [NotMapped]
     public decimal Subtotal { get; set; }
+
+    [NotMapped]
     public decimal DiscountAmount { get; set; }
+
+    [NotMapped]
     public decimal TaxAmount { get; set; }
+
+    [NotMapped]
     public decimal ShippingCost { get; set; }
+
+    [NotMapped]
     public decimal GrandTotal { get; set; }
+
     public string Currency { get; set; } = "PHP";
 
-    public AcknowledgementReceipt() { }
+    public AcknowledgementReceipt() {        
+    
+    }
 }

@@ -53,7 +53,7 @@ public partial class MealProductItemViewModel : ObservableValidator
             MealID = item.MealID,
             Quantity = item.Quantity,
             RequestDescription = item.RequestDescription,
-            Meal = item.Meal != null ? MealViewModel.CreateFromEntity(item.Meal, null) : null
+            Meal = item.Meal != null ? MealViewModel.CreateFromEntity(item.Meal) : null
         };
     }
 

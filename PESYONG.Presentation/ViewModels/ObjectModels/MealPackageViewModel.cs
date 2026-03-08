@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens.Experimental;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.ViewModels;
@@ -21,10 +22,10 @@ namespace PESYONG.Presentation.ViewModels.PageModels;
 
 public partial class MealProductViewModel : ObservableValidator
 {
-    private readonly MealProductRepository? _mealProductRepository;
+    private MealProductRepository _mealProductRepository;
 
     [ObservableProperty]
-    private Guid? mealProductID;
+    private int? mealProductID;
 
     [ObservableProperty]
     private int? ownerID;
@@ -73,9 +74,9 @@ public partial class MealProductViewModel : ObservableValidator
     public IRelayCommand AddItemCommand { get; }
     public IRelayCommand RemoveItemCommand { get; }
 
-    public MealProductViewModel(MealProductRepository mealProductRepository)
+    public MealProductViewModel()
     {
-        _mealProductRepository = mealProductRepository;
+        _mealProductRepository = App.Instance.Services.GetRequiredService<MealProductRepository>();
 
         SaveCommand = new AsyncRelayCommand(SaveMealProductAsync, CanSaveMealProduct);
         LoadCommand = new AsyncRelayCommand(LoadMealProductAsync);
@@ -103,9 +104,9 @@ public partial class MealProductViewModel : ObservableValidator
         MealProductItems.CollectionChanged += (s, e) => RecalculatePrices();
     }
 
-    public static MealProductViewModel CreateFromEntity(MealProduct mealProduct, MealProductRepository repository)
+    public static MealProductViewModel CreateFromEntity(MealProduct mealProduct)
     {
-        var vm = new MealProductViewModel(repository);
+        var vm = new MealProductViewModel();
         vm.LoadFromEntity(mealProduct);
         return vm;
     }
@@ -135,7 +136,7 @@ public partial class MealProductViewModel : ObservableValidator
     {
         return new MealProduct
         {
-            MealProductID = (Guid)MealProductID,
+            MealProductID = (int)MealProductID,
             OwnerID = OwnerID ?? 0,
             PromoID = PromoID,
             Owner = Owner,
@@ -181,8 +182,6 @@ public partial class MealProductViewModel : ObservableValidator
 
     private async Task SaveMealProductAsync()
     {
-        if (!CanSaveMealProduct() || _mealProductRepository == null) return;
-
         try
         {
             // var entity = ToEntity();
@@ -203,8 +202,6 @@ public partial class MealProductViewModel : ObservableValidator
 
     private async Task LoadMealProductAsync()
     {
-        if (!MealProductID.HasValue || _mealProductRepository == null) return;
-
         try
         {
             // var mealProduct = await _mealRepository.GetMealProductByIdAsync(MealProductID.Value);
@@ -221,8 +218,6 @@ public partial class MealProductViewModel : ObservableValidator
 
     private async Task DeleteMealProductAsync()
     {
-        if (!MealProductID.HasValue || _mealProductRepository == null) return;
-
         bool confirmed = true;
 
         if (confirmed)

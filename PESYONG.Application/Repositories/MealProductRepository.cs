@@ -57,7 +57,7 @@ public class MealProductRepository
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<MealProduct> GetMealByIdAsync(Guid id)
+    public async Task<MealProduct> GetMealByIdAsync(int id)
     {
         try
         {

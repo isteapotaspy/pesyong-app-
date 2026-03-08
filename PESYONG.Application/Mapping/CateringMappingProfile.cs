@@ -26,7 +26,7 @@ public class CateringMappingProfile : Profile
             .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.ProductBasePrice));
 
         CreateMap<MealSelectionDto, MealProductItem>()
-         .ForMember(d => d.MealID, o => o.MapFrom(s => s.Id))
+         .ForMember(d => d.MealID, o => o.MapFrom(s => s.MealId))
          .ForMember(d => d.ItemPrice, o => o.MapFrom(s => s.Price))
          .ForMember(d => d.Quantity, o => o.MapFrom(s => 1));
     }

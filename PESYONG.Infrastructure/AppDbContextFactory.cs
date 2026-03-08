@@ -10,7 +10,7 @@ namespace PESYONG.Infrastructure
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
             var connectionString =
-                @"Server=(localdb)\MSSQLLocalDB;Database=PesyongDb;Trusted_Connection=True;TrustServerCertificate=True;";
+                  @"Server=localhost\SQLEXPRESS;Database=PesyongDb;Trusted_Connection=True;TrustServerCertificate=True;";
 
             optionsBuilder.UseSqlServer(connectionString);
 
