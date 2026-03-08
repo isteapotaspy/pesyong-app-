@@ -39,6 +39,8 @@ public class MealProduct
     [StringLength(100)]
     public string? ProductDescription { get; set; }
 
+    public byte[]? ImageBytes { get; set; }
+
     [NotMapped]
     public decimal ProductBasePrice => MealProductItems.Sum(item => item.ItemPrice);
 

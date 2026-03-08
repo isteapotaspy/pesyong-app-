@@ -5,8 +5,17 @@ using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 
 namespace PESYONG.ApplicationLogic.Mapping;
+
+/// <summary>
+/// Defines AutoMapper mappings related to catering meals, meal packages,
+/// and selected catering items.
+/// </summary>
 public class CateringMappingProfile : Profile
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CateringMappingProfile"/> class
+    /// and configures catering-related object mappings.
+    /// </summary>
     public CateringMappingProfile()
     {
         // Map from your Domain Entity to the UI DTO
@@ -26,8 +35,8 @@ public class CateringMappingProfile : Profile
             .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.ProductBasePrice));
 
         CreateMap<MealSelectionDto, MealProductItem>()
-         .ForMember(d => d.MealID, o => o.MapFrom(s => s.MealId))
-         .ForMember(d => d.ItemPrice, o => o.MapFrom(s => s.Price))
-         .ForMember(d => d.Quantity, o => o.MapFrom(s => 1));
+            .ForMember(d => d.MealID, o => o.MapFrom(s => s.MealId))
+            .ForMember(d => d.ItemPrice, o => o.MapFrom(s => s.Price))
+            .ForMember(d => d.Quantity, o => o.MapFrom(s => 1));
     }
 }

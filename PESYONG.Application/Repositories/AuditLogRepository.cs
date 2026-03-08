@@ -10,10 +10,18 @@ using PESYONG.Infrastructure;
 
 namespace PESYONG.ApplicationLogic.Repositories;
 
+/// <summary>
+/// Provides data access operations for audit logs, including creation,
+/// retrieval, filtering, statistics, updates, and cleanup.
+/// </summary>
 public class AuditLogRepository
 {
     private readonly AppDbContext _context;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuditLogRepository"/> class.
+    /// </summary>
+    /// <param name="context">The application database context.</param>
     public AuditLogRepository(AppDbContext context)
     {
         _context = context;

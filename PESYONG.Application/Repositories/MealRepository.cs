@@ -9,10 +9,18 @@ using PESYONG.Infrastructure;
 
 namespace PESYONG.ApplicationLogic.Repositories
 {
+    /// <summary>
+    /// Provides data access operations for meals, including creation,
+    /// retrieval, querying, updating, and deletion.
+    /// </summary>
     public class MealRepository
     {
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MealRepository"/> class.
+        /// </summary>
+        /// <param name="contextFactory">The database context factory used to create application database contexts.</param>
         public MealRepository(IDbContextFactory<AppDbContext> contextFactory)
         {
             _contextFactory = contextFactory;

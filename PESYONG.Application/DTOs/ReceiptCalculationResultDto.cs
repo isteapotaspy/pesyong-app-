@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace PESYONG.ApplicationLogic.DTOs;
 
+/// <summary>
+/// Represents the computed receipt totals for an order.
+/// </summary>
 public class ReceiptCalculationResultDto
 {
     public decimal Subtotal { get; set; }

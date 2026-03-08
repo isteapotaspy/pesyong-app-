@@ -12,15 +12,28 @@ using System.Threading.Tasks;
 
 namespace PESYONG.ApplicationLogic.Repositories;
 
+/// <summary>
+/// Provides data access operations for orders, including order placement,
+/// retrieval, filtering, updates, receipt assignment, and deletion.
+/// </summary>
 public class OrderRepository
 {
     private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OrderRepository"/> class.
+    /// </summary>
+    /// <param name="contextFactory">The database context factory used to create application database contexts.</param>
     public OrderRepository(IDbContextFactory<AppDbContext> contextFactory)
     {
         _contextFactory = contextFactory;
     }
 
+    /// <summary>
+    /// Places a new order using the provided checkout request data.
+    /// </summary>
+    /// <param name="request">The checkout request containing customer and item details.</param>
+    /// <returns>The ID of the newly created order.</returns>
     public async Task<Guid> PlaceOrderAsync(CheckoutRequestDto request)
     {
         using var context = _contextFactory.CreateDbContext();
@@ -121,14 +134,14 @@ public class OrderRepository
                     ProductName = meal.MealName,
                     IsCateringPackage = false,
                     MealProductItems = new List<MealProductItem>
-                {
-                    new MealProductItem
                     {
-                        MealID = meal.MealID.Value,
-                        Meal = meal,
-                        Quantity = 1
+                        new MealProductItem
+                        {
+                            MealID = meal.MealID.Value,
+                            Meal = meal,
+                            Quantity = 1
+                        }
                     }
-                }
                 };
 
                 context.MealProducts.Add(mealProduct);
@@ -147,9 +160,6 @@ public class OrderRepository
             }
             else if (item.Type == "kakanin")
             {
-                // This depends on how kakanin is stored in your DB.
-                // If kakanin is also stored in Meals, use Meals.FindAsync(item.ProductId).
-                // If not, you need a separate branch for its actual table.
                 var meal = await context.Meals.FindAsync(item.ProductID);
                 if (meal == null || !meal.MealID.HasValue)
                 {
@@ -163,14 +173,14 @@ public class OrderRepository
                     ProductName = meal.MealName,
                     IsCateringPackage = false,
                     MealProductItems = new List<MealProductItem>
-                {
-                    new MealProductItem
                     {
-                        MealID = meal.MealID.Value,
-                        Meal = meal,
-                        Quantity = 1
+                        new MealProductItem
+                        {
+                            MealID = meal.MealID.Value,
+                            Meal = meal,
+                            Quantity = 1
+                        }
                     }
-                }
                 };
 
                 context.MealProducts.Add(mealProduct);
@@ -197,6 +207,11 @@ public class OrderRepository
         return order.OrderID;
     }
 
+    /// <summary>
+    /// Retrieves an order by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the order to retrieve.</param>
+    /// <returns>The matching order if found; otherwise, <c>null</c>.</returns>
     public async Task<Order?> GetOrderByIdAsync(Guid id)
     {
         using var context = _contextFactory.CreateDbContext();
@@ -208,6 +223,10 @@ public class OrderRepository
             .FirstOrDefaultAsync(o => o.OrderID == id);
     }
 
+    /// <summary>
+    /// Retrieves all orders ordered by most recent order date.
+    /// </summary>
+    /// <returns>A list of all orders.</returns>
     public async Task<List<Order>> GetAllOrdersAsync()
     {
         using var context = _contextFactory.CreateDbContext();
@@ -219,6 +238,11 @@ public class OrderRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Retrieves all orders for a specific customer.
+    /// </summary>
+    /// <param name="customerId">The ID of the customer.</param>
+    /// <returns>A list of orders belonging to the customer.</returns>
     public async Task<List<Order>> GetOrdersByCustomerAsync(Guid customerId)
     {
         using var context = _contextFactory.CreateDbContext();
@@ -231,6 +255,11 @@ public class OrderRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Retrieves all orders with a specific delivery status.
+    /// </summary>
+    /// <param name="status">The delivery status to filter by.</param>
+    /// <returns>A list of matching orders.</returns>
     public async Task<List<Order>> GetOrdersByStatusAsync(DeliveryStatus status)
     {
         using var context = _contextFactory.CreateDbContext();
@@ -243,6 +272,10 @@ public class OrderRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Retrieves all orders currently marked as on-cart.
+    /// </summary>
+    /// <returns>A list of cart orders.</returns>
     public async Task<List<Order>> GetCartOrdersAsync()
     {
         using var context = _contextFactory.CreateDbContext();
@@ -255,6 +288,10 @@ public class OrderRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Updates an existing order.
+    /// </summary>
+    /// <param name="order">The order object containing updated values.</param>
     public async Task UpdateOrderAsync(Order order)
     {
         using var context = _contextFactory.CreateDbContext();
@@ -263,6 +300,11 @@ public class OrderRepository
         await context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Updates the delivery status of an order.
+    /// </summary>
+    /// <param name="orderId">The ID of the order to update.</param>
+    /// <param name="newStatus">The new delivery status.</param>
     public async Task UpdateOrderStatusAsync(Guid orderId, DeliveryStatus newStatus)
     {
         using var context = _contextFactory.CreateDbContext();
@@ -275,6 +317,11 @@ public class OrderRepository
         }
     }
 
+    /// <summary>
+    /// Assigns a receipt to an order.
+    /// </summary>
+    /// <param name="orderId">The ID of the order to update.</param>
+    /// <param name="receiptId">The ID of the receipt to assign.</param>
     public async Task AssignReceiptAsync(Guid orderId, int receiptId)
     {
         using var context = _contextFactory.CreateDbContext();
@@ -287,6 +334,10 @@ public class OrderRepository
         }
     }
 
+    /// <summary>
+    /// Deletes an order by its ID.
+    /// </summary>
+    /// <param name="orderId">The ID of the order to delete.</param>
     public async Task DeleteOrderAsync(Guid orderId)
     {
         using var context = _contextFactory.CreateDbContext();
