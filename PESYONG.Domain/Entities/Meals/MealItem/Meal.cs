@@ -75,11 +75,6 @@ public class Meal
     [Required]
     public DateTime CreationDate { get; set; } = DateTime.UtcNow;
 
-
-
-
-
-
     // UpdatedBy -> Admin/Operator (mapping to AdminUser)
     //[Required]
     public int? LastModifiedByOperatorID { get; set; }
@@ -99,7 +94,7 @@ public class Meal
 
         return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
     }
-    public IEnumerable<string> GetValidationErrors()
+    public IEnumerable<string?> GetValidationErrors()
     {
         var validationContext = new ValidationContext(this);
         var validationResults = new List<ValidationResult>();

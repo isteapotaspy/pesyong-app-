@@ -39,6 +39,9 @@ public class MealProduct
     [StringLength(100)]
     public string? ProductDescription { get; set; }
 
+    public byte[]? ImageBytes { get; set; }
+
+    // Computed properties for pricing
     [NotMapped]
     public decimal ProductBasePrice => MealProductItems.Sum(item => item.ItemPrice);
 

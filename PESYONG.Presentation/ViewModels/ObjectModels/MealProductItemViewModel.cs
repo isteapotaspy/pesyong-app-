@@ -1,60 +1,111 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using PESYONG.ApplicationLogic.ViewModels.ObjectModels;
-using PESYONG.Domain.Entities.Meals.MealItem;
+﻿using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
-namespace PESYONG.Presentation.ViewModels.PageModels;
+namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
-public partial class MealProductItemViewModel : ObservableValidator
+public sealed class MealProductItemViewModel : INotifyPropertyChanged, IDataErrorInfo
 {
-    [ObservableProperty]
-    private int mealID;
+    private int _mealId;
+    private string _mealName = string.Empty;
+    private int _quantity = 1;
+    private string? _requestDescription;
+    private decimal _unitPrice;
+    private Meal? _mealReference;
 
-    [ObservableProperty]
-    private MealViewModel? meal;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-    [ObservableProperty]
-    [Range(1, 100)]
-    private int quantity = 1;
-
-    [ObservableProperty]
-    [StringLength(100)]
-    private string? requestDescription;
-
-    [ObservableProperty]
-    private decimal itemPrice;
-
-    [JsonIgnore]
-    public IRelayCommand IncrementQuantityCommand { get; }
-    [JsonIgnore]
-    public IRelayCommand DecrementQuantityCommand { get; }
-
-    public MealProductItemViewModel()
+    public int MealID
     {
-        IncrementQuantityCommand = new RelayCommand(IncrementQuantity);
-        DecrementQuantityCommand = new RelayCommand(DecrementQuantity);
-
-        PropertyChanged += (s, e) =>
+        get => _mealId;
+        set
         {
-            if (e.PropertyName == nameof(Quantity) || e.PropertyName == nameof(Meal))
+            if (SetProperty(ref _mealId, value))
             {
-                RecalculatePrice();
+                OnPropertyChanged(nameof(ItemPrice));
+                OnPropertyChanged(nameof(FormattedItemPrice));
             }
-        };
+        }
     }
 
-    public static MealProductItemViewModel CreateFromEntity(MealProductItem item)
+    public string MealName
     {
-        return new MealProductItemViewModel
+        get => _mealName;
+        set => SetProperty(ref _mealName, value);
+    }
+
+    public int Quantity
+    {
+        get => _quantity;
+        set
         {
-            MealID = item.MealID,
-            Quantity = item.Quantity,
-            RequestDescription = item.RequestDescription,
-            Meal = item.Meal != null ? MealViewModel.CreateFromEntity(item.Meal) : null
-        };
+            if (SetProperty(ref _quantity, value))
+            {
+                OnPropertyChanged(nameof(ItemPrice));
+                OnPropertyChanged(nameof(FormattedItemPrice));
+            }
+        }
+    }
+
+    public string? RequestDescription
+    {
+        get => _requestDescription;
+        set => SetProperty(ref _requestDescription, value);
+    }
+
+    public decimal UnitPrice
+    {
+        get => _unitPrice;
+        set
+        {
+            if (SetProperty(ref _unitPrice, value))
+            {
+                OnPropertyChanged(nameof(ItemPrice));
+                OnPropertyChanged(nameof(FormattedUnitPrice));
+                OnPropertyChanged(nameof(FormattedItemPrice));
+            }
+        }
+    }
+
+    public Meal? MealReference
+    {
+        get => _mealReference;
+        set => SetProperty(ref _mealReference, value);
+    }
+
+    public decimal ItemPrice => UnitPrice * Quantity;
+
+    public string FormattedUnitPrice => $"PHP {UnitPrice:N2}";
+
+    public string FormattedItemPrice => $"PHP {ItemPrice:N2}";
+
+    public string Error => string.Empty;
+
+    public string this[string columnName]
+    {
+        get
+        {
+            return columnName switch
+            {
+                nameof(MealID) when MealID <= 0 => "Meal is required.",
+                nameof(Quantity) when Quantity < 1 => "Quantity must be at least 1.",
+                nameof(Quantity) when Quantity > 100 => "Quantity must not exceed 100.",
+                nameof(RequestDescription) when !string.IsNullOrWhiteSpace(RequestDescription) && RequestDescription.Length > 100
+                    => "Request description must not exceed 100 characters.",
+                _ => string.Empty
+            };
+        }
+    }
+
+    public bool IsValid()
+    {
+        return string.IsNullOrWhiteSpace(this[nameof(MealID)])
+            && string.IsNullOrWhiteSpace(this[nameof(Quantity)])
+            && string.IsNullOrWhiteSpace(this[nameof(RequestDescription)]);
     }
 
     public MealProductItem ToEntity()
@@ -63,29 +114,38 @@ public partial class MealProductItemViewModel : ObservableValidator
         {
             MealID = MealID,
             Quantity = Quantity,
-            RequestDescription = string.IsNullOrWhiteSpace(RequestDescription) ? null : RequestDescription,
-            Meal = Meal?.ToEntity()
+            RequestDescription = string.IsNullOrWhiteSpace(RequestDescription)
+                ? null
+                : RequestDescription.Trim(),
+            Meal = MealReference
         };
     }
 
-    private void IncrementQuantity()
+    public static MealProductItemViewModel CreateFromEntity(MealProductItem entity)
     {
-        if (Quantity < 100)
+        return new MealProductItemViewModel
         {
-            Quantity++;
-        }
+            MealID = entity.MealID,
+            MealName = entity.Meal?.MealName ?? $"Meal #{entity.MealID}",
+            Quantity = entity.Quantity,
+            RequestDescription = entity.RequestDescription,
+            UnitPrice = entity.Meal?.MealPrice ?? 0m,
+            MealReference = entity.Meal
+        };
     }
 
-    private void DecrementQuantity()
+    private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
-        if (Quantity > 1)
-        {
-            Quantity--;
-        }
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return false;
+
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
     }
 
-    private void RecalculatePrice()
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        ItemPrice = (Meal?.MealPrice ?? 0m) * Quantity;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

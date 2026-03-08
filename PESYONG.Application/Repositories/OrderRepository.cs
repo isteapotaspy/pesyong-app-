@@ -197,7 +197,15 @@ public class OrderRepository
         return order.OrderID;
     }
 
-    public async Task<Order?> GetOrderByIdAsync(Guid id)
+    public async Task<Order> CreateOrderAsyncReturnSelf(Order order)
+    {
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+        
+        return order;
+    }
+
+    public async Task<Order> GetOrderByIdAsync(Guid id)
     {
         using var context = _contextFactory.CreateDbContext();
 

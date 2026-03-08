@@ -78,4 +78,19 @@ public class Order
     [StringLength(300, ErrorMessage = "Special instructions cannot exceed 300 characters")]
     [DataType(DataType.MultilineText)]
     public string? SpecialInstructions { get; set; }
+
+    public bool IsValid()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+
+        return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
+    }
+    public IEnumerable<string?> GetValidationErrors()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+        Validator.TryValidateObject(this, validationContext, validationResults, true);
+        return validationResults.Select(vr => vr.ErrorMessage);
+    }
 }

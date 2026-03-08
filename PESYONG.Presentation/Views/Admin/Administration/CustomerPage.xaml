@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="PESYONG.Presentation.Views.Admin.Administration.CustomerPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:objectmodels="using:PESYONG.Presentation.ViewModels.ObjectModels"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    d:DataContext="{d:DesignInstance objectmodels:CustomerViewModel}"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <DataTemplate x:Key="AdminCustomerListViewTemplate" x:DataType="objectmodels:CustomerViewModel">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="1"
+                     Text="{x:Bind DisplayName}"
+                     x:Phase="1"
+                     Style="{ThemeResource BaseTextBlockStyle}"
+                     Margin="12,6,0,0"/>
+                <TextBlock Grid.Column="1"
+                     Grid.Row="1"
+                     Text="{x:Bind Email}"
+                     x:Phase="2"
+                     Style="{ThemeResource BodyTextBlockStyle}"
+                     Margin="12,0,0,6"/>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Column - Customer List -->
+        <Grid Grid.Column="0" HorizontalAlignment="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ListView 
+                 x:Name="CustomersListView"
+                 Grid.Row="0"
+                 SelectionMode="Single" 
+                 ItemsSource="{Binding CustomerListViewModels, Mode=OneWay}"
+                 ItemTemplate="{StaticResource AdminCustomerListViewTemplate}"
+                 SelectionChanged="ListView_SelectionChanged"
+                 Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
+                 Margin="12,36,0,12"
+                 CornerRadius="6"/>
+
+            <StackPanel Grid.Row="1" 
+                        Orientation="Horizontal"
+                        Margin="12,0,0,24"
+                        Spacing="12">
+                <Grid x:Name="Output" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <Button x:Name="QueryPopupToggleButton"
+                            Content="Filter customers" 
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="ShowQueryPopupButton_Click"/>
+                    <Popup x:Name="QueryPopup" 
+                           VerticalOffset="-170" 
+                           HorizontalOffset="0" 
+                           IsLightDismissEnabled="True">
+                        <Border Padding="20" 
+                                CornerRadius="{StaticResource OverlayCornerRadius}" 
+                                Width="200" Height="160" BorderThickness="1" 
+                                BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                                Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                                <TextBlock Text="Simple Popup" FontSize="16" HorizontalAlignment="Center" />
+                                <Button Content="Close" Click="CloseQueryPopupButton_Click" />
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+                <Button Style="{StaticResource AccentButtonStyle}" 
+                        Content="Add new customer"
+                        Click="AddCustomerButton_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Right Column - Customer Details -->
+        <ScrollViewer Grid.Column="1"
+                      Padding="12,12,12,12"
+                      Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}">
+            <StackPanel Orientation="Vertical" x:Name="CustomerFormsPanel">
+
+                <!-- Fallback when no customer is selected -->
+                <StackPanel x:Name="MainPanel" Visibility="Visible">
+                    <!-- Customer Info Header -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MaxWidth="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,24,0,0">
+                            <Border BorderBrush="LightGray" 
+                                    BorderThickness="1" 
+                                    CornerRadius="2" 
+                                    Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
+                                    MaxWidth="150"
+                                    MaxHeight="150">
+                                <!-- Placeholder for customer avatar/image -->
+                                <Grid Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}">
+                                    <TextBlock Text="👤" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="24,12,12,12">
+                            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Margin="0,6,0,0">
+                                <Run Text="{Binding DisplayName, FallbackValue='New Customer'}"/>
+                            </TextBlock>
+
+                            <!-- Customer ID & Status -->
+                            <StackPanel Orientation="Vertical" Margin="0,6,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0"
+                                             Header="Customer ID" 
+                                             Text="{Binding CustomerID, Mode=OneWay}"
+                                             Margin="0,0,3,0"
+                                             IsReadOnly="True"
+                                             PlaceholderText="Auto-generated"/>
+                                    <ComboBox Grid.Column="1"
+                                              Header="Status"
+                                              SelectedIndex="{Binding IsActive, Converter={StaticResource BooleanToIndexConverter}}"
+                                              Margin="3,0,0,0"
+                                              Height="60">
+                                        <ComboBoxItem Content="Active"/>
+                                        <ComboBoxItem Content="Inactive"/>
+                                    </ComboBox>
+                                </Grid>
+                                <StackPanel Margin="0,12,0,0">
+                                    <CalendarDatePicker Date="{Binding CreatedDate, Mode=TwoWay}"
+                                                        Header="Created Date" 
+                                                        Height="60"/>
+                                    <TextBlock Text="{Binding RelativeCreationTime, FallbackValue='Recently created'}" 
+                                               FontSize="12" 
+                                               Foreground="Gray" 
+                                               FontStyle="Italic"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Customer Details Section -->
+                    <TextBlock Style="{StaticResource BodyLargeStrongTextBlockStyle}" Margin="0,24,0,0">
+                        Customer Details
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
+                        Manage customer personal information and contact details.
+                    </TextBlock>
+
+                    <StackPanel Orientation="Vertical" Margin="0,6,0,0">
+                        <!-- Name Fields -->
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0"
+                                     Header="First Name" 
+                                     Text="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,6,0"
+                                     PlaceholderText="Enter first name"/>
+                            <TextBox Grid.Column="1"
+                                     Header="Last Name" 
+                                     Text="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="6,0,0,0"
+                                     PlaceholderText="Enter last name"/>
+                        </Grid>
+
+                        <!-- Email -->
+                        <TextBox Header="Email" 
+                                 Text="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,6,0,0"
+                                 PlaceholderText="Enter email address"
+                                 InputScope="EmailSmtpAddress"/>
+
+                        <!-- Address -->
+                        <TextBox Header="Address" 
+                                 Text="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,6,0,0"
+                                 AcceptsReturn="True" 
+                                 TextWrapping="Wrap" 
+                                 Height="80"
+                                 PlaceholderText="Enter customer address"/>
+
+                        <!-- Validation Errors Display -->
+                        <ItemsControl ItemsSource="{Binding ValidationErrors}" 
+                                      Margin="0,12,0,0"
+                                      Visibility="{Binding HasValidationErrors, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" 
+                                               Foreground="Red" 
+                                               FontSize="12"
+                                               Margin="0,2,0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+                                Margin="12,24,12,12"
+                                Spacing="8">
+                        <Button x:Name="DeleteButton" 
+                                Content="Delete" 
+                                Style="{StaticResource DefaultButtonStyle}" 
+                                Foreground="White"
+                                Command="{Binding DeleteCommand}"
+                                IsEnabled="{Binding IsNewCustomer, Converter={StaticResource InverseBooleanConverter}}"/>
+                        <Button x:Name="SaveButton" 
+                                Content="Save Changes" 
+                                Style="{StaticResource AccentButtonStyle}" 
+                                Foreground="White"
+                                Command="{Binding SaveCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

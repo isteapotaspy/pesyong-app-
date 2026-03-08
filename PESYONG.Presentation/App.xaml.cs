@@ -73,16 +73,26 @@ public partial class App : Microsoft.UI.Xaml.Application
             options.UseSqlServer(connectionString);
         });
 
-        // To be implemented
+        // To be implemented, auth services
         services.AddSingleton<AuthenticationService>();
         services.AddSingleton<AuthorizationService>();
 
 
         // Register repository accessors
-        services.AddTransient<MealRepository>(provider =>
-         new MealRepository(provider.GetRequiredService<IDbContextFactory<AppDbContext>>()));
-        services.AddTransient<OrderRepository>();
+        services.AddScoped<AcknowledgementReceiptRepository>();
+        services.AddScoped<AppUserRepository>();
+        services.AddScoped<AuditLogRepository>();
+        services.AddScoped<CustomerRepository>();
+        services.AddScoped<DeliveryRepository>();
+        services.AddScoped<DeliveryUpdateRepository>();
+        services.AddScoped<MealProductRepository>();
+        services.AddScoped<MealRepository>();
+        services.AddScoped<OrderRepository>();
+        services.AddScoped<PaymentRepository>();
+        services.AddScoped<PromoRepository>();
 
+        // Register services
+        services.AddScoped<AcknowledgementReceiptService>();
         services.AddScoped<CateringService>();
         services.AddSingleton<MealSyncService>();
         services.AddSingleton<CartStateService>();
@@ -95,7 +105,23 @@ public partial class App : Microsoft.UI.Xaml.Application
         // Admin ViewModels
         // THIS IS WHY WE FREAKING USE DEPENDENCY INJECTION 
         // I LITERALLY SAID TO LEARN THIS JUD BA UNYA WA GINA TAKE SERIOUSLY ISTG
+        services.AddTransient<AcknowledgementReceiptViewModel>();
+        services.AddTransient<AppUserViewModel>();
+        services.AddTransient<AuditLogViewModel>();
+        services.AddTransient<CustomerViewModel>();
+        services.AddTransient<DeliveryViewModel>();
+        services.AddTransient<DeliveryUpdateViewModel>();
+        services.AddTransient<MealProductViewModel>();
+        services.AddTransient<MealProductItemViewModel>();
+        services.AddTransient<PromoViewModel>();
         services.AddTransient<MealViewModel>();
+        services.AddTransient<OrderMealProductViewModel>();
+        services.AddTransient<OrderViewModel>();
+
+        // Not implemented as view models yet
+        //services.AddTransient<PaymentRepository>();
+        //services.AddTransient<PromoRepository>();
+
 
 
         Services = services.BuildServiceProvider();
@@ -120,6 +146,8 @@ public partial class App : Microsoft.UI.Xaml.Application
         try
         {
             Debug.WriteLine("\n\n=== Testing Dependency Injection ===");
+            var appDb = Services.GetService<AppDbContext>();
+            Debug.WriteLine($"\n\nMealRepository: {(appDb != null ? "[/] Resolved" : "[X] Failed")}");
 
             var mealRepo = Services.GetService<MealRepository>();
             Debug.WriteLine($"MealRepository: {(mealRepo != null ? "[/] Resolved" : "[X] Failed")}");

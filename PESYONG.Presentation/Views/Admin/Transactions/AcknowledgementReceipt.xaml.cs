@@ -16,15 +16,16 @@ using Windows.Foundation.Collections;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace PESYONG.Presentation.Views.Admin.Logistics;
-
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
-public sealed partial class DeliveryUpdatePage : Page
+namespace PESYONG.Presentation.Views.Admin.Transactions
 {
-    public DeliveryUpdatePage()
+    /// <summary>
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// </summary>
+    public sealed partial class AcknowledgementReceipt : Page
     {
-        InitializeComponent();
+        public AcknowledgementReceipt()
+        {
+            InitializeComponent();
+        }
     }
 }
