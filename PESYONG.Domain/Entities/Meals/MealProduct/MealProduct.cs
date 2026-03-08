@@ -41,6 +41,7 @@ public class MealProduct
 
     public byte[]? ImageBytes { get; set; }
 
+    // Computed properties for pricing
     [NotMapped]
     public decimal ProductBasePrice => MealProductItems.Sum(item => item.ItemPrice);
 

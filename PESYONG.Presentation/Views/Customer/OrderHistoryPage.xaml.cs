@@ -5,6 +5,7 @@ using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Enums;
 using PESYONG.Presentation.ViewModels;
+using PESYONG.Presentation.ViewModels.ObjectModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -86,7 +87,12 @@ namespace PESYONG.Presentation.Views.Customer
             };
 
             _orders = new ObservableCollection<OrderViewModel>(
-                orders.Select(o => new OrderViewModel(o))
+                orders.Select(o =>
+                {
+                    var vm = new OrderViewModel();
+                    vm.LoadFromEntity(o);
+                    return vm;
+                })
             );
 
             OrdersList.ItemsSource = _orders;
@@ -105,14 +111,23 @@ namespace PESYONG.Presentation.Views.Customer
             var button = sender as Button;
             _selectedOrderForReview = button?.Tag as OrderViewModel;
 
-            if (_selectedOrderForReview != null)
+            if (_selectedOrderForReview == null)
             {
-                ReviewDialogTitle.Text = $"Review: {_selectedOrderForReview.OrderItems.First().MealProduct?.ProductName}";
-                ResetStarRating();
-                ReviewTextBox.Text = string.Empty;
-                ReviewStatusText.Text = string.Empty;
-                _ = ReviewDialog.ShowAsync();
+                return;
             }
+
+            var firstItem = _selectedOrderForReview.OrderItems.FirstOrDefault();
+            if (firstItem == null)
+            {
+                ReviewStatusText.Text = "This order has no items to review.";
+                return;
+            }
+
+            ReviewDialogTitle.Text = $"Review: {firstItem.MealProductName}";
+            ResetStarRating();
+            ReviewTextBox.Text = string.Empty;
+            ReviewStatusText.Text = string.Empty;
+            _ = ReviewDialog.ShowAsync();
         }
 
         private T? FindParent<T>(DependencyObject child) where T : DependencyObject

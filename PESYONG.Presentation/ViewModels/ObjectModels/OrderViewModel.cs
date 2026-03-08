@@ -1,27 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.Runtime.CompilerServices;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Enums;
 using PESYONG.Presentation.ViewModels.ObjectModels;
 
-namespace PESYONG.Presentation.ViewModels;
+namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
-/// <summary>
-/// A reactive representation of an <see cref="Order"/> for the UI.
-/// Fixes the "Object reference required" error by correctly referencing the instance field.
-/// </summary>
-public partial class OrderViewModel : ObservableValidator
+public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
 {
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsNewOrder))]
     private Guid _orderID;
-
-    [ObservableProperty]
     private int? _receiptID;
 
     [ObservableProperty]
@@ -48,47 +41,16 @@ public partial class OrderViewModel : ObservableValidator
     [Required(ErrorMessage = "Order date is required")]
     [NotifyPropertyChangedFor(nameof(OrderDateDisplay))]
     private DateTime _orderDate = DateTime.Now;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(EstimatedDeliveryDateDisplay))]
     private DateTime? _estimatedDeliveryDate;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ActualDeliveryDateDisplay))]
     private DateTime? _actualDeliveryDate;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DeliveryTypeDisplay))]
     private DeliveryStatus _deliveryType = DeliveryStatus.OnCart;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DeliveryStatusDisplay))]
-    [NotifyPropertyChangedFor(nameof(CanBeDelivered))]
-    [NotifyPropertyChangedFor(nameof(IsCompleted))]
     private DeliveryStatus _deliveryStatus = DeliveryStatus.Pending;
-
-    [ObservableProperty]
-    [Required(ErrorMessage = "Address is required")]
-    [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters")]
-    [NotifyDataErrorInfo]
-    [NotifyPropertyChangedFor(nameof(CanSave))]
     private string? _address;
-
-    [ObservableProperty]
-    [StringLength(50, ErrorMessage = "Tracking number cannot exceed 50 characters")]
-    [RegularExpression(@"^[A-Z0-9\-]+$", ErrorMessage = "Tracking number can only contain uppercase letters, numbers, and hyphens")]
-    [NotifyDataErrorInfo]
     private string? _trackingNumber;
-
-    [ObservableProperty]
-    [StringLength(500, ErrorMessage = "Customer notes cannot exceed 500 characters")]
-    [NotifyDataErrorInfo]
     private string? _customerNotes;
-
-    [ObservableProperty]
-    [StringLength(300, ErrorMessage = "Special instructions cannot exceed 300 characters")]
-    [NotifyDataErrorInfo]
     private string? _specialInstructions;
+    private string _statusMessage = string.Empty;
+    private string _validationSummary = string.Empty;
 
     public OrderViewModel(Order entity)
     {
@@ -135,53 +97,112 @@ public partial class OrderViewModel : ObservableValidator
 
     public OrderViewModel()
     {
-        // Validate when properties change
-        PropertyChanged += (sender, args) =>
+        get => _orderID;
+        set
         {
-            if (args.PropertyName != nameof(HasErrors) &&
-                args.PropertyName != nameof(CanSave) &&
-                args.PropertyName != nameof(OrderTotalAmount) &&
-                args.PropertyName != nameof(ItemCount))
+            if (SetProperty(ref _orderID, value))
             {
-                OnPropertyChanged(nameof(CanSave));
-                OnPropertyChanged(nameof(OrderTotalAmount));
-                OnPropertyChanged(nameof(ItemCount));
+                OnPropertyChanged(nameof(DisplayName));
+                OnPropertyChanged(nameof(OrderIDText));
             }
-        };
-
-        ValidateAllProperties();
+        }
     }
 
-    // Computed properties
-    public decimal OrderTotalAmount => OrderItems?.Sum(item => item.SubTotal) ?? 0;
-
-    public int ItemCount => OrderItems?.Sum(item => item.MealProductOrderQty) ?? 0;
-
-    public bool IsNewOrder => OrderID == Guid.Empty;
-
-    public bool CanSave => !HasErrors && !string.IsNullOrWhiteSpace(Address) && OrderItems.Any();
-
-    public bool CanBeDelivered => DeliveryStatus != DeliveryStatus.Delivered && DeliveryStatus != DeliveryStatus.Cancelled;
-
-    public bool IsCompleted => DeliveryStatus == DeliveryStatus.Delivered;
-
-    public string OrderDateDisplay => OrderDate.ToString("MMM dd, yyyy hh:mm tt");
-
-    public string EstimatedDeliveryDateDisplay => EstimatedDeliveryDate?.ToString("MMM dd, yyyy") ?? "Not set";
-
-    public string ActualDeliveryDateDisplay => ActualDeliveryDate?.ToString("MMM dd, yyyy") ?? "Not delivered";
-
-    public string DeliveryTypeDisplay => DeliveryType.ToString();
-
-    public string DeliveryStatusDisplay => DeliveryStatus.ToString();
-
-    // Entity Mappers
-    public static OrderViewModel FromEntity(Order entity)
+    public int? ReceiptID
     {
-        if (entity == null)
-            return new OrderViewModel();
+        get => _receiptID;
+        set => SetProperty(ref _receiptID, value);
+    }
 
-        var viewModel = new OrderViewModel
+    public int? RecipientID
+    {
+        get => _recipientID;
+        set => SetProperty(ref _recipientID, value);
+    }
+
+    public DateTime OrderDate
+    {
+        get => _orderDate;
+        set
+        {
+            if (SetProperty(ref _orderDate, value))
+            {
+                OnPropertyChanged(nameof(OrderDateDisplay));
+                OnPropertyChanged(nameof(OrderDateUi));
+            }
+        }
+    }
+
+    public DateTime? EstimatedDeliveryDate
+    {
+        get => _estimatedDeliveryDate;
+        set
+        {
+            if (SetProperty(ref _estimatedDeliveryDate, value))
+            {
+                OnPropertyChanged(nameof(EstimatedDeliveryDateUi));
+            }
+        }
+    }
+
+    public DateTime? ActualDeliveryDate
+    {
+        get => _actualDeliveryDate;
+        set
+        {
+            if (SetProperty(ref _actualDeliveryDate, value))
+            {
+                OnPropertyChanged(nameof(ActualDeliveryDateUi));
+            }
+        }
+    }
+
+    public DeliveryStatus DeliveryType
+    {
+        get => _deliveryType;
+        set => SetProperty(ref _deliveryType, value);
+    }
+
+    public DeliveryStatus DeliveryStatus
+    {
+        get => _deliveryStatus;
+        set => SetProperty(ref _deliveryStatus, value);
+    }
+
+    [Required(ErrorMessage = "Address is required.")]
+    [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters.")]
+    public string? Address
+    {
+        get => _address;
+        set => SetProperty(ref _address, value);
+    }
+
+    [StringLength(50, ErrorMessage = "Tracking number cannot exceed 50 characters.")]
+    [RegularExpression(@"^[A-Z0-9\-]+$", ErrorMessage = "Tracking number can only contain uppercase letters, numbers, and hyphens.")]
+    public string? TrackingNumber
+    {
+        get => _trackingNumber;
+        set => SetProperty(ref _trackingNumber, value);
+    }
+
+    [StringLength(500, ErrorMessage = "Customer notes cannot exceed 500 characters.")]
+    public string? CustomerNotes
+    {
+        get => _customerNotes;
+        set => SetProperty(ref _customerNotes, value);
+    }
+
+    [StringLength(300, ErrorMessage = "Special instructions cannot exceed 300 characters.")]
+    public string? SpecialInstructions
+    {
+        get => _specialInstructions;
+        set => SetProperty(ref _specialInstructions, value);
+    }
+
+    public ObservableCollection<OrderMealProductViewModel> OrderItems
+    {
+        get => _orderItems;
+        set
         {
             OrderID = entity.OrderID,
             ReceiptID = entity.ReceiptID,
@@ -197,19 +218,35 @@ public partial class OrderViewModel : ObservableValidator
             SpecialInstructions = entity.SpecialInstructions
         };
 
-        // Convert OrderItems
-        if (entity.OrderItems != null && entity.OrderItems.Any())
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        set
         {
-            viewModel.OrderItems = new ObservableCollection<OrderMealProductViewModel>(
-                entity.OrderItems.Select(OrderMealProductViewModel.FromEntity));
+            if (SetProperty(ref _statusMessage, value))
+            {
+                OnPropertyChanged(nameof(HasStatusMessage));
+            }
         }
-
-        return viewModel;
     }
 
-    public Order ToEntity()
+    public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
+
+    public string ValidationSummary
     {
-        var entity = new Order
+        get => _validationSummary;
+        set => SetProperty(ref _validationSummary, value);
+    }
+
+    public string DisplayName =>
+        OrderID == Guid.Empty
+            ? "New Order"
+            : $"Order {OrderID.ToString()[..8]}";
+
+    public string OrderIDText
+    {
+        get => OrderID == Guid.Empty ? string.Empty : OrderID.ToString();
+        set
         {
             OrderID = OrderID != Guid.Empty ? OrderID : Guid.NewGuid(),
             ReceiptID = ReceiptID,
@@ -225,96 +262,166 @@ public partial class OrderViewModel : ObservableValidator
             SpecialInstructions = SpecialInstructions?.Trim()
         };
 
-        return entity;
+            OnPropertyChanged();
+        }
     }
 
-    // Order item management
-    public void AddOrderItem(OrderMealProductViewModel item)
+    public string ReceiptIDText
     {
-        if (item != null)
+        get => ReceiptID?.ToString() ?? string.Empty;
+        set
         {
-            // Check if item already exists
-            var existingItem = OrderItems.FirstOrDefault(i => i.MealProductID == item.MealProductID);
-            if (existingItem != null)
+            if (string.IsNullOrWhiteSpace(value))
             {
-                // Update quantity if item exists
-                existingItem.MealProductOrderQty += item.MealProductOrderQty;
+                ReceiptID = null;
             }
-            else
+            else if (int.TryParse(value.Trim(), out var parsed))
             {
-                OrderItems.Add(item);
+                ReceiptID = parsed;
             }
 
-            OnPropertyChanged(nameof(OrderTotalAmount));
-            OnPropertyChanged(nameof(ItemCount));
+            OnPropertyChanged();
         }
     }
 
-    public void RemoveOrderItem(int mealProductId)
+    public string RecipientIDText
     {
-        var item = OrderItems.FirstOrDefault(i => i.MealProductID == mealProductId);
-        if (item != null)
+        get => RecipientID?.ToString() ?? string.Empty;
+        set
         {
-            OrderItems.Remove(item);
-            OnPropertyChanged(nameof(OrderTotalAmount));
-            OnPropertyChanged(nameof(ItemCount));
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                RecipientID = null;
+            }
+            else if (int.TryParse(value.Trim(), out var parsed))
+            {
+                RecipientID = parsed;
+            }
+
+            OnPropertyChanged();
         }
     }
 
-    public void UpdateOrderItemQuantity(int mealProductId, int newQuantity)
+    public DateTimeOffset OrderDateUi
     {
-        var item = OrderItems.FirstOrDefault(i => i.MealProductID == mealProductId);
-        if (item != null)
+        get => new DateTimeOffset(OrderDate);
+        set
         {
-            item.MealProductOrderQty = newQuantity;
-            OnPropertyChanged(nameof(OrderTotalAmount));
-            OnPropertyChanged(nameof(ItemCount));
+            OrderDate = value.DateTime;
+            OnPropertyChanged();
         }
     }
 
-    public void ClearOrderItems()
+    public DateTimeOffset? EstimatedDeliveryDateUi
     {
-        OrderItems.Clear();
-        OnPropertyChanged(nameof(OrderTotalAmount));
-        OnPropertyChanged(nameof(ItemCount));
+        get => EstimatedDeliveryDate.HasValue ? new DateTimeOffset(EstimatedDeliveryDate.Value) : null;
+        set
+        {
+            EstimatedDeliveryDate = value?.DateTime;
+            OnPropertyChanged();
+        }
     }
 
-    // Status management
-    public void MarkAsDelivered(DateTime deliveryDate)
+    public DateTimeOffset? ActualDeliveryDateUi
     {
-        DeliveryStatus = DeliveryStatus.Delivered;
-        ActualDeliveryDate = deliveryDate;
+        get => ActualDeliveryDate.HasValue ? new DateTimeOffset(ActualDeliveryDate.Value) : null;
+        set
+        {
+            ActualDeliveryDate = value?.DateTime;
+            OnPropertyChanged();
+        }
     }
 
-    public void MarkAsShipped(string trackingNumber)
+    public string OrderDateDisplay => OrderDate.ToString("g");
+
+    public decimal OrderTotalAmount => OrderItems.Sum(x => x.SubTotal);
+
+    public string FormattedOrderTotalAmount => OrderTotalAmount.ToString("C");
+
+    public string Error => string.Empty;
+
+    public string this[string columnName]
     {
-        DeliveryStatus = DeliveryStatus.InTransit;
-        TrackingNumber = trackingNumber;
+        get
+        {
+            try
+            {
+                if (columnName == nameof(OrderIDText))
+                    return string.Empty;
+
+                if (columnName == nameof(ReceiptIDText) || columnName == nameof(RecipientIDText))
+                    return string.Empty;
+
+                var context = new ValidationContext(this) { MemberName = columnName };
+                var results = new List<ValidationResult>();
+
+                var property = GetType().GetProperty(columnName);
+                if (property == null)
+                    return string.Empty;
+
+                var value = property.GetValue(this);
+                var valid = Validator.TryValidateProperty(value, context, results);
+
+                return valid ? string.Empty : results.FirstOrDefault()?.ErrorMessage ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"OrderViewModel validation indexer failed: {ex}");
+                return string.Empty;
+            }
+        }
     }
 
-    public void CancelOrder()
+    public static OrderViewModel CreateFromEntity(Order entity)
     {
-        DeliveryStatus = DeliveryStatus.Cancelled;
+        var vm = new OrderViewModel();
+        vm.LoadFromEntity(entity);
+        return vm;
     }
 
-    // Validation helpers
-    public void ValidateAllProperties()
+    public void LoadFromEntity(Order entity)
     {
-        ValidateAllProperties();
+        OrderID = entity.OrderID;
+        ReceiptID = entity.ReceiptID;
+        RecipientID = entity.RecipientID;
+        OrderDate = entity.OrderDate;
+        EstimatedDeliveryDate = entity.EstimatedDeliveryDate;
+        ActualDeliveryDate = entity.ActualDeliveryDate;
+        DeliveryType = entity.DeliveryType;
+        DeliveryStatus = entity.DeliveryStatus;
+        Address = entity.Address;
+        TrackingNumber = entity.TrackingNumber;
+        CustomerNotes = entity.CustomerNotes;
+        SpecialInstructions = entity.SpecialInstructions;
+
+        OrderItems = new ObservableCollection<OrderMealProductViewModel>(
+            entity.OrderItems?.Select(OrderMealProductViewModel.CreateFromEntity) ??
+            Enumerable.Empty<OrderMealProductViewModel>());
+
+        RefreshTotals();
     }
 
-    public string GetErrorMessages()
+    public Order ToEntity()
     {
-        if (!HasErrors) return string.Empty;
-
-        var errors = GetErrors()
-            .Select(error => $"{error.MemberNames.FirstOrDefault()}: {error.ErrorMessage}");
-
-        return string.Join(Environment.NewLine, errors);
+        return new Order
+        {
+            OrderID = OrderID == Guid.Empty ? Guid.NewGuid() : OrderID,
+            ReceiptID = ReceiptID,
+            RecipientID = RecipientID,
+            OrderDate = OrderDate,
+            EstimatedDeliveryDate = EstimatedDeliveryDate,
+            ActualDeliveryDate = ActualDeliveryDate,
+            DeliveryType = DeliveryType,
+            DeliveryStatus = DeliveryStatus,
+            Address = NormalizeNullable(Address),
+            TrackingNumber = NormalizeNullable(TrackingNumber),
+            CustomerNotes = NormalizeNullable(CustomerNotes),
+            SpecialInstructions = NormalizeNullable(SpecialInstructions),
+            OrderItems = OrderItems.Select(x => x.ToEntity()).ToList()
+        };
     }
 
-    // Reset method
-    public void Reset()
+    public void Clear()
     {
         OrderID = Guid.Empty;
         ReceiptID = null;
@@ -325,18 +432,25 @@ public partial class OrderViewModel : ObservableValidator
         ActualDeliveryDate = null;
         DeliveryType = DeliveryStatus.OnCart;
         DeliveryStatus = DeliveryStatus.Pending;
-        Address = null;
+        Address = string.Empty;
         TrackingNumber = null;
         CustomerNotes = null;
         SpecialInstructions = null;
-
-        ClearErrors();
+        OrderItems.Clear();
+        StatusMessage = string.Empty;
+        ValidationSummary = string.Empty;
+        RefreshTotals();
     }
 
-    // Copy method for creating similar orders
-    public OrderViewModel CreateCopy()
+    public void RefreshTotals()
     {
-        var copy = new OrderViewModel
+        OnPropertyChanged(nameof(OrderTotalAmount));
+        OnPropertyChanged(nameof(FormattedOrderTotalAmount));
+    }
+
+    public bool ValidateAll()
+    {
+        try
         {
             CustomerID = CustomerID,
             Address = Address,
@@ -345,12 +459,52 @@ public partial class OrderViewModel : ObservableValidator
             DeliveryType = DeliveryType
         };
 
-        // Copy order items
-        foreach (var item in OrderItems)
+            OnPropertyChanged(string.Empty);
+            return isValid;
+        }
+        catch (Exception ex)
         {
-            copy.AddOrderItem(item.Clone());
+            Debug.WriteLine($"Order validation failed: {ex}");
+            ValidationSummary = "Validation failed unexpectedly.";
+            return false;
+        }
+    }
+
+    private bool ValidateBusinessRules()
+    {
+        if (OrderItems.Count == 0)
+        {
+            StatusMessage = "At least one order item is required.";
+            return false;
         }
 
-        return copy;
+        if (ActualDeliveryDate.HasValue && ActualDeliveryDate < OrderDate)
+        {
+            StatusMessage = "Actual delivery date cannot be earlier than order date.";
+            return false;
+        }
+
+        StatusMessage = string.Empty;
+        return true;
+    }
+
+    private static string? NormalizeNullable(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return false;
+
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

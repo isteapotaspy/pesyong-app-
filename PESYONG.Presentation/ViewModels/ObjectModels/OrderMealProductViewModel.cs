@@ -1,45 +1,56 @@
-﻿using System;
+﻿using PESYONG.Domain.Entities.Orders;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using PESYONG.Domain.Entities.Meals.MealProduct;
-using PESYONG.Domain.Entities.Orders;
-using PESYONG.Presentation.ViewModels.PageModels;
+using System.Runtime.CompilerServices;
 
 namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
-public partial class OrderMealProductViewModel : ObservableValidator
+public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
 {
-    [ObservableProperty]
-    [Required(ErrorMessage = "Order ID is required")]
     private Guid _orderID;
-
-    [ObservableProperty]
-    private OrderViewModel? _order;
-
-    [ObservableProperty]
-    [Required(ErrorMessage = "Meal product ID is required")]
     private int _mealProductID;
-
-    [ObservableProperty]
-    private MealProductViewModel? _mealProduct;
-
-    [ObservableProperty]
-    [Required(ErrorMessage = "Item price is required")]
-    [Range(0.01, double.MaxValue, ErrorMessage = "Item price must be greater than 0")]
-    [NotifyPropertyChangedFor(nameof(SubTotal))]
-    [NotifyDataErrorInfo]
+    private string _mealProductName = string.Empty;
     private decimal _itemPrice;
-
-    [ObservableProperty]
-    [Required(ErrorMessage = "Quantity is required")]
-    [Range(1, 1000, ErrorMessage = "Quantity must be between 1 and 1000")]
-    [NotifyPropertyChangedFor(nameof(SubTotal))]
-    [NotifyDataErrorInfo]
     private int _mealProductOrderQty = 1;
+    private string _validationMessage = string.Empty;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public Guid OrderID
+    {
+        get => _orderID;
+        set => SetProperty(ref _orderID, value);
+    }
+
+    public int MealProductID
+    {
+        get => _mealProductID;
+        set => SetProperty(ref _mealProductID, value);
+    }
+
+    public string MealProductName
+    {
+        get => _mealProductName;
+        set => SetProperty(ref _mealProductName, value);
+    }
+
+    public decimal ItemPrice
+    {
+        get => _itemPrice;
+        set
+        {
+            if (SetProperty(ref _itemPrice, value))
+            {
+                OnPropertyChanged(nameof(FormattedItemPrice));
+                OnPropertyChanged(nameof(SubTotal));
+                OnPropertyChanged(nameof(FormattedSubTotal));
+            }
+        }
+    }
 
     public OrderMealProductViewModel(OrderMealProduct entity)
     {
@@ -65,26 +76,63 @@ public partial class OrderMealProductViewModel : ObservableValidator
 
     public OrderMealProductViewModel()
     {
-        ValidateAllProperties();
+        get => _mealProductOrderQty;
+        set
+        {
+            if (SetProperty(ref _mealProductOrderQty, value))
+            {
+                OnPropertyChanged(nameof(SubTotal));
+                OnPropertyChanged(nameof(FormattedSubTotal));
+            }
+        }
     }
 
-    // Computed properties
     public decimal SubTotal => MealProductOrderQty * ItemPrice;
 
-    public bool HasMealProduct => MealProduct != null;
+    public string FormattedItemPrice => ItemPrice.ToString("C");
 
-    //public string ProductName => MealProduct?.Name ?? "Unknown Product";
+    public string FormattedSubTotal => SubTotal.ToString("C");
 
-    // Entity Mappers
-    public static OrderMealProductViewModel FromEntity(OrderMealProduct entity)
+    public string ValidationMessage
     {
-        if (entity == null)
-            return new OrderMealProductViewModel();
+        get => _validationMessage;
+        set => SetProperty(ref _validationMessage, value);
+    }
 
+    public string Error => string.Empty;
+
+    public string this[string columnName]
+    {
+        get
+        {
+            try
+            {
+                var context = new ValidationContext(this) { MemberName = columnName };
+                var results = new List<ValidationResult>();
+
+                var property = GetType().GetProperty(columnName);
+                if (property == null)
+                    return string.Empty;
+
+                var value = property.GetValue(this);
+                var valid = Validator.TryValidateProperty(value, context, results);
+
+                return valid ? string.Empty : results.FirstOrDefault()?.ErrorMessage ?? string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+    }
+
+    public static OrderMealProductViewModel CreateFromEntity(OrderMealProduct entity)
+    {
         return new OrderMealProductViewModel
         {
             OrderID = entity.OrderID,
             MealProductID = entity.MealProductID,
+            MealProductName = entity.MealProduct?.ProductName ?? $"Meal Product #{entity.MealProductID}",
             ItemPrice = entity.ItemPrice,
             MealProductOrderQty = entity.MealProductOrderQty
         };
@@ -101,50 +149,39 @@ public partial class OrderMealProductViewModel : ObservableValidator
         };
     }
 
-    // Validation helpers
-    public string GetErrorMessages()
+    public bool ValidateAll()
     {
-        if (!HasErrors) return string.Empty;
-
-        var errors = GetErrors()
-            .Select(error => $"{error.MemberNames.FirstOrDefault()}: {error.ErrorMessage}");
-
-        return string.Join(Environment.NewLine, errors);
-    }
-
-    // Clone method
-    public OrderMealProductViewModel Clone()
-    {
-        return new OrderMealProductViewModel
+        try
         {
-            OrderID = OrderID,
-            MealProductID = MealProductID,
-            ItemPrice = ItemPrice,
-            MealProductOrderQty = MealProductOrderQty,
-            //MealProduct = MealProduct?.Clone()
-        };
-    }
+            var results = new List<ValidationResult>();
+            var context = new ValidationContext(this);
+            var isValid = Validator.TryValidateObject(this, context, results, true);
 
-    // Update from meal product
-    public void UpdateFromMealProduct(MealProductViewModel mealProduct)
-    {
-        if (mealProduct != null)
+            ValidationMessage = string.Join(Environment.NewLine,
+                results.Select(x => x.ErrorMessage).Where(x => !string.IsNullOrWhiteSpace(x)));
+
+            return isValid;
+        }
+        catch (Exception ex)
         {
-            MealProduct = mealProduct;
-            MealProductID = (int)mealProduct.MealProductID;
-            ItemPrice = mealProduct.FinalPrice; // Use current price
+            Debug.WriteLine($"OrderMealProduct validation failed: {ex}");
+            ValidationMessage = "Item validation failed.";
+            return false;
         }
     }
 
-    // Reset method
-    public void Reset()
+    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
-        OrderID = Guid.Empty;
-        MealProductID = 0;
-        ItemPrice = 0;
-        MealProductOrderQty = 1;
-        MealProduct = null;
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return false;
 
-        ClearErrors();
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

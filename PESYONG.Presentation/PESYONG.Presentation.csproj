@@ -140,11 +140,39 @@
   <ItemGroup>
     <Folder Include="Themes\" />
     <Folder Include="ViewModels\PageModels\" />
-    <Folder Include="Views\Admin\Administration\" />
-    <Folder Include="Views\Admin\Transactions\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\Admin\Logistics\DeliveryUpdatePage.xaml">
+    <Page Update="Views\Admin\Meals\MealProductPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Transactions\OrderPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Transactions\PaymentPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Transactions\AcknowledgementReceipt.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Administration\AuditLogPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Administration\AppUserPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Admin\Administration\CustomerPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -180,16 +208,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Customer\ShortOrdersPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Admin\Meals\MealPackagePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Admin\Meals\MealPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
