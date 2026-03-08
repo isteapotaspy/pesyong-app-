@@ -54,18 +54,22 @@
                                 Icon="Home" ToolTipService.ToolTip="Dashboard" 
                                 Tag="PESYONG.Presentation.Views.Admin.DashboardPage"/>
             
-            <NavigationViewItem Content="Meals" ToolTipService.ToolTip="Meals">
-                <NavigationViewItem.MenuItems>
+            <NavigationViewItem Content="Foodstuff"
+                                ToolTipService.ToolTip="Meals">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xED56;" FontFamily="Segoe MDL2 Assets" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
                         <NavigationViewItem Content="Kiosk Meals" 
-                                        ToolTipService.ToolTip="Individual Meals" 
-                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage">
+                                            ToolTipService.ToolTip="Individual Meals" 
+                                            Tag="PESYONG.Presentation.Views.Admin.Meals.MealPage">
                             <NavigationViewItem.Icon>
-                                <FontIcon Glyph="&#xED56;" FontFamily="Segoe MDL2 Assets" />
+                                <FontIcon Glyph="&#xEBFC;" FontFamily="Segoe MDL2 Assets" />
                             </NavigationViewItem.Icon>
                         </NavigationViewItem>
                         <NavigationViewItem Content="Catering Packages" 
                                         ToolTipService.ToolTip="Meal Packages" 
-                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealPackagePage">
+                                        Tag="PESYONG.Presentation.Views.Admin.Meals.MealProductPage">
                             <NavigationViewItem.Icon>
                                 <FontIcon Glyph="&#xE7B8;" FontFamily="Segoe MDL2 Assets" />
                             </NavigationViewItem.Icon>
@@ -73,8 +77,13 @@
                     </NavigationViewItem.MenuItems>
             </NavigationViewItem>
             
-            <NavigationViewItem Content="Logistics" ToolTipService.ToolTip="Logistics" SelectsOnInvoked="False">
-                <NavigationViewItem.MenuItems>
+            <NavigationViewItem Content="Logistics" 
+                                ToolTipService.ToolTip="Logistics" 
+                                SelectsOnInvoked="False">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE804;" FontFamily="Segoe MDL2 Assets" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
                     <NavigationViewItem Content="Delivery" 
                                         Icon="OpenLocal" 
                                         ToolTipService.ToolTip="Deliveries" 
@@ -82,20 +91,24 @@
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
 
-            <NavigationViewItem Content="Transactions" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
-                <NavigationViewItem.MenuItems>
+            <NavigationViewItem Content="Transactions" 
+                                ToolTipService.ToolTip="Document options" 
+                                SelectsOnInvoked="False">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE825;" FontFamily="Segoe MDL2 Assets" />
+                    </NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
                     <NavigationViewItem Content="Orders" 
                                         Icon="Shop" 
                                         ToolTipService.ToolTip="Upload file" 
-                                        Tag="PESYONG.Presentation.Views.Admin.Transactions.Orderpage"/>
+                                        Tag="PESYONG.Presentation.Views.Admin.Transactions.OrderPage"/>
                     <NavigationViewItem Content="Payments" 
                                     ToolTipService.ToolTip="Create new" 
                                     Tag="PESYONG.Presentation.Views.Admin.Transactions.AcknowledgementReceipt">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xE8C7;" FontFamily="Segoe MDL2 Assets" />
                         </NavigationViewItem.Icon>
-                    </NavigationViewItem>
-                    
+                    </NavigationViewItem>                    
                     <NavigationViewItem Content="Acknowledgement Receipts" 
                                     Icon="Document" 
                                     ToolTipService.ToolTip="Create new" 
@@ -103,7 +116,10 @@
                 </NavigationViewItem.MenuItems>
             </NavigationViewItem>
 
-            <NavigationViewItem Content="Administration" ToolTipService.ToolTip="Document options" SelectsOnInvoked="False">
+            <NavigationViewItem Content="Administration" 
+                                Icon="Manage"
+                                ToolTipService.ToolTip="Document options" 
+                                SelectsOnInvoked="False">
                 <NavigationViewItem.MenuItems>
                     <NavigationViewItem Content="Customers" 
                                         Icon="Contact" 

@@ -142,6 +142,11 @@
     <Folder Include="ViewModels\PageModels\" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\Admin\Meals\MealProductPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
     <Page Update="Views\Admin\Transactions\OrderPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -168,11 +173,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Admin\Administration\CustomerPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Admin\Logistics\DeliveryUpdatePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -208,16 +208,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Customer\ShortOrdersPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Admin\Meals\MealPackagePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Views\Admin\Meals\MealPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

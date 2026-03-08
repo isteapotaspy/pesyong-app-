@@ -113,6 +113,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddTransient<DeliveryUpdateViewModel>();
         services.AddTransient<MealProductViewModel>();
         services.AddTransient<MealProductItemViewModel>();
+        services.AddTransient<PromoViewModel>();
         services.AddTransient<MealViewModel>();
         services.AddTransient<OrderMealProductViewModel>();
         services.AddTransient<OrderViewModel>();
