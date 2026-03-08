@@ -175,11 +175,10 @@ public partial class DeliveryViewModel : ObservableValidator
         };
 
         // Convert DeliveryUpdates
-        if (entity.DeliveryUpdates != null && entity.DeliveryUpdates.Any())
-        {
-            viewModel.DeliveryUpdates = new ObservableCollection<DeliveryUpdateViewModel>(
-                entity.DeliveryUpdates.Select(DeliveryUpdateViewModel.FromEntity));
-        }
+        viewModel.DeliveryUpdates = new ObservableCollection<DeliveryUpdateViewModel>(
+            entity.DeliveryUpdates?.Select(DeliveryUpdateViewModel.CreateFromEntity) 
+            ?? Enumerable.Empty<DeliveryUpdateViewModel>()
+        );
 
         return viewModel;
     }

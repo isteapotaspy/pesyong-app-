@@ -57,7 +57,7 @@ public class MealProductRepository
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<MealProduct> GetMealByIdAsync(int id)
+    public async Task<MealProduct> GetMealProductByIdAsync(int id)
     {
         try
         {
@@ -120,7 +120,7 @@ public class MealProductRepository
     /// </summary>
     /// <param name="mealProduct"></param>
     /// <returns></returns>
-    public async Task UpdateMealAsync(MealProduct mealProduct)
+    public async Task UpdateMealProductAsync(MealProduct mealProduct)
     {
         _context.MealProducts.Update(mealProduct);
         await _context.SaveChangesAsync();
@@ -131,7 +131,7 @@ public class MealProductRepository
     /// </summary>
     /// <param name="mealProductID"></param>
     /// <returns></returns>
-    public async Task DeleteMealAsync(Guid mealProductID)
+    public async Task DeleteMealProductAsync(int mealProductID)
     {
         var mealProduct = await _context.MealProducts.FindAsync(mealProductID);
         if (mealProduct != null)

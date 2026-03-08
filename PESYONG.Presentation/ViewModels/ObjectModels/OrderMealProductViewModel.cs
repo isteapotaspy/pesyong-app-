@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
-using PESYONG.Presentation.ViewModels.PageModels;
-using PESYONG.Presentation.Views.Admin.Meals;
 
 namespace PESYONG.Presentation.ViewModels.ObjectModels;
 

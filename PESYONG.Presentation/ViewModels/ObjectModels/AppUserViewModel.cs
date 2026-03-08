@@ -206,7 +206,7 @@ public partial class AppUserViewModel : ObservableValidator
             }
             else
             {
-                await _userRepository.CreateUserAsync(ToEntity(), Password);
+                await _userRepository.CreateUserAsync(ToEntity());
             }
         }
         catch (Exception ex)

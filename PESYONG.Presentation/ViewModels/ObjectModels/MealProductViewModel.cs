@@ -185,15 +185,15 @@ public partial class MealProductViewModel : ObservableValidator
     {
         try
         {
-            // var entity = ToEntity();
-            // if (MealProductID.HasValue)
-            // {
-            //     await _mealRepository.UpdateMealProductAsync(entity);
-            // }
-            // else
-            // {
-            //     await _mealRepository.CreateMealProductAsync(entity);
-            // }
+            var entity = ToEntity();
+            if (MealProductID.HasValue)
+            {
+                await _mealProductRepository.UpdateMealProductAsync(entity);
+            }
+            else
+            {
+                await _mealProductRepository.CreateMealProductAsync(entity);
+            }
         }
         catch (Exception ex)
         {
@@ -205,11 +205,11 @@ public partial class MealProductViewModel : ObservableValidator
     {
         try
         {
-            // var mealProduct = await _mealRepository.GetMealProductByIdAsync(MealProductID.Value);
-            // if (mealProduct != null)
-            // {
-            //     LoadFromEntity(mealProduct);
-            // }
+            var mealProduct = await _mealProductRepository.GetMealProductByIdAsync(MealProductID.Value);
+            if (mealProduct != null)
+            {
+                LoadFromEntity(mealProduct);
+            }
         }
         catch (Exception ex)
         {
@@ -225,8 +225,13 @@ public partial class MealProductViewModel : ObservableValidator
         {
             try
             {
-                // Implementation would depend on your repository methods
-                // await _mealRepository.DeleteMealProductAsync(MealProductID.Value);
+                //Implementation would depend on your repository methods
+
+                if (MealProductID != null)
+                {
+
+                    await _mealProductRepository.DeleteMealProductAsync(MealProductID.Value);
+                }
             }
             catch (Exception ex)
             {
