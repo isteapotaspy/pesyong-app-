@@ -23,6 +23,10 @@ public class MealProduct
 
     [Required]
     public bool IsCateringPackage { get; set; }
+    public int PaxCount { get; set; }
+
+    [NotMapped]
+    public string PaxDisplay => PaxCount > 0 ? $"Good for {PaxCount} pax" : string.Empty;
 
     public ICollection<MealProductItem> MealProductItems { get; set; } = [];
 
@@ -40,6 +44,7 @@ public class MealProduct
 
     [NotMapped]
     public decimal DiscountAmount => ProductBasePrice - FinalPrice;
+
 
     [NotMapped]
     public decimal FinalPrice => Promo?.ApplyDiscount(ProductBasePrice) ?? ProductBasePrice;

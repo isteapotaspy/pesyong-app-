@@ -85,6 +85,7 @@ public partial class App : Microsoft.UI.Xaml.Application
 
         services.AddScoped<CateringService>();
         services.AddSingleton<MealSyncService>();
+        services.AddSingleton<CartStateService>();
 
         // Customer ViewModels
         services.AddTransient<PackagesViewModel>();

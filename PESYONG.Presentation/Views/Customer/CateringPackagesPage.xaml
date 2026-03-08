@@ -14,8 +14,8 @@
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
         <converters:PriceFormatConverter x:Key="PriceFormatConverter"/>
+        <converters:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVisibilityConverter"/>
 
-        <!-- Card Style with hover effects -->
         <Style x:Key="CateringCardStyle" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="#FFE5CC"/>
@@ -30,7 +30,12 @@
             </Setter>
         </Style>
 
-        <!-- Add to Cart Button Style -->
+        <Style x:Key="CartBadgeStyle" TargetType="Border">
+            <Setter Property="Background" Value="#FF6600"/>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+
         <Style x:Key="AddToCartButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#FF6600"/>
             <Setter Property="Foreground" Value="White"/>
@@ -49,14 +54,12 @@
                                 <VisualStateGroup x:Name="CommonStates">
                                     <VisualState x:Name="Normal"/>
 
-                                    <!-- Hover -->
                                     <VisualState x:Name="PointerOver">
                                         <VisualState.Setters>
                                             <Setter Target="ButtonBorder.Background" Value="#E65A00"/>
                                         </VisualState.Setters>
                                     </VisualState>
 
-                                    <!-- Click -->
                                     <VisualState x:Name="Pressed">
                                         <VisualState.Setters>
                                             <Setter Target="ButtonBorder.Background" Value="#CC4D00"/>
@@ -85,59 +88,71 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" 
-                Background="#FF6600" 
-                CornerRadius="12" 
-                Padding="20,15" 
+        <Border Grid.Row="0"
+                Background="#FF6600"
+                CornerRadius="12"
+                Padding="20,15"
                 Margin="20,20,20,0">
             <StackPanel>
-                <TextBlock Text="Catering Packages" 
-                          FontSize="36" 
-                          FontWeight="Bold" 
-                          Foreground="White"/>
-                <TextBlock Text="Perfect for events, parties, and special occasions" 
-                          FontSize="16" 
-                          Foreground="#FFE5CC"/>
+                <TextBlock Text="Catering Packages"
+                           FontSize="36"
+                           FontWeight="Bold"
+                           Foreground="White"/>
+                <TextBlock Text="Perfect for events, parties, and special occasions"
+                           FontSize="16"
+                           Foreground="#FFE5CC"/>
             </StackPanel>
         </Border>
 
         <!-- Scrollable Content -->
-        <ScrollViewer Grid.Row="1" 
+        <ScrollViewer Grid.Row="1"
                       Padding="20"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Auto">
             <ItemsControl x:Name="PackagesItemsControl">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapGrid Orientation="Horizontal" 
-                            MaximumRowsOrColumns="5" 
-                            ItemWidth="400"
-                            ItemHeight="650"
-                            HorizontalAlignment="Stretch"/>
+                        <WrapGrid Orientation="Horizontal"
+                                  MaximumRowsOrColumns="5"
+                                  ItemWidth="400"
+                                  ItemHeight="650"
+                                  HorizontalAlignment="Stretch"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="10">
                             <Border x:Name="CardBorder"
                                     Width="350"
-                                    
                                     Style="{StaticResource CateringCardStyle}"
                                     PointerEntered="CardBorder_PointerEntered"
                                     PointerExited="CardBorder_PointerExited">
                                 <StackPanel>
                                     <!-- Image -->
-                                    <Border Height="200" 
+                                    <Border Height="200"
                                             Background="#FFF0E0"
                                             CornerRadius="12,12,0,0">
                                         <Grid>
-                                            <Image Source="{Binding ImageSourceString}" 
-                                                   Stretch="UniformToFill"/>
-                                            <TextBlock Text="No Image" 
-                                                      VerticalAlignment="Center"
-                                                      HorizontalAlignment="Center"
-                                                      Foreground="#999999"
-                                                      Visibility="{Binding ImageSourceString, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=inverse}"/>
+                                            <!-- Temporary package image placeholder -->
+                                            <TextBlock Text="Package Image"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"
+                                                       Foreground="#999999"/>
+
+                                            <!-- Cart Badge -->
+                                            <Border Style="{StaticResource CartBadgeStyle}"
+                                                    HorizontalAlignment="Right"
+                                                    VerticalAlignment="Top"
+                                                    Margin="8"
+                                                    Visibility="{Binding CartQuantity, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}">
+                                                <TextBlock Foreground="White"
+                                                           FontWeight="Bold"
+                                                           FontSize="10">
+                                                    <Run Text="{Binding CartQuantity}"/>
+                                                    <Run Text=" in cart"/>
+                                                </TextBlock>
+                                            </Border>
                                         </Grid>
                                     </Border>
 
@@ -145,44 +160,43 @@
                                     <StackPanel Padding="20" Spacing="15">
                                         <!-- Title and Description -->
                                         <StackPanel Spacing="5">
-                                            <TextBlock Text="{Binding ProductName}" 
-                                                      FontSize="20" 
-                                                      FontWeight="Bold" 
-                                                      Foreground="#FF6600"
-                                                      TextWrapping="Wrap"/>
-                                            <TextBlock Text="{Binding ProductDescription}" 
-                                                      FontSize="14" 
-                                                      Foreground="#666666"
-                                                      TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding ProductName}"
+                                                       FontSize="20"
+                                                       FontWeight="Bold"
+                                                       Foreground="#FF6600"
+                                                       TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding ProductDescription}"
+                                                       FontSize="14"
+                                                       Foreground="#666666"
+                                                       TextWrapping="Wrap"/>
                                         </StackPanel>
 
                                         <!-- Viands List -->
-                                        <Border Background="#FFF5E5" 
-                                                CornerRadius="8" 
+                                        <Border Background="#FFF5E5"
+                                                CornerRadius="8"
                                                 Padding="15">
                                             <StackPanel Spacing="10">
-                                                <TextBlock Text="Includes:" 
-                                                          FontWeight="SemiBold" 
-                                                          Foreground="#FF6600"/>
+                                                <TextBlock Text="Includes:"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="#FF6600"/>
 
-                                                <!-- Show either custom message or list -->
                                                 <Grid>
-                                                    <TextBlock Text="🔸 Choose any 8 viands from our menu" 
-                                                              Foreground="#FF6600"
-                                                              FontSize="14"
-                                                              Visibility="{Binding MealProductItems.Count, Converter={StaticResource CountToVisibilityConverter}, ConverterParameter=0}"/>
+                                                    <TextBlock Text="🔸 Choose any 8 viands from our menu"
+                                                               Foreground="#FF6600"
+                                                               FontSize="14"
+                                                               Visibility="{Binding MealProductItems.Count, Converter={StaticResource CountToVisibilityConverter}, ConverterParameter=0}"/>
 
                                                     <ItemsControl ItemsSource="{Binding MealProductItems}"
                                                                   Visibility="{Binding MealProductItems.Count, Converter={StaticResource CountToVisibilityConverter}}">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
                                                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                                                    <FontIcon Glyph="&#xE73E;" 
-                                                                             Foreground="#FF6600" 
-                                                                             FontSize="12"/>
-                                                                    <TextBlock Text="{Binding Meal.MealName}" 
+                                                                    <FontIcon Glyph="&#xE73E;"
                                                                               Foreground="#FF6600"
-                                                                              FontSize="14"/>
+                                                                              FontSize="12"/>
+                                                                    <TextBlock Text="{Binding Meal.MealName}"
+                                                                               Foreground="#FF6600"
+                                                                               FontSize="14"/>
                                                                 </StackPanel>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
@@ -191,12 +205,21 @@
                                             </StackPanel>
                                         </Border>
 
-                                        <!-- Price -->
-                                        <StackPanel Spacing="5">
-                                            <TextBlock Text="{Binding ProductBasePrice, Converter={StaticResource PriceFormatConverter}}" 
-                                                      FontSize="32" 
-                                                      FontWeight="Bold" 
-                                                      Foreground="#FF6600"/>
+                                        <!-- Price + Pax Info -->
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{Binding ProductBasePrice, Converter={StaticResource PriceFormatConverter}}"
+                                                       FontSize="32"
+                                                       FontWeight="Bold"
+                                                       Foreground="#FF6600"/>
+
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE716;"
+                                                           Foreground="#666666"
+                                                           FontSize="14"/>
+                                                <TextBlock Text="{Binding PaxDisplay}"
+                                                           FontSize="14"
+                                                           Foreground="#666666"/>
+                                            </StackPanel>
                                         </StackPanel>
 
                                         <!-- Add to Cart Button -->
@@ -204,9 +227,9 @@
                                                 Tag="{Binding MealProductID}"
                                                 Click="AddToCart_Click">
                                             <StackPanel Orientation="Horizontal" Spacing="10">
-                                                <FontIcon Glyph="&#xE7BF;" 
-                                                         Foreground="White" 
-                                                         FontSize="18"/>
+                                                <FontIcon Glyph="&#xE7BF;"
+                                                          Foreground="White"
+                                                          FontSize="18"/>
                                                 <TextBlock Text="Add to Cart" FontSize="16"/>
                                             </StackPanel>
                                         </Button>
@@ -228,14 +251,14 @@
                        DefaultButton="Primary">
             <ContentDialog.Content>
                 <StackPanel Width="500" Spacing="20">
-                    <TextBlock x:Name="DialogDescription" 
-                              TextWrapping="Wrap"
-                              Foreground="#666666"/>
+                    <TextBlock x:Name="DialogDescription"
+                               TextWrapping="Wrap"
+                               Foreground="#666666"/>
 
-                    <TextBlock x:Name="SelectedCountText" 
-                              Foreground="#FF6600"
-                              FontWeight="SemiBold"
-                              FontSize="16"/>
+                    <TextBlock x:Name="SelectedCountText"
+                               Foreground="#FF6600"
+                               FontWeight="SemiBold"
+                               FontSize="16"/>
 
                     <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
                         <ItemsControl x:Name="ViandsGrid">
@@ -265,17 +288,17 @@
                                                       Tag="{Binding MealID}"/>
 
                                             <StackPanel Grid.Column="1">
-                                                <Image Source="{Binding ImageSourceString}" 
-                                                       Width="100" 
-                                                       Height="70" 
+                                                <Image Source="{Binding ImageSourceString}"
+                                                       Width="100"
+                                                       Height="70"
                                                        Stretch="UniformToFill"
                                                        Margin="0,0,0,5"/>
-                                                <TextBlock Text="{Binding MealName}" 
-                                                          FontWeight="Medium"
-                                                          TextWrapping="Wrap"/>
-                                                <TextBlock Text="{Binding MealPrice, Converter={StaticResource PriceFormatConverter}}" 
-                                                          Foreground="#FF6600"
-                                                          FontSize="12"/>
+                                                <TextBlock Text="{Binding MealName}"
+                                                           FontWeight="Medium"
+                                                           TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding MealPrice, Converter={StaticResource PriceFormatConverter}}"
+                                                           Foreground="#FF6600"
+                                                           FontSize="12"/>
                                             </StackPanel>
                                         </Grid>
                                     </Border>

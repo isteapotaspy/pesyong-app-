@@ -68,6 +68,11 @@ namespace PESYONG.ApplicationLogic.Services
             CartUpdated?.Invoke(this, EventArgs.Empty);
         }
 
+        public int GetTotalItemCount()
+        {
+            return Cart.Sum(item => item.Quantity);
+        }
+
         public double GetSubtotal()
         {
             return Cart.Sum(item => item.Price * item.Quantity);

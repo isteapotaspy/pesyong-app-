@@ -1,3 +1,4 @@
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -143,21 +144,32 @@ namespace PESYONG.Presentation.Views.Customer
 
         private void CardBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
-            var border = sender as Border;
-            if (border != null)
+            if (sender is Border border)
             {
-                // Scale up slightly on hover
-                border.RenderTransform = new ScaleTransform { ScaleX = 1.02, ScaleY = 1.02 };
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 153, 51)); // #FF9933
+                border.BorderThickness = new Thickness(2);
+
+                if (border.RenderTransform is ScaleTransform scale)
+                {
+                    scale.ScaleX = 1.02;
+                    scale.ScaleY = 1.02;
+                }
             }
         }
 
+
         private void CardBorder_PointerExited(object sender, PointerRoutedEventArgs e)
         {
-            var border = sender as Border;
-            if (border != null)
+            if (sender is Border border)
             {
-                // Reset to original size
-                border.RenderTransform = new ScaleTransform { ScaleX = 1.0, ScaleY = 1.0 };
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 229, 204)); // #FFE5CC
+                border.BorderThickness = new Thickness(1);
+
+                if (border.RenderTransform is ScaleTransform scale)
+                {
+                    scale.ScaleX = 1.0;
+                    scale.ScaleY = 1.0;
+                }
             }
         }
 
@@ -201,5 +213,7 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
     }
+
+
 
 }

@@ -1,3 +1,4 @@
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -9,99 +10,82 @@ using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Users.Identity;
+using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.Views.Customer
 {
-    /// <summary>
-    /// Represents the catering packages page where customers can view and select meal packages.
-    /// Supports both fixed packages and customizable packages where users can choose their viands.
-    /// </summary>
     public sealed partial class CateringPackagesPage : Page
     {
-        /// <summary>
-        /// Collection of available catering packages displayed in the UI.
-        /// </summary>
-        private ObservableCollection<MealProduct> Packages { get; set; }
+        private ObservableCollection<CateringPackageCardViewModel> Packages { get; set; } = new();
+        private ObservableCollection<Meal> AvailableViands { get; set; } = new();
+        private List<Meal> SelectedViands { get; set; } = new();
+        private CateringPackageCardViewModel? CurrentSelectedPackage { get; set; }
 
-        /// <summary>
-        /// Collection of available viands that can be selected for customizable packages.
-        /// </summary>
-        private ObservableCollection<Meal> AvailableViands { get; set; }
+        private readonly CartService _cartService;
 
-        /// <summary>
-        /// List of viands currently selected by the user in the selection dialog.
-        /// </summary>
-        private List<Meal> SelectedViands { get; set; }
-
-        /// <summary>
-        /// The package currently being configured in the viand selection dialog.
-        /// </summary>
-        private MealProduct CurrentSelectedPackage { get; set; }
-
-        /// <summary>
-        /// Service for managing cart operations.
-        /// </summary>
-        private CartService _cartService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CateringPackagesPage"/> class.
-        /// Sets up the page, loads packages and available viands, and initializes the cart service.
-        /// </summary>
         public CateringPackagesPage()
         {
-            try
-            {
-                this.InitializeComponent();
-                SelectedViands = new List<Meal>();
+            InitializeComponent();
 
-                _cartService = CartService.Instance;
+            _cartService = CartService.Instance;
 
-                this.Loaded += async (_, _) => await LoadPackagesAsync();
-                this.Loaded += async (_, _) => await LoadAvailableViandsAsync();
-            }
-            catch (Exception ex)
+            Loaded += CateringPackagesPage_Loaded;
+            Unloaded += CateringPackagesPage_Unloaded;
+
+            if (_cartService.Cart != null)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in constructor: {ex.Message}");
+                _cartService.Cart.CollectionChanged += Cart_CollectionChanged;
             }
         }
 
-        /// <summary>
-        /// Retrieves the currently logged-in user.
-        /// </summary>
-        /// <returns>The current AppUser object, or a mock user if not implemented.</returns>
-        /// <remarks>
-        /// TODO: Implement this method based on your authentication system.
-        /// This should return the actual logged-in user from your auth service.
-        /// </remarks>
+        private async void CateringPackagesPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            await LoadPackagesAsync();
+            await LoadAvailableViandsAsync();
+            UpdateCartQuantities();
+        }
+
+        private void CateringPackagesPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (_cartService.Cart != null)
+            {
+                _cartService.Cart.CollectionChanged -= Cart_CollectionChanged;
+            }
+        }
+
+        private void Cart_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdateCartQuantities();
+        }
+
         private AppUser GetCurrentUser()
         {
             try
             {
-                // Try to get from App instance
                 var currentUser = (App.Current as App)?.CurrentUser;
 
                 if (currentUser == null)
                 {
-                    // Return a default/test user for development
                     return new AppUser
                     {
                         Id = 1,
                         UserName = "test@email.com",
                         FirstName = "Test",
                         LastName = "User",
-                        UserOrders = new List<Order>(), // Initialize collections
+                        UserOrders = new List<Order>(),
                         UserMealProducts = new List<MealProduct>(),
                         UserReceipts = new List<AcknowledgementReceipt>()
                     };
                 }
 
-                // Ensure collections are initialized
                 currentUser.UserOrders ??= new List<Order>();
                 currentUser.UserMealProducts ??= new List<MealProduct>();
                 currentUser.UserReceipts ??= new List<AcknowledgementReceipt>();
@@ -111,120 +95,142 @@ namespace PESYONG.Presentation.Views.Customer
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error in GetCurrentUser: {ex.Message}");
-                return null;
+                return null!;
             }
         }
 
-        /// <summary>
-        /// Loads sample catering packages into the Packages collection.
-        /// In a production environment, this would fetch data from a database or service.
-        /// </summary>
         private async Task LoadPackagesAsync()
         {
             try
             {
                 var sampleImageBytes = await LoadImageBytesAsync("Assets/SampleMeal.png");
 
-                Packages = new ObservableCollection<MealProduct>
-        {
-            new MealProduct
-            {
-                MealProductID = 1,
-                ProductName = "Package 1 - 3 Viands",
-                ProductDescription = "Perfect for small gatherings and family meals",
-                MealProductItems = new List<MealProductItem>
+                var packageModels = new List<MealProduct>
                 {
-                    new MealProductItem {
-                        Meal = new Meal {
-                            MealID = 1,
-                            MealName = "Battered Chicken",
-                            MealPrice = 450,
-                            ImageBytes = sampleImageBytes
-                        },
-                        Quantity = 1
+                    new MealProduct
+                    {
+                        MealProductID = 1,
+                        ProductName = "Package 1 - 3 Viands",
+                        ProductDescription = "Perfect for small gatherings and family meals",
+                        MealProductItems = new List<MealProductItem>
+                        {
+                            new MealProductItem
+                            {
+                                Meal = new Meal
+                                {
+                                    MealID = 1,
+                                    MealName = "Battered Chicken",
+                                    MealPrice = 450,
+                                    ImageBytes = sampleImageBytes
+                                },
+                                Quantity = 1
+                            },
+                            new MealProductItem
+                            {
+                                Meal = new Meal
+                                {
+                                    MealID = 2,
+                                    MealName = "Bihon Guisado",
+                                    MealPrice = 350,
+                                    ImageBytes = sampleImageBytes
+                                },
+                                Quantity = 1
+                            },
+                            new MealProductItem
+                            {
+                                Meal = new Meal
+                                {
+                                    MealID = 3,
+                                    MealName = "Fish Fillet",
+                                    MealPrice = 400,
+                                    ImageBytes = sampleImageBytes
+                                },
+                                Quantity = 1
+                            }
+                        }
                     },
-                    new MealProductItem {
-                        Meal = new Meal {
-                            MealID = 2,
-                            MealName = "Bihon Guisado",
-                            MealPrice = 350,
-                            ImageBytes = sampleImageBytes
-                        },
-                        Quantity = 1
+                    new MealProduct
+                    {
+                        MealProductID = 2,
+                        ProductName = "Package 2 - 5 Viands",
+                        ProductDescription = "Great for medium-sized celebrations",
+                        MealProductItems = new List<MealProductItem>
+                        {
+                            new MealProductItem
+                            {
+                                Meal = new Meal
+                                {
+                                    MealID = 1,
+                                    MealName = "Battered Chicken",
+                                    MealPrice = 450,
+                                    ImageBytes = sampleImageBytes
+                                },
+                                Quantity = 1
+                            },
+                            new MealProductItem
+                            {
+                                Meal = new Meal
+                                {
+                                    MealID = 4,
+                                    MealName = "Buttered Shrimp",
+                                    MealPrice = 550,
+                                    ImageBytes = sampleImageBytes
+                                },
+                                Quantity = 1
+                            },
+                            new MealProductItem
+                            {
+                                Meal = new Meal
+                                {
+                                    MealID = 2,
+                                    MealName = "Bihon Guisado",
+                                    MealPrice = 350,
+                                    ImageBytes = sampleImageBytes
+                                },
+                                Quantity = 1
+                            },
+                            new MealProductItem
+                            {
+                                Meal = new Meal
+                                {
+                                    MealID = 5,
+                                    MealName = "Tuna Kinilaw",
+                                    MealPrice = 400,
+                                    ImageBytes = sampleImageBytes
+                                },
+                                Quantity = 1
+                            },
+                            new MealProductItem
+                            {
+                                Meal = new Meal
+                                {
+                                    MealID = 3,
+                                    MealName = "Fish Fillet",
+                                    MealPrice = 400,
+                                    ImageBytes = sampleImageBytes
+                                },
+                                Quantity = 1
+                            }
+                        }
                     },
-                    new MealProductItem {
-                        Meal = new Meal {
-                            MealID = 3,
-                            MealName = "Fish Fillet",
-                            MealPrice = 400,
-                            ImageBytes = sampleImageBytes
-                        },
-                        Quantity = 1
+                    new MealProduct
+                    {
+                        MealProductID = 3,
+                        ProductName = "Package 3 - 8 Viands + Free Dessert",
+                        ProductDescription = "Our most popular package! Choose your favorite viands",
+                        MealProductItems = new List<MealProductItem>()
                     }
-                }
-            },
-            new MealProduct
-            {
-                MealProductID = 2,
-                ProductName = "Package 2 - 5 Viands",
-                ProductDescription = "Great for medium-sized celebrations",
-                MealProductItems = new List<MealProductItem>
+                };
+
+                Packages.Clear();
+
+                foreach (var package in packageModels)
                 {
-                    new MealProductItem {
-                        Meal = new Meal {
-                            MealID = 1,
-                            MealName = "Battered Chicken",
-                            MealPrice = 450,
-                            ImageBytes = sampleImageBytes
-                        },
-                        Quantity = 1
-                    },
-                    new MealProductItem {
-                        Meal = new Meal {
-                            MealID = 4,
-                            MealName = "Buttered Shrimp",
-                            MealPrice = 550,
-                            ImageBytes = sampleImageBytes
-                        },
-                        Quantity = 1
-                    },
-                    new MealProductItem {
-                        Meal = new Meal {
-                            MealID = 2,
-                            MealName = "Bihon Guisado",
-                            MealPrice = 350,
-                            ImageBytes = sampleImageBytes
-                        },
-                        Quantity = 1
-                    },
-                    new MealProductItem {
-                        Meal = new Meal {
-                            MealID = 5,
-                            MealName = "Tuna Kinilaw",
-                            MealPrice = 400,
-                            ImageBytes = sampleImageBytes
-                        },
-                        Quantity = 1
-                    },
-                    new MealProductItem {
-                        Meal = new Meal {
-                            MealID = 3,
-                            MealName = "Fish Fillet",
-                            MealPrice = 400,
-                            ImageBytes = sampleImageBytes
-                        },
-                        Quantity = 1
-                    }
+                    Packages.Add(new CateringPackageCardViewModel(package)
+                    {
+                        CartQuantity = GetCartQuantityForPackage(package.MealProductID)
+                    });
                 }
-            },
-            new MealProduct
-            {
-                MealProductID = 3,
-                ProductName = "Package 3 - 8 Viands + Free Dessert",
-                ProductDescription = "Our most popular package! Choose your favorite viands",
-                MealProductItems = new List<MealProductItem>()
-            }
-        };
 
                 PackagesItemsControl.ItemsSource = Packages;
             }
@@ -254,10 +260,6 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Loads sample available viands into the AvailableViands collection.
-        /// In a production environment, this would fetch data from a database or service.
-        /// </summary>
         private async Task LoadAvailableViandsAsync()
         {
             try
@@ -265,16 +267,16 @@ namespace PESYONG.Presentation.Views.Customer
                 var sampleImageBytes = await LoadImageBytesAsync("Assets/SampleMeal.png");
 
                 AvailableViands = new ObservableCollection<Meal>
-        {
-            new Meal { MealID = 1, MealName = "Battered Chicken", MealPrice = 450, ImageBytes = sampleImageBytes },
-            new Meal { MealID = 4, MealName = "Buttered Shrimp", MealPrice = 550, ImageBytes = sampleImageBytes },
-            new Meal { MealID = 2, MealName = "Bihon Guisado", MealPrice = 350, ImageBytes = sampleImageBytes },
-            new Meal { MealID = 5, MealName = "Tuna Kinilaw", MealPrice = 400, ImageBytes = sampleImageBytes },
-            new Meal { MealID = 3, MealName = "Fish Fillet", MealPrice = 400, ImageBytes = sampleImageBytes },
-            new Meal { MealID = 6, MealName = "Pork Menudo", MealPrice = 450, ImageBytes = sampleImageBytes },
-            new Meal { MealID = 7, MealName = "Chicken Adobo", MealPrice = 400, ImageBytes = sampleImageBytes },
-            new Meal { MealID = 8, MealName = "Beef Caldereta", MealPrice = 500, ImageBytes = sampleImageBytes }
-        };
+                {
+                    new Meal { MealID = 1, MealName = "Battered Chicken", MealPrice = 450, ImageBytes = sampleImageBytes },
+                    new Meal { MealID = 4, MealName = "Buttered Shrimp", MealPrice = 550, ImageBytes = sampleImageBytes },
+                    new Meal { MealID = 2, MealName = "Bihon Guisado", MealPrice = 350, ImageBytes = sampleImageBytes },
+                    new Meal { MealID = 5, MealName = "Tuna Kinilaw", MealPrice = 400, ImageBytes = sampleImageBytes },
+                    new Meal { MealID = 3, MealName = "Fish Fillet", MealPrice = 400, ImageBytes = sampleImageBytes },
+                    new Meal { MealID = 6, MealName = "Pork Menudo", MealPrice = 450, ImageBytes = sampleImageBytes },
+                    new Meal { MealID = 7, MealName = "Chicken Adobo", MealPrice = 400, ImageBytes = sampleImageBytes },
+                    new Meal { MealID = 8, MealName = "Beef Caldereta", MealPrice = 500, ImageBytes = sampleImageBytes }
+                };
             }
             catch (Exception ex)
             {
@@ -282,47 +284,49 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Handles the Click event of the Add to Cart button.
-        /// Determines whether the package is fixed or customizable and processes accordingly.
-        /// </summary>
-        /// <param name="sender">The button that was clicked.</param>
-        /// <param name="e">Event arguments containing additional event data.</param>
+        private int GetCartQuantityForPackage(int packageId)
+        {
+            if (_cartService?.Cart == null)
+                return 0;
+
+            return _cartService.Cart
+                .Where(c => c.ProductId == packageId && c.Type == "package")
+                .Sum(c => c.Quantity);
+        }
+
+        private void UpdateCartQuantities()
+        {
+            if (Packages == null || _cartService?.Cart == null)
+                return;
+
+            foreach (var package in Packages)
+            {
+                package.CartQuantity = GetCartQuantityForPackage(package.MealProductID);
+            }
+        }
+
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var button = sender as Button;
-                if (button?.Tag == null) return;
+                if (sender is not Button button || button.Tag == null)
+                    return;
 
-                // Safely parse the package ID
-                int packageId;
-                if (button.Tag is int intTag)
+                int packageId = Convert.ToInt32(button.Tag);
+                var package = Packages.FirstOrDefault(p => p.MealProductID == packageId);
+
+                if (package == null)
+                    return;
+
+                if (package.MealProductItems == null || !package.MealProductItems.Any())
                 {
-                    packageId = intTag;
+                    CurrentSelectedPackage = package;
+                    SelectedViands.Clear();
+                    ShowViandSelectionDialog(package);
                 }
                 else
                 {
-                    int.TryParse(button.Tag.ToString(), out packageId);
-                }
-
-                var package = Packages?.FirstOrDefault(p => p.MealProductID == packageId);
-
-                if (package != null)
-                {
-                    // Check if it's the selectable package (Package 3)
-                    if (package.MealProductItems == null || !package.MealProductItems.Any())
-                    {
-                        // Show selection dialog for custom package
-                        CurrentSelectedPackage = package;
-                        SelectedViands?.Clear();
-                        ShowViandSelectionDialog(package);
-                    }
-                    else
-                    {
-                        // Add fixed package to cart
-                        AddToCart(package, null);
-                    }
+                    AddToCart(package, null);
                 }
             }
             catch (Exception ex)
@@ -331,11 +335,7 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Displays the viand selection dialog for customizable packages.
-        /// </summary>
-        /// <param name="package">The package being configured.</param>
-        private async void ShowViandSelectionDialog(MealProduct package)
+        private async void ShowViandSelectionDialog(CateringPackageCardViewModel package)
         {
             try
             {
@@ -343,13 +343,11 @@ namespace PESYONG.Presentation.Views.Customer
                 DialogDescription.Text = $"Choose your favorite dishes for {package.ProductName}";
                 SelectedCountText.Text = $"Selected: 0 / 8";
 
-                // Reset selection states
-                SelectedViands?.Clear();
+                SelectedViands.Clear();
 
-                // Make sure XamlRoot is set
                 if (ViandSelectionDialog.XamlRoot == null)
                 {
-                    ViandSelectionDialog.XamlRoot = this.XamlRoot;
+                    ViandSelectionDialog.XamlRoot = XamlRoot;
                 }
 
                 await ViandSelectionDialog.ShowAsync();
@@ -360,33 +358,15 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Handles the Checked event of viand checkboxes in the selection dialog.
-        /// Adds the selected viand to the SelectedViands list if under the 8-item limit.
-        /// </summary>
-        /// <param name="sender">The checkbox that was checked.</param>
-        /// <param name="e">Event arguments containing additional event data.</param>
         private void ViandCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             try
             {
-                var checkBox = sender as CheckBox;
+                if (sender is not CheckBox checkBox || checkBox.Tag == null)
+                    return;
 
-                // Safely get Tag value
-                if (checkBox?.Tag == null) return;
-
-                // Handle both int and string conversions
-                int mealId;
-                if (checkBox.Tag is int intTag)
-                {
-                    mealId = intTag;
-                }
-                else
-                {
-                    int.TryParse(checkBox.Tag.ToString(), out mealId);
-                }
-
-                var selectedMeal = AvailableViands?.FirstOrDefault(m => m.MealID == mealId);
+                int mealId = Convert.ToInt32(checkBox.Tag);
+                var selectedMeal = AvailableViands.FirstOrDefault(m => m.MealID == mealId);
 
                 if (selectedMeal != null && SelectedViands.Count < 8)
                 {
@@ -395,16 +375,14 @@ namespace PESYONG.Presentation.Views.Customer
                 }
                 else if (SelectedViands.Count >= 8)
                 {
-                    // Uncheck if already 8 selected
                     checkBox.IsChecked = false;
 
-                    // Show warning
                     var warningDialog = new ContentDialog
                     {
                         Title = "Maximum Selection",
                         Content = "You can only select up to 8 viands.",
                         CloseButtonText = "OK",
-                        XamlRoot = this.XamlRoot
+                        XamlRoot = XamlRoot
                     };
                     _ = warningDialog.ShowAsync();
                 }
@@ -415,33 +393,15 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Handles the Unchecked event of viand checkboxes in the selection dialog.
-        /// Removes the unselected viand from the SelectedViands list.
-        /// </summary>
-        /// <param name="sender">The checkbox that was unchecked.</param>
-        /// <param name="e">Event arguments containing additional event data.</param>
         private void ViandCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             try
             {
-                var checkBox = sender as CheckBox;
+                if (sender is not CheckBox checkBox || checkBox.Tag == null)
+                    return;
 
-                // Safely get Tag value
-                if (checkBox?.Tag == null) return;
-
-                // Handle both int and string conversions
-                int mealId;
-                if (checkBox.Tag is int intTag)
-                {
-                    mealId = intTag;
-                }
-                else
-                {
-                    int.TryParse(checkBox.Tag.ToString(), out mealId);
-                }
-
-                var selectedMeal = AvailableViands?.FirstOrDefault(m => m.MealID == mealId);
+                int mealId = Convert.ToInt32(checkBox.Tag);
+                var selectedMeal = AvailableViands.FirstOrDefault(m => m.MealID == mealId);
 
                 if (selectedMeal != null)
                 {
@@ -455,14 +415,11 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Updates the selected count display text in the viand selection dialog.
-        /// </summary>
         private void UpdateSelectedCount()
         {
             try
             {
-                SelectedCountText.Text = $"Selected: {SelectedViands?.Count ?? 0} / 8";
+                SelectedCountText.Text = $"Selected: {SelectedViands.Count} / 8";
             }
             catch (Exception ex)
             {
@@ -470,30 +427,24 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Handles the PrimaryButtonClick event of the viand selection dialog.
-        /// Validates that exactly 8 viands are selected before adding to cart.
-        /// </summary>
-        /// <param name="sender">The content dialog that was clicked.</param>
-        /// <param name="args">Event arguments that allow canceling the dialog close.</param>
         private void ViandSelectionDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             try
             {
-                if (SelectedViands?.Count == 8 && CurrentSelectedPackage != null)
+                if (SelectedViands.Count == 8 && CurrentSelectedPackage != null)
                 {
                     AddToCart(CurrentSelectedPackage, SelectedViands);
                 }
                 else
                 {
                     args.Cancel = true;
-                    // Show error message
+
                     var errorDialog = new ContentDialog
                     {
                         Title = "Invalid Selection",
                         Content = "Please select exactly 8 viands.",
                         CloseButtonText = "OK",
-                        XamlRoot = this.XamlRoot
+                        XamlRoot = XamlRoot
                     };
                     _ = errorDialog.ShowAsync();
                 }
@@ -504,39 +455,27 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Adds a package to the shopping cart.
-        /// </summary>
-        /// <param name="package">The package to add to cart.</param>
-        /// <param name="selectedViands">
-        /// The list of selected viands for customizable packages.
-        /// Null for fixed packages.
-        /// </param>
-        private void AddToCart(MealProduct package, List<Meal> selectedViands)
+        private void AddToCart(CateringPackageCardViewModel package, List<Meal>? selectedViands)
         {
             try
             {
-                // Calculate total price
                 decimal totalPrice;
                 string itemName;
 
                 if (selectedViands != null && selectedViands.Any())
                 {
-                    // Custom package with selected viands
                     totalPrice = selectedViands.Sum(v => v.MealPrice);
                     itemName = $"{package.ProductName} (Custom)";
                 }
                 else
                 {
-                    // Fixed package
                     totalPrice = package.ProductBasePrice;
                     itemName = package.ProductName;
                 }
 
-                // Create cart item
                 var cartItem = new CartItem
                 {
-                    Id = $"package_{package.MealProductID}",
+                    Id = $"package_{package.MealProductID}_{Guid.NewGuid()}",
                     Name = itemName,
                     Price = (double)totalPrice,
                     Quantity = 1,
@@ -547,16 +486,16 @@ namespace PESYONG.Presentation.Views.Customer
 
                 _cartService.AddToCart(cartItem);
 
-                // Show success message
+                UpdateCartQuantities();
+
                 var successDialog = new ContentDialog
                 {
                     Title = "Added to Cart!",
                     Content = $"{itemName} has been added to your cart.",
                     CloseButtonText = "OK",
-                    XamlRoot = this.XamlRoot
+                    XamlRoot = XamlRoot
                 };
                 _ = successDialog.ShowAsync();
-
             }
             catch (Exception ex)
             {
@@ -567,52 +506,17 @@ namespace PESYONG.Presentation.Views.Customer
                     Title = "Error",
                     Content = "Failed to add item to cart. Please try again.",
                     CloseButtonText = "OK",
-                    XamlRoot = this.XamlRoot
+                    XamlRoot = XamlRoot
                 };
                 _ = errorDialog.ShowAsync();
             }
         }
 
-        /// <summary>
-        /// Updates the cart badge count in the UI.
-        /// </summary>
-        private void UpdateCartBadge()
-        {
-            try
-            {
-                // You can raise an event or use a messenger to update the cart badge
-                // in your main layout or navigation view
-                var cartCount = _cartService.Cart?.Count ?? 0;
-
-                // For example, if you have a static event:
-                CartUpdated?.Invoke(this, cartCount);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error in UpdateCartBadge: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Event that fires when the cart is updated, allowing parent components to update cart badges.
-        /// </summary>
-        public event EventHandler<int> CartUpdated;
-
-        /// <summary>
-        /// Helper method to get formatted package price for XAML binding.
-        /// </summary>
-        /// <param name="package">The package to get the price for.</param>
-        /// <returns>Formatted price string with thousand separators.</returns>
         private string GetPackagePrice(MealProduct package)
         {
             return package?.ProductBasePrice.ToString("N0") ?? "0";
         }
 
-        /// <summary>
-        /// Helper method to get comma-separated viand names for a package.
-        /// </summary>
-        /// <param name="package">The package to get viand names for.</param>
-        /// <returns>A string of viand names separated by commas, or a default message for customizable packages.</returns>
         private string GetViandNames(MealProduct package)
         {
             if (package?.MealProductItems == null || !package.MealProductItems.Any())
@@ -621,11 +525,6 @@ namespace PESYONG.Presentation.Views.Customer
             return string.Join(", ", package.MealProductItems.Select(i => i.Meal?.MealName));
         }
 
-        /// <summary>
-        /// Determines whether a package is selectable (customizable) or fixed.
-        /// </summary>
-        /// <param name="package">The package to check.</param>
-        /// <returns>True if the package is customizable (no predefined viands), false otherwise.</returns>
         private bool IsSelectablePackage(MealProduct package)
         {
             return package?.MealProductItems == null || !package.MealProductItems.Any();
@@ -635,7 +534,14 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                border.RenderTransform = new ScaleTransform { ScaleX = 1.04, ScaleY = 1.04 };
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 153, 51)); // #FF9933
+                border.BorderThickness = new Thickness(2);
+
+                if (border.RenderTransform is ScaleTransform scale)
+                {
+                    scale.ScaleX = 1.02;
+                    scale.ScaleY = 1.02;
+                }
             }
         }
 
@@ -643,8 +549,17 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                border.RenderTransform = new ScaleTransform { ScaleX = 1.0, ScaleY = 1.0 };
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 229, 204)); // #FFE5CC
+                border.BorderThickness = new Thickness(1);
+
+                if (border.RenderTransform is ScaleTransform scale)
+                {
+                    scale.ScaleX = 1.0;
+                    scale.ScaleY = 1.0;
+                }
             }
         }
     }
+
+    
 }

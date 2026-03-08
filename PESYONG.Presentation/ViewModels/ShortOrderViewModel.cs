@@ -43,11 +43,11 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         _imageBytes = meal.ImageBytes;
         _description = meal.Description ?? string.Empty;
         _stockQuantity = meal.StockQuantity;
-        _minOrderQuantity = meal.MinOrderQuantity;
+        _minOrderQuantity = meal.MinOrderQuantity > 0 ? meal.MinOrderQuantity : 1;
         _deliveryType = meal.DeliveryType;
         _mealTags = meal.MealTags?.ToList() ?? new List<string>();
         _cartQuantity = cartQuantity;
-        _selectedQuantity = _minOrderQuantity > 0 ? _minOrderQuantity : 1;
+        _selectedQuantity = _minOrderQuantity;
         _totalPrice = _mealPrice * _selectedQuantity;
 
         _ = LoadMealImageAsync();
@@ -178,7 +178,7 @@ public class ShortOrderViewModel : INotifyPropertyChanged
                 _stockQuantity = value;
                 OnPropertyChanged();
 
-                if (_selectedQuantity > _stockQuantity)
+                if (_stockQuantity > 0 && _selectedQuantity > _stockQuantity)
                 {
                     SelectedQuantity = _stockQuantity;
                 }
@@ -195,9 +195,11 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         get => _minOrderQuantity;
         set
         {
-            if (_minOrderQuantity != value)
+            int safeValue = value > 0 ? value : 1;
+
+            if (_minOrderQuantity != safeValue)
             {
-                _minOrderQuantity = value;
+                _minOrderQuantity = safeValue;
                 OnPropertyChanged();
 
                 if (_selectedQuantity < _minOrderQuantity)
@@ -267,30 +269,6 @@ public class ShortOrderViewModel : INotifyPropertyChanged
         {
             SelectedQuantity--;
         }
-    }
-
-    public void AddToCart()
-    {
-        CartQuantity += SelectedQuantity;
-        SelectedQuantity = MinOrderQuantity;
-    }
-
-    public void RemoveFromCart(int quantity)
-    {
-        if (quantity <= CartQuantity)
-        {
-            CartQuantity -= quantity;
-        }
-    }
-
-    public bool HasTag(string tag)
-    {
-        return MealTags.Contains(tag);
-    }
-
-    public string GetTagBadges()
-    {
-        return string.Join(" • ", MealTags);
     }
 
     private async Task LoadMealImageAsync()
