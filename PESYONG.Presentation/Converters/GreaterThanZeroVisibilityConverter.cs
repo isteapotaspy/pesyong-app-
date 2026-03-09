@@ -48,7 +48,7 @@ using System.Threading.Tasks;
 /// </summary>
 /// 
 
-namespace PESYONG.ApplicationLogic.Converters
+namespace PESYONG.Presentation.Converters
 {
     public class GreaterThanZeroToVisibilityConverter : IValueConverter
     {

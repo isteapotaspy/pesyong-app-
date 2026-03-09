@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml.Data;
 using System;
 using System.Collections;
 
-namespace PESYONG.ApplicationLogic.Converters
+namespace PESYONG.Presentation.Converters
 {
     /// <summary>
     /// Converts the count of a collection to Visibility.Visible or Visibility.Collapsed.

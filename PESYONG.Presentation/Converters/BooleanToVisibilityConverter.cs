@@ -2,7 +2,7 @@
 using Microsoft.UI.Xaml.Data;
 using System;
 
-namespace PESYONG.ApplicationLogic.Converters
+namespace PESYONG.Presentation.Converters
 {
     public class BooleanToVisibilityConverter : IValueConverter
     {

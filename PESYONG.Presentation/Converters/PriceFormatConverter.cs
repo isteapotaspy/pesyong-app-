@@ -1,7 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Data;
 using System;
 
-namespace PESYONG.ApplicationLogic.Converters
+namespace PESYONG.Presentation.Converters
 {
     /// <summary>
     /// Converts a numeric price value to a formatted string with currency symbol and thousand separators.

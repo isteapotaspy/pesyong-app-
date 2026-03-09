@@ -2,7 +2,7 @@
 using Microsoft.UI.Xaml.Data;
 using System;
 
-namespace PESYONG.ApplicationLogic.Converters
+namespace PESYONG.Presentation.Converters
 {
     /// <summary>
     /// Converts a null or empty value to Visibility.Visible or Visibility.Collapsed.
