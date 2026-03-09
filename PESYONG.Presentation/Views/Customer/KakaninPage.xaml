@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="using:PESYONG.ApplicationLogic.Converters"
+    xmlns:local="using:PESYONG.Presentation.Converters"
     xmlns:models="using:PESYONG.Domain.Entities.Meals.MealItem"
     mc:Ignorable="d"
     Background="#FFFDF5">
@@ -311,7 +311,7 @@
                                                             HorizontalAlignment="Right"
                                                             Spacing="6">
                                                     <Button Style="{StaticResource QuantityButtonStyle}"
-                                                            Tag="{Binding MealID}"
+                                                            Tag="{Binding MealProductID}"
                                                             Click="DecreaseQuantity_Click"
                                                             IsEnabled="{Binding CanDecreaseQuantity}">
                                                         <FontIcon Glyph="&#xF8AB;" 
@@ -329,7 +329,7 @@
                                                                VerticalAlignment="Center"/>
 
                                                     <Button Style="{StaticResource QuantityButtonStyle}"
-                                                            Tag="{Binding MealID}"
+                                                            Tag="{Binding MealProductID}"
                                                             Click="IncreaseQuantity_Click"
                                                             IsEnabled="{Binding CanIncreaseQuantity}">
                                                         <FontIcon Glyph="&#xF8AA;" 

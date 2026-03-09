@@ -1,28 +1,31 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using PESYONG.Domain.Entities.Meals.MealProduct;
-using PESYONG.Domain.Entities.Orders;
+using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.Domain.Enums;
-using PESYONG.Presentation.ViewModels;
+using PESYONG.Presentation.Services;
 using PESYONG.Presentation.ViewModels.ObjectModels;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.Views.Customer
 {
     /// <summary>
     /// Manages the display and interaction of a customer's past and active orders.
-    /// Provides functionality for order tracking, item reordering, 
+    /// Provides functionality for order tracking, item reordering,
     /// and a star-based rating system for order reviews.
     /// </summary>
     public sealed partial class OrderHistoryPage : Page, INotifyPropertyChanged
     {
-        private ObservableCollection<OrderViewModel> _orders;
+        private readonly OrderRepository _orderRepository;
+        private readonly RealtimeService _realtimeService;
+
+        private ObservableCollection<OrderViewModel> _orders = new();
         private int _currentRating = 0;
         private OrderViewModel? _selectedOrderForReview;
 
@@ -30,78 +33,74 @@ namespace PESYONG.Presentation.Views.Customer
 
         public OrderHistoryPage()
         {
-            this.InitializeComponent();
-            LoadOrders();
+            InitializeComponent();
+
+            _orderRepository = App.Current.Services.GetRequiredService<OrderRepository>();
+            _realtimeService = App.Current.Services.GetRequiredService<RealtimeService>();
+
+            Loaded += OrderHistoryPage_Loaded;
+            Unloaded += OrderHistoryPage_Unloaded;
         }
 
-        private void LoadOrders()
+        private async void OrderHistoryPage_Loaded(object sender, RoutedEventArgs e)
         {
-            // In a real app, this would come from your OrderService
-            // Mock orders using your Order entity structure
-            var orders = new List<Order>
+            _realtimeService.OrderStatusChanged += OnOrderStatusChanged;
+            await LoadOrdersAsync();
+        }
+
+        private void OrderHistoryPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _realtimeService.OrderStatusChanged -= OnOrderStatusChanged;
+        }
+
+        private async Task OnOrderStatusChanged(Guid orderId, string status)
+        {
+            System.Diagnostics.Debug.WriteLine($"OrderStatusChanged received: {orderId} -> {status}");
+            await LoadOrdersAsync();
+        }
+
+        private async Task LoadOrdersAsync()
+        {
+            try
             {
-                new Order
+                var customerId = App.Current.CurrentCustomerId;
+                System.Diagnostics.Debug.WriteLine($"OrderHistoryPage CurrentCustomerId: {customerId}");
+
+                if (customerId == null || customerId == Guid.Empty)
                 {
-                    OrderID = Guid.NewGuid(),
-                    OrderDate = new DateTime(2026, 1, 23),
-                    ActualDeliveryDate = new DateTime(2026, 1, 24),
-                    DeliveryStatus = DeliveryStatus.OutForDelivery,
-                    OrderItems = new List<OrderMealProduct>
-                    {
-                        new OrderMealProduct
-                        {
-                            MealProduct = new MealProduct { ProductName = "Package 3 - 8 Viands" },
-                            MealProductOrderQty = 1,
-                            ItemPrice = 3800
-                        },
-                        new OrderMealProduct
-                        {
-                            MealProduct = new MealProduct { ProductName = "Bibingka" },
-                            MealProductOrderQty = 2,
-                            ItemPrice = 80
-                        }
-                    }
-                },
-                new Order
-                {
-                    OrderID = Guid.NewGuid(),
-                    OrderDate = new DateTime(2026, 1, 20),
-                    ActualDeliveryDate = new DateTime(2026, 1, 21),
-                    DeliveryStatus = DeliveryStatus.Delivered,
-                    OrderItems = new List<OrderMealProduct>
-                    {
-                        new OrderMealProduct
-                        {
-                            MealProduct = new MealProduct { ProductName = "Battered Chicken" },
-                            MealProductOrderQty = 3,
-                            ItemPrice = 120
-                        },
-                        new OrderMealProduct
-                        {
-                            MealProduct = new MealProduct { ProductName = "Puto" },
-                            MealProductOrderQty = 1,
-                            ItemPrice = 60
-                        }
-                    }
+                    _orders.Clear();
+                    OrdersList.ItemsSource = _orders;
+                    UpdateEmptyState();
+                    return;
                 }
-            };
 
-            _orders = new ObservableCollection<OrderViewModel>(
-                orders.Select(o =>
-                {
-                    var vm = new OrderViewModel();
-                    vm.LoadFromEntity(o);
-                    return vm;
-                })
-            );
+                var orders = await _orderRepository.GetOrdersByCustomerAsync(customerId.Value);
+                System.Diagnostics.Debug.WriteLine($"Orders loaded for customer {customerId}: {orders.Count}");
 
-            OrdersList.ItemsSource = _orders;
-            UpdateEmptyState();
+                _orders = new ObservableCollection<OrderViewModel>(
+                    orders.Select(o =>
+                    {
+                        var vm = new OrderViewModel();
+                        vm.LoadFromEntity(o);
+                        return vm;
+                    }));
+
+                OrdersList.ItemsSource = _orders;
+                UpdateEmptyState();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading orders: {ex}");
+
+                _orders.Clear();
+                OrdersList.ItemsSource = _orders;
+                UpdateEmptyState();
+            }
         }
 
         private void UpdateEmptyState()
         {
-            bool hasOrders = _orders?.Any() ?? false;
+            bool hasOrders = _orders.Any();
             EmptyStatePanel.Visibility = hasOrders ? Visibility.Collapsed : Visibility.Visible;
             OrdersList.Visibility = hasOrders ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -112,9 +111,7 @@ namespace PESYONG.Presentation.Views.Customer
             _selectedOrderForReview = button?.Tag as OrderViewModel;
 
             if (_selectedOrderForReview == null)
-            {
                 return;
-            }
 
             var firstItem = _selectedOrderForReview.OrderItems.FirstOrDefault();
             if (firstItem == null)
@@ -145,25 +142,26 @@ namespace PESYONG.Presentation.Views.Customer
             return null;
         }
 
-        private void ReorderButton_Click(object sender, RoutedEventArgs e)
+        private async void ReorderButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
             var order = button?.Tag as OrderViewModel;
 
-            if (order != null)
-            {
-                var dialog = new ContentDialog
-                {
-                    Title = "Reorder",
-                    Content = $"Items from order {order.OrderID} have been added to your cart.",
-                    CloseButtonText = "OK",
-                    XamlRoot = this.XamlRoot
-                };
-                _ = dialog.ShowAsync();
+            if (order == null)
+                return;
 
-                var layout = FindParent<PESYONG.Presentation.Components.Layouts.CustomerLayout>(this);
-                layout?.NavigateByTag("CartPage");
-            }
+            var dialog = new ContentDialog
+            {
+                Title = "Reorder",
+                Content = $"Items from order {order.OrderID} have been added to your cart.",
+                CloseButtonText = "OK",
+                XamlRoot = XamlRoot
+            };
+
+            await dialog.ShowAsync();
+
+            var layout = FindParent<PESYONG.Presentation.Components.Layouts.CustomerLayout>(this);
+            layout?.NavigateByTag("CartPage");
         }
 
         private void StarRating_Click(object sender, RoutedEventArgs e)
@@ -185,17 +183,17 @@ namespace PESYONG.Presentation.Views.Customer
         private void UpdateStarIcons()
         {
             var stars = new[] { Star1Icon, Star2Icon, Star3Icon, Star4Icon, Star5Icon };
+
             for (int i = 0; i < stars.Length; i++)
             {
                 stars[i].Foreground = new SolidColorBrush(
-                    i < _currentRating ?
-                    Windows.UI.Color.FromArgb(255, 255, 102, 0) : // #FF6600
-                    Windows.UI.Color.FromArgb(255, 255, 178, 102)   // #FFB266
-                );
+                    i < _currentRating
+                        ? Windows.UI.Color.FromArgb(255, 255, 102, 0)
+                        : Windows.UI.Color.FromArgb(255, 255, 178, 102));
             }
         }
 
-        private void ReviewDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        private async void ReviewDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             if (_currentRating == 0)
             {
@@ -211,24 +209,26 @@ namespace PESYONG.Presentation.Views.Customer
                 return;
             }
 
-            //save the review to your database
             var reviewData = new
             {
                 OrderId = _selectedOrderForReview?.OrderID,
                 Rating = _currentRating,
-                Review = ReviewTextBox.Text,
+                Review = ReviewTextBox.Text.Trim(),
                 Date = DateTime.Now
             };
 
-            // Show success notification
+            System.Diagnostics.Debug.WriteLine(
+                $"Review submitted: Order={reviewData.OrderId}, Rating={reviewData.Rating}, Review={reviewData.Review}");
+
             var successDialog = new ContentDialog
             {
                 Title = "Review Submitted",
                 Content = "Thank you for your feedback!",
                 CloseButtonText = "OK",
-                XamlRoot = this.XamlRoot
+                XamlRoot = XamlRoot
             };
-            _ = successDialog.ShowAsync();
+
+            await successDialog.ShowAsync();
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -237,4 +237,3 @@ namespace PESYONG.Presentation.Views.Customer
         }
     }
 }
-    

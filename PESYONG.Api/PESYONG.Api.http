@@ -1,0 +1,6 @@
+@PESYONG.Api_HostAddress = http://localhost:5204
+
+GET {{PESYONG.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

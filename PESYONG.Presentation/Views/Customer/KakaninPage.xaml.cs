@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -5,6 +6,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Presentation.Services;
 using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -21,12 +23,34 @@ namespace PESYONG.Presentation.Views.Customer
     {
         private ObservableCollection<KakaninViewModel> KakaninItems { get; set; } = new();
         private readonly CartService _cartService;
+        private readonly RealtimeService _realtimeService;
 
         public KakaninPage()
         {
             this.InitializeComponent();
+
             _cartService = CartService.Instance;
-            this.Loaded += async (_, _) => await LoadKakaninAsync();
+            _realtimeService = App.Current.Services.GetRequiredService<RealtimeService>();
+
+            Loaded += KakaninPage_Loaded;
+            Unloaded += KakaninPage_Unloaded;
+        }
+
+        private async void KakaninPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            _realtimeService.CatalogChanged += OnCatalogChanged;
+            await LoadKakaninAsync();
+        }
+
+        private void KakaninPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            _realtimeService.CatalogChanged -= OnCatalogChanged;
+        }
+
+        private async Task OnCatalogChanged()
+        {
+            System.Diagnostics.Debug.WriteLine("CatalogChanged received in KakaninPage!");
+            await LoadKakaninAsync();
         }
 
         private async Task LoadKakaninAsync()
