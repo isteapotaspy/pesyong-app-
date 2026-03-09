@@ -1,8 +1,10 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
 using PESYONG.Domain.Entities.Financial.AcknowledgementReceipts;
@@ -14,9 +16,7 @@ using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 
@@ -28,14 +28,19 @@ namespace PESYONG.Presentation.Views.Customer
         private ObservableCollection<Meal> AvailableViands { get; set; } = new();
         private List<Meal> SelectedViands { get; set; } = new();
         private CateringPackageCardViewModel? CurrentSelectedPackage { get; set; }
+        private int RequiredViandCount { get; set; } = 8;
 
         private readonly CartService _cartService;
+        private readonly MealProductRepository _mealProductRepository;
+        private readonly MealRepository _mealRepository;
 
         public CateringPackagesPage()
         {
             InitializeComponent();
 
             _cartService = CartService.Instance;
+            _mealProductRepository = App.Current.Services.GetRequiredService<MealProductRepository>();
+            _mealRepository = App.Current.Services.GetRequiredService<MealRepository>();
 
             Loaded += CateringPackagesPage_Loaded;
             Unloaded += CateringPackagesPage_Unloaded;
@@ -103,128 +108,14 @@ namespace PESYONG.Presentation.Views.Customer
         {
             try
             {
-                var sampleImageBytes = await LoadImageBytesAsync("Assets/SampleMeal.png");
-
-                var packageModels = new List<MealProduct>
-                {
-                    new MealProduct
-                    {
-                        MealProductID = 1,
-                        ProductName = "Package 1 - 3 Viands",
-                        ProductDescription = "Perfect for small gatherings and family meals",
-                        MealProductItems = new List<MealProductItem>
-                        {
-                            new MealProductItem
-                            {
-                                Meal = new Meal
-                                {
-                                    MealID = 1,
-                                    MealName = "Battered Chicken",
-                                    MealPrice = 450,
-                                    ImageBytes = sampleImageBytes
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem
-                            {
-                                Meal = new Meal
-                                {
-                                    MealID = 2,
-                                    MealName = "Bihon Guisado",
-                                    MealPrice = 350,
-                                    ImageBytes = sampleImageBytes
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem
-                            {
-                                Meal = new Meal
-                                {
-                                    MealID = 3,
-                                    MealName = "Fish Fillet",
-                                    MealPrice = 400,
-                                    ImageBytes = sampleImageBytes
-                                },
-                                Quantity = 1
-                            }
-                        }
-                    },
-                    new MealProduct
-                    {
-                        MealProductID = 2,
-                        ProductName = "Package 2 - 5 Viands",
-                        ProductDescription = "Great for medium-sized celebrations",
-                        MealProductItems = new List<MealProductItem>
-                        {
-                            new MealProductItem
-                            {
-                                Meal = new Meal
-                                {
-                                    MealID = 1,
-                                    MealName = "Battered Chicken",
-                                    MealPrice = 450,
-                                    ImageBytes = sampleImageBytes
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem
-                            {
-                                Meal = new Meal
-                                {
-                                    MealID = 4,
-                                    MealName = "Buttered Shrimp",
-                                    MealPrice = 550,
-                                    ImageBytes = sampleImageBytes
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem
-                            {
-                                Meal = new Meal
-                                {
-                                    MealID = 2,
-                                    MealName = "Bihon Guisado",
-                                    MealPrice = 350,
-                                    ImageBytes = sampleImageBytes
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem
-                            {
-                                Meal = new Meal
-                                {
-                                    MealID = 5,
-                                    MealName = "Tuna Kinilaw",
-                                    MealPrice = 400,
-                                    ImageBytes = sampleImageBytes
-                                },
-                                Quantity = 1
-                            },
-                            new MealProductItem
-                            {
-                                Meal = new Meal
-                                {
-                                    MealID = 3,
-                                    MealName = "Fish Fillet",
-                                    MealPrice = 400,
-                                    ImageBytes = sampleImageBytes
-                                },
-                                Quantity = 1
-                            }
-                        }
-                    },
-                    new MealProduct
-                    {
-                        MealProductID = 3,
-                        ProductName = "Package 3 - 8 Viands + Free Dessert",
-                        ProductDescription = "Our most popular package! Choose your favorite viands",
-                        MealProductItems = new List<MealProductItem>()
-                    }
-                };
+                var packageEntities = (await _mealProductRepository.GetAllMealProductsAsync())
+                    .Where(p => p.IsCateringPackage && p.IsAvailable)
+                    .OrderBy(p => p.MealProductID)
+                    .ToList();
 
                 Packages.Clear();
 
-                foreach (var package in packageModels)
+                foreach (var package in packageEntities)
                 {
                     Packages.Add(new CateringPackageCardViewModel(package)
                     {
@@ -236,27 +127,7 @@ namespace PESYONG.Presentation.Views.Customer
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in LoadPackagesAsync: {ex.Message}");
-            }
-        }
-
-        private async Task<byte[]?> LoadImageBytesAsync(string relativePath)
-        {
-            try
-            {
-                var file = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(
-                    new Uri($"ms-appx:///{relativePath}"));
-
-                using var stream = await file.OpenReadAsync();
-                byte[] bytes = new byte[stream.Size];
-                await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, Windows.Storage.Streams.InputStreamOptions.None);
-
-                return bytes;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to load image bytes: {ex.Message}");
-                return null;
+                System.Diagnostics.Debug.WriteLine($"Error in LoadPackagesAsync: {ex}");
             }
         }
 
@@ -264,23 +135,20 @@ namespace PESYONG.Presentation.Views.Customer
         {
             try
             {
-                var sampleImageBytes = await LoadImageBytesAsync("Assets/SampleMeal.png");
+                var meals = await _mealRepository.GetAllMealsAsync();
 
-                AvailableViands = new ObservableCollection<Meal>
+                AvailableViands.Clear();
+
+                foreach (var meal in meals
+                    .Where(m => m.MealID.HasValue)
+                    .OrderBy(m => m.MealName))
                 {
-                    new Meal { MealID = 1, MealName = "Battered Chicken", MealPrice = 450, ImageBytes = sampleImageBytes },
-                    new Meal { MealID = 4, MealName = "Buttered Shrimp", MealPrice = 550, ImageBytes = sampleImageBytes },
-                    new Meal { MealID = 2, MealName = "Bihon Guisado", MealPrice = 350, ImageBytes = sampleImageBytes },
-                    new Meal { MealID = 5, MealName = "Tuna Kinilaw", MealPrice = 400, ImageBytes = sampleImageBytes },
-                    new Meal { MealID = 3, MealName = "Fish Fillet", MealPrice = 400, ImageBytes = sampleImageBytes },
-                    new Meal { MealID = 6, MealName = "Pork Menudo", MealPrice = 450, ImageBytes = sampleImageBytes },
-                    new Meal { MealID = 7, MealName = "Chicken Adobo", MealPrice = 400, ImageBytes = sampleImageBytes },
-                    new Meal { MealID = 8, MealName = "Beef Caldereta", MealPrice = 500, ImageBytes = sampleImageBytes }
-                };
+                    AvailableViands.Add(meal);
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in LoadAvailableViandsAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error in LoadAvailableViandsAsync: {ex}");
             }
         }
 
@@ -305,58 +173,48 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        private void AddToCart_Click(object sender, RoutedEventArgs e)
+        private async void AddToCart_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (sender is not Button button || button.Tag == null)
+                if (sender is not Button button || button.DataContext is not CateringPackageCardViewModel package)
                     return;
 
-                int packageId = Convert.ToInt32(button.Tag);
-                var package = Packages.FirstOrDefault(p => p.MealProductID == packageId);
-
-                if (package == null)
-                    return;
-
-                if (package.MealProductItems == null || !package.MealProductItems.Any())
-                {
-                    CurrentSelectedPackage = package;
-                    SelectedViands.Clear();
-                    ShowViandSelectionDialog(package);
-                }
-                else
+                if (!package.IsCustomizable)
                 {
                     AddToCart(package, null);
+                    return;
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error in AddToCart_Click: {ex.Message}");
-            }
-        }
 
-        private async void ShowViandSelectionDialog(CateringPackageCardViewModel package)
-        {
-            try
-            {
-                ViandsGrid.ItemsSource = AvailableViands;
-                DialogDescription.Text = $"Choose your favorite dishes for {package.ProductName}";
-                SelectedCountText.Text = $"Selected: 0 / 8";
-
+                CurrentSelectedPackage = package;
                 SelectedViands.Clear();
+                RequiredViandCount = package.PreferredViandCount > 0 ? package.PreferredViandCount : 8;
 
-                if (ViandSelectionDialog.XamlRoot == null)
-                {
-                    ViandSelectionDialog.XamlRoot = XamlRoot;
-                }
+                DialogDescription.Text = $"Choose exactly {RequiredViandCount} viands for {package.ProductName}.";
+                UpdateSelectedCount();
 
+                await LoadAvailableViandsAsync();
+                ViandsGrid.ItemsSource = AvailableViands;
+
+                ViandSelectionDialog.XamlRoot = XamlRoot;
                 await ViandSelectionDialog.ShowAsync();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in ShowViandSelectionDialog: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error in AddToCart_Click: {ex.Message}");
+
+                var dialog = new ContentDialog
+                {
+                    Title = "Error",
+                    Content = "Unable to open viand selection.",
+                    CloseButtonText = "OK",
+                    XamlRoot = XamlRoot
+                };
+
+                await dialog.ShowAsync();
             }
         }
+
 
         private void ViandCheckBox_Checked(object sender, RoutedEventArgs e)
         {
@@ -366,26 +224,31 @@ namespace PESYONG.Presentation.Views.Customer
                     return;
 
                 int mealId = Convert.ToInt32(checkBox.Tag);
-                var selectedMeal = AvailableViands.FirstOrDefault(m => m.MealID == mealId);
+                var selectedMeal = AvailableViands.FirstOrDefault(m => (m.MealID ?? 0) == mealId);
 
-                if (selectedMeal != null && SelectedViands.Count < 8)
-                {
-                    SelectedViands.Add(selectedMeal);
-                    UpdateSelectedCount();
-                }
-                else if (SelectedViands.Count >= 8)
+                if (selectedMeal == null)
+                    return;
+
+                if (SelectedViands.Any(m => (m.MealID ?? 0) == mealId))
+                    return;
+
+                if (SelectedViands.Count >= RequiredViandCount)
                 {
                     checkBox.IsChecked = false;
 
                     var warningDialog = new ContentDialog
                     {
                         Title = "Maximum Selection",
-                        Content = "You can only select up to 8 viands.",
+                        Content = $"You can only select up to {RequiredViandCount} viands.",
                         CloseButtonText = "OK",
                         XamlRoot = XamlRoot
                     };
                     _ = warningDialog.ShowAsync();
+                    return;
                 }
+
+                SelectedViands.Add(selectedMeal);
+                UpdateSelectedCount();
             }
             catch (Exception ex)
             {
@@ -401,7 +264,7 @@ namespace PESYONG.Presentation.Views.Customer
                     return;
 
                 int mealId = Convert.ToInt32(checkBox.Tag);
-                var selectedMeal = AvailableViands.FirstOrDefault(m => m.MealID == mealId);
+                var selectedMeal = SelectedViands.FirstOrDefault(m => (m.MealID ?? 0) == mealId);
 
                 if (selectedMeal != null)
                 {
@@ -415,11 +278,12 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
+
         private void UpdateSelectedCount()
         {
             try
             {
-                SelectedCountText.Text = $"Selected: {SelectedViands.Count} / 8";
+                SelectedCountText.Text = $"Selected: {SelectedViands.Count} / {RequiredViandCount}";
             }
             catch (Exception ex)
             {
@@ -431,23 +295,28 @@ namespace PESYONG.Presentation.Views.Customer
         {
             try
             {
-                if (SelectedViands.Count == 8 && CurrentSelectedPackage != null)
+                if (CurrentSelectedPackage == null)
                 {
-                    AddToCart(CurrentSelectedPackage, SelectedViands);
+                    args.Cancel = true;
+                    return;
                 }
-                else
+
+                if (SelectedViands.Count != RequiredViandCount)
                 {
                     args.Cancel = true;
 
                     var errorDialog = new ContentDialog
                     {
                         Title = "Invalid Selection",
-                        Content = "Please select exactly 8 viands.",
+                        Content = $"Please select exactly {RequiredViandCount} viands.",
                         CloseButtonText = "OK",
                         XamlRoot = XamlRoot
                     };
                     _ = errorDialog.ShowAsync();
+                    return;
                 }
+
+                AddToCart(CurrentSelectedPackage, SelectedViands.ToList());
             }
             catch (Exception ex)
             {
@@ -459,19 +328,10 @@ namespace PESYONG.Presentation.Views.Customer
         {
             try
             {
-                decimal totalPrice;
-                string itemName;
-
-                if (selectedViands != null && selectedViands.Any())
-                {
-                    totalPrice = selectedViands.Sum(v => v.MealPrice);
-                    itemName = $"{package.ProductName} (Custom)";
-                }
-                else
-                {
-                    totalPrice = package.ProductBasePrice;
-                    itemName = package.ProductName;
-                }
+                decimal totalPrice = package.ProductBasePrice;
+                string itemName = selectedViands != null && selectedViands.Any()
+                    ? $"{package.ProductName} (Custom)"
+                    : package.ProductName;
 
                 var cartItem = new CartItem
                 {
@@ -481,7 +341,13 @@ namespace PESYONG.Presentation.Views.Customer
                     Quantity = 1,
                     Type = "package",
                     ProductId = package.MealProductID,
-                    Pax = package.MealProductItems?.Count ?? 0
+                    Pax = package.PaxCount > 0 ? package.PaxCount : package.MealProductItems?.Count ?? 0,
+                    CateringSelections = selectedViands?.Select(v => new CateringCartSelection
+                    {
+                        MealId = v.MealID ?? 0,
+                        MealName = v.MealName,
+                        Price = v.MealPrice
+                    }).ToList()
                 };
 
                 _cartService.AddToCart(cartItem);
@@ -512,29 +378,11 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        private string GetPackagePrice(MealProduct package)
-        {
-            return package?.ProductBasePrice.ToString("N0") ?? "0";
-        }
-
-        private string GetViandNames(MealProduct package)
-        {
-            if (package?.MealProductItems == null || !package.MealProductItems.Any())
-                return "Choose any 8 viands";
-
-            return string.Join(", ", package.MealProductItems.Select(i => i.Meal?.MealName));
-        }
-
-        private bool IsSelectablePackage(MealProduct package)
-        {
-            return package?.MealProductItems == null || !package.MealProductItems.Any();
-        }
-
         private void CardBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
             if (sender is Border border)
             {
-                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 153, 51)); // #FF9933
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 153, 51));
                 border.BorderThickness = new Thickness(2);
 
                 if (border.RenderTransform is ScaleTransform scale)
@@ -549,7 +397,7 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 229, 204)); // #FFE5CC
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 229, 204));
                 border.BorderThickness = new Thickness(1);
 
                 if (border.RenderTransform is ScaleTransform scale)
@@ -560,6 +408,4 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
     }
-
-    
 }

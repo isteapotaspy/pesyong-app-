@@ -117,7 +117,7 @@ public sealed class MealProductItemViewModel : INotifyPropertyChanged, IDataErro
             RequestDescription = string.IsNullOrWhiteSpace(RequestDescription)
                 ? null
                 : RequestDescription.Trim(),
-            Meal = MealReference
+            Meal = null
         };
     }
 

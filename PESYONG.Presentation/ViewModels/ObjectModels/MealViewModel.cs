@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
 
@@ -29,7 +30,7 @@ public sealed class MealViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     private DeliveryType _deliveryType = DeliveryType.Delivery;
     private string? _operatorId;
     private string? _lastModifiedByOperatorId;
-    private DateTime _creationDate = DateTime.UtcNow;
+    private DateTimeOffset _creationDate = DateTimeOffset.UtcNow;
     private DateTime _lastModifiedDate = DateTime.UtcNow;
     private string _statusMessage = string.Empty;
 
@@ -163,7 +164,7 @@ public sealed class MealViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         set => SetProperty(ref _lastModifiedByOperatorId, value);
     }
 
-    public DateTime CreationDate
+    public DateTimeOffset CreationDate
     {
         get => _creationDate;
         set
@@ -199,7 +200,7 @@ public sealed class MealViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
     {
         get
         {
-            var now = DateTime.UtcNow;
+            var now = DateTimeOffset.UtcNow;
             var span = now - CreationDate;
 
             if (span.TotalMinutes < 1)
@@ -260,7 +261,7 @@ public sealed class MealViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         DeliveryType = DeliveryType.Delivery;
         OperatorID = null;
         LastModifiedByOperatorID = null;
-        CreationDate = DateTime.UtcNow;
+        CreationDate = DateTimeOffset.UtcNow;
         LastModifiedDate = DateTime.UtcNow;
         MealTags.Clear();
         StatusMessage = string.Empty;
@@ -285,7 +286,9 @@ public sealed class MealViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
         DeliveryType = entity.DeliveryType;
         OperatorID = entity.OperatorID?.ToString();
         LastModifiedByOperatorID = entity.LastModifiedByOperatorID?.ToString();
-        CreationDate = entity.CreationDate == default ? DateTime.UtcNow : entity.CreationDate;
+        CreationDate = entity.CreationDate == default
+                        ? DateTimeOffset.UtcNow
+                        : new DateTimeOffset(entity.CreationDate);
         LastModifiedDate = entity.LastModifiedDate == default ? DateTime.UtcNow : entity.LastModifiedDate;
 
         MealTags.Clear();
@@ -331,7 +334,7 @@ public sealed class MealViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
                 .ToList(),
             OperatorID = ParseNullableInt(OperatorID),
             LastModifiedByOperatorID = ParseNullableInt(LastModifiedByOperatorID),
-            CreationDate = CreationDate,
+            CreationDate = CreationDate.UtcDateTime,
             LastModifiedDate = LastModifiedDate
         };
     }
@@ -520,22 +523,18 @@ public sealed class MealViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
                 return;
             }
 
-            using var stream = new InMemoryRandomAccessStream();
-            using (var writer = new DataWriter(stream))
-            {
-                writer.WriteBytes(bytes);
-                await writer.StoreAsync();
-                await writer.FlushAsync();
-            }
-
+            var stream = new InMemoryRandomAccessStream();
+            await stream.WriteAsync(bytes.AsBuffer());
             stream.Seek(0);
 
             var bitmap = new BitmapImage();
             await bitmap.SetSourceAsync(stream);
+
             MealImage = bitmap;
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"UpdateMealImageAsync failed: {ex}");
             MealImage = null;
         }
     }

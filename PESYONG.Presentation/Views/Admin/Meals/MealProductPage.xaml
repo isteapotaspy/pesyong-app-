@@ -18,15 +18,42 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0"
-                           Text="{x:Bind ProductName}"
-                           Style="{ThemeResource BaseTextBlockStyle}" />
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="1"
-                           Margin="0,4,0,0"
-                           Text="{x:Bind FormattedFinalPrice}"
-                           Opacity="0.75"
-                           Style="{ThemeResource BodyTextBlockStyle}" />
+                    <TextBlock Grid.Column="0"
+                               Text="{x:Bind ProductName}"
+                               Style="{ThemeResource BaseTextBlockStyle}" />
+
+                    <TextBlock Grid.Column="1"
+                               Text="{x:Bind PaxDisplay}"
+                               Margin="12,0,0,0"
+                               Opacity="0.8"
+                               FontStyle="Italic" />
+                </Grid>
+
+                <StackPanel Grid.Row="1"
+                            Orientation="Horizontal"
+                            Spacing="8"
+                            Margin="0,4,0,0">
+                    <TextBlock Text="{x:Bind FormattedFinalPrice}"
+                               Opacity="0.75"
+                               Style="{ThemeResource BodyTextBlockStyle}" />
+
+                    <TextBlock Text="•"
+                               Opacity="0.5"/>
+
+                    <TextBlock Text="{x:Bind ItemCount, Mode=OneWay}"
+                               Opacity="0.75"
+                               Style="{ThemeResource BodyTextBlockStyle}" />
+
+                    <TextBlock Text="meal(s)"
+                               Opacity="0.75"
+                               Style="{ThemeResource BodyTextBlockStyle}" />
+                </StackPanel>
             </Grid>
         </DataTemplate>
 
@@ -85,7 +112,7 @@
             <ColumnDefinition Width="1.35*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- LEFT -->
+        <!-- LEFT: CATERING PACKAGES -->
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -103,7 +130,7 @@
                       CornerRadius="8"/>
 
             <Button Grid.Row="1"
-                    Content="Add New Meal Product"
+                    Content="Add New Catering Package"
                     Click="AddMealProductButton_Click"
                     Style="{StaticResource AccentButtonStyle}" />
         </Grid>
@@ -117,55 +144,147 @@
                 BorderThickness="1">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="Meal Product Configuration"
+                    <TextBlock Text="Catering Package Configuration"
                                Style="{StaticResource TitleTextBlockStyle}" />
 
-                    <Grid ColumnSpacing="12" RowSpacing="12">
+                    <Grid ColumnSpacing="16" RowSpacing="16">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="160"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Row="0"
-                                 Grid.Column="0"
-                                 Header="Meal Product ID"
-                                 Text="{Binding MealProductID}"
-                                 IsReadOnly="True" />
+                        <!-- IMAGE SECTION -->
+                        <StackPanel Grid.Row="0"
+                                    Grid.Column="0"
+                                    Grid.RowSpan="2"
+                                    Spacing="12">
+                            <Border Width="150"
+                                    Height="150"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+                                <Image x:Name="PackageImageControl"
+                                       Source="{Binding ProductImage, Mode=OneWay}"
+                                       Width="150"
+                                       Height="150"
+                                       Stretch="UniformToFill"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                            </Border>
 
-                        <TextBox Grid.Row="0"
-                                 Grid.Column="1"
-                                 Header="Owner ID"
-                                 Text="{Binding OwnerID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 TextChanged="FormTextBox_TextChanged" />
+                            <Button Content="Change Photo"
+                                    Click="PickImageButton_Click"/>
+                        </StackPanel>
+
+                        <!-- BASIC INFO -->
+                        <Grid Grid.Row="0"
+                              Grid.Column="1"
+                              ColumnSpacing="12"
+                              RowSpacing="12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Row="0"
+                                     Grid.Column="0"
+                                     Header="Catering Package ID"
+                                     Text="{Binding MealProductID}"
+                                     IsReadOnly="True" />
+
+                            <TextBox Grid.Row="0"
+                                     Grid.Column="1"
+                                     Header="Owner ID"
+                                     Text="{Binding OwnerID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     TextChanged="FormTextBox_TextChanged" />
+
+                            <TextBox Grid.Row="1"
+                                     Grid.Column="0"
+                                     Header="Promo ID"
+                                     Text="{Binding PromoID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                     TextChanged="FormTextBox_TextChanged" />
+
+                            <NumberBox Grid.Row="1"
+                                       Grid.Column="1"
+                                       Header="Number of Pax"
+                                       Value="{Binding PaxCount, Mode=TwoWay}"
+                                       Minimum="0"
+                                       SmallChange="1"
+                                       LargeChange="5"
+                                       SpinButtonPlacementMode="Inline"
+                                       ValidationMode="InvalidInputOverwritten"
+                                       ValueChanged="PaxCountNumberBox_ValueChanged" />
+
+                            <StackPanel Grid.Row="2"
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Orientation="Vertical"
+                                        Spacing="10">
+
+                                <StackPanel Orientation="Horizontal" Spacing="20">
+                                    <CheckBox Content="Is Catering Package"
+                                              IsChecked="{Binding IsCateringPackage, Mode=TwoWay}" />
+
+                                    <CheckBox Content="Is Available"
+                                              IsChecked="{Binding IsAvailable, Mode=TwoWay}" />
+
+                                    <CheckBox x:Name="IsCustomizableCheckBox"
+                                              Content="Customizable Package"
+                                              IsChecked="{Binding IsCustomizable, Mode=TwoWay}"
+                                              Checked="IsCustomizableCheckBox_Checked"
+                                              Unchecked="IsCustomizableCheckBox_Unchecked" />
+                                </StackPanel>
+
+                                <StackPanel x:Name="PreferredViandCountPanel"
+                                            Orientation="Horizontal"
+                                            Spacing="12"
+                                            Visibility="Collapsed">
+                                    <TextBlock Text="Preferred Viand Count"
+                                               VerticalAlignment="Center" />
+
+                                    <NumberBox x:Name="PreferredViandCountNumberBox"
+                                               Width="120"
+                                               Minimum="1"
+                                               SmallChange="1"
+                                               SpinButtonPlacementMode="Inline"
+                                               ValidationMode="InvalidInputOverwritten"
+                                               Value="{Binding PreferredViandCount, Mode=TwoWay}" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="0"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding PaxDisplay}"
+                                       FontStyle="Italic"
+                                       Opacity="0.8"
+                                       Margin="0,4,0,0" />
+                        </Grid>
 
                         <TextBox Grid.Row="1"
-                                 Grid.Column="0"
-                                 Header="Promo ID"
-                                 Text="{Binding PromoID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                 Grid.Column="1"
+                                 Header="Package Name"
+                                 Text="{Binding ProductName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  TextChanged="FormTextBox_TextChanged" />
-
-                        <CheckBox Grid.Row="1"
-                                  Grid.Column="1"
-                                  Content="Is Catering Package"
-                                  IsChecked="{Binding IsCateringPackage, Mode=TwoWay}" />
 
                         <TextBox Grid.Row="2"
                                  Grid.Column="0"
                                  Grid.ColumnSpan="2"
-                                 Header="Product Name"
-                                 Text="{Binding ProductName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 TextChanged="FormTextBox_TextChanged" />
-
-                        <TextBox Grid.Row="3"
-                                 Grid.Column="0"
-                                 Grid.ColumnSpan="2"
-                                 Header="Product Description"
+                                 Header="Package Description"
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
                                  MinHeight="100"
@@ -173,8 +292,9 @@
                                  TextChanged="FormTextBox_TextChanged" />
                     </Grid>
 
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Available Meals"
+                    <StackPanel x:Name="FixedMealsPanel" Spacing="8">
+                        <TextBlock x:Name="MealsSectionTitle"
+                                   Text="Meals to Include in Package"
                                    Style="{StaticResource BodyStrongTextBlockStyle}" />
 
                         <Grid ColumnSpacing="12">
@@ -185,16 +305,23 @@
 
                             <ComboBox x:Name="MealSelectorComboBox"
                                       Grid.Column="0"
-                                      Header="Select Meal"
+                                      Header="Select Meal to Add"
                                       ItemsSource="{Binding AvailableMeals}"
                                       SelectedItem="{Binding SelectedMealForAdd, Mode=TwoWay}"
                                       DisplayMemberPath="MealName" />
 
-                            <Button Grid.Column="1"
+                            <Button x:Name="AddMealButton"
+                                    Grid.Column="1"
                                     Content="Add Meal"
                                     VerticalAlignment="Bottom"
                                     Click="AddMealItemButton_Click" />
                         </Grid>
+
+                        <TextBlock x:Name="CustomizableHintText"
+                                   Visibility="Collapsed"
+                                   Foreground="DarkOrange"
+                                   TextWrapping="Wrap"
+                                   Text="This package is customizable. Customers will choose their preferred viands, so fixed meals are not required." />
                     </StackPanel>
 
                     <StackPanel Spacing="8">
@@ -204,21 +331,16 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0"
-                                       Text="Included Meals"
+                            <TextBlock x:Name="IncludedMealsTitle"
+                                       Grid.Column="0"
+                                       Text="Meals Included in This Package"
                                        Style="{StaticResource BodyStrongTextBlockStyle}" />
 
                             <StackPanel Grid.Column="1"
                                         HorizontalAlignment="Right"
                                         Spacing="2">
-                                <TextBlock Text="{Binding FormattedProductBasePrice}"
-                                           FontSize="18"
-                                           FontWeight="SemiBold" />
-                                <TextBlock Text="{Binding FormattedDiscountAmount}"
-                                           FontSize="12"
-                                           Opacity="0.75" />
                                 <TextBlock Text="{Binding FormattedFinalPrice}"
-                                           FontSize="18"
+                                           FontSize="20"
                                            FontWeight="SemiBold" />
                             </StackPanel>
                         </Grid>

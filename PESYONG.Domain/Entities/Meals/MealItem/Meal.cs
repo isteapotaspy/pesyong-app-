@@ -87,6 +87,8 @@ public class Meal
 
     public byte[]? ImageBytes { get; set; }
 
+    public bool IsViandOption { get; set; } = false;
+
     public bool IsValid()
     {
         var validationContext = new ValidationContext(this);

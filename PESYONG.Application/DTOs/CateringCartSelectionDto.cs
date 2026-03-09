@@ -9,6 +9,8 @@ namespace PESYONG.ApplicationLogic.DTOs;
 /// <summary>
 /// Represents a selected meal item inside a catering package/cart.
 /// </summary>
+/// 
+// CheckoutItemDto uses CateringCartSelectionDto
 public class CateringCartSelectionDto
 {
     /// <summary>
@@ -24,5 +26,5 @@ public class CateringCartSelectionDto
     /// <summary>
     /// Gets or sets the selected meal's price.
     /// </summary>
-    public decimal Price { get; set; }
+    public decimal MealPrice { get; set; }
 }

@@ -1,24 +1,34 @@
-﻿using PESYONG.Domain.Entities.Meals.MealItem;
+﻿
+using Microsoft.UI.Xaml.Media.Imaging;
+using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
 public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataErrorInfo
 {
     private int? _mealProductId;
-    private int _ownerId;
+    private string? _ownerId;
     private int? _promoId;
     private bool _isCateringPackage;
     private string _productName = string.Empty;
     private string? _productDescription;
     private byte[]? _imageBytes;
+    private BitmapImage? _productImage;
+    private int _paxCount;
+    private bool _isAvailable = true;
+    private bool _isCustomizable;
+    private int _preferredViandCount;
     private DateTime _creationDate = DateTime.UtcNow;
     private DateTime _lastModifiedDate = DateTime.UtcNow;
     private string _statusMessage = string.Empty;
@@ -43,6 +53,7 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
             OnPropertyChanged(nameof(FormattedProductBasePrice));
             OnPropertyChanged(nameof(FormattedFinalPrice));
             OnPropertyChanged(nameof(FormattedDiscountAmount));
+            OnPropertyChanged(nameof(CustomizableDisplay));
             OnPropertyChanged(nameof(ValidationSummary));
         };
     }
@@ -53,7 +64,7 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
         set => SetProperty(ref _mealProductId, value);
     }
 
-    public int OwnerID
+    public string? OwnerID
     {
         get => _ownerId;
         set
@@ -110,7 +121,13 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
     public byte[]? ImageBytes
     {
         get => _imageBytes;
-        set => SetProperty(ref _imageBytes, value);
+        set
+        {
+            if (SetProperty(ref _imageBytes, value))
+            {
+                _ = UpdateProductImageAsync(value);
+            }
+        }
     }
 
     public DateTime CreationDate
@@ -125,6 +142,68 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
         set => SetProperty(ref _lastModifiedDate, value);
     }
 
+    public int PaxCount
+    {
+        get => _paxCount;
+        set
+        {
+            if (SetProperty(ref _paxCount, value))
+            {
+                ValidateProperty(nameof(PaxCount));
+                OnPropertyChanged(nameof(PaxDisplay));
+            }
+        }
+    }
+
+    public string PaxDisplay => PaxCount > 0 ? $"Good for {PaxCount} pax" : string.Empty;
+
+    public bool IsAvailable
+    {
+        get => _isAvailable;
+        set => SetProperty(ref _isAvailable, value);
+    }
+
+    public BitmapImage? ProductImage
+    {
+        get => _productImage;
+        private set => SetProperty(ref _productImage, value);
+    }
+
+    public bool IsCustomizable
+    {
+        get => _isCustomizable;
+        set
+        {
+            if (SetProperty(ref _isCustomizable, value))
+            {
+                ValidateProperty(nameof(IsCustomizable));
+                ValidateProperty(nameof(PreferredViandCount));
+                OnPropertyChanged(nameof(CustomizableDisplay));
+                OnPropertyChanged(nameof(ProductBasePrice));
+                OnPropertyChanged(nameof(FinalPrice));
+                OnPropertyChanged(nameof(FormattedProductBasePrice));
+                OnPropertyChanged(nameof(FormattedFinalPrice));
+                OnPropertyChanged(nameof(ValidationSummary));
+            }
+        }
+    }
+
+    public int PreferredViandCount
+    {
+        get => _preferredViandCount;
+        set
+        {
+            if (SetProperty(ref _preferredViandCount, value))
+            {
+                ValidateProperty(nameof(PreferredViandCount));
+                OnPropertyChanged(nameof(CustomizableDisplay));
+                OnPropertyChanged(nameof(ValidationSummary));
+            }
+        }
+    }
+
+    public string CustomizableDisplay =>
+        IsCustomizable ? $"Customizable ({PreferredViandCount} viands)" : "Fixed";
     public ObservableCollection<MealProductItemViewModel> MealProductItems { get; }
 
     public ObservableCollection<Meal> AvailableMeals { get; }
@@ -137,7 +216,9 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
 
     public int ItemCount => MealProductItems.Count;
 
-    public decimal ProductBasePrice => MealProductItems.Sum(x => x.ItemPrice);
+    public decimal ProductBasePrice => IsCustomizable
+    ? 0
+    : MealProductItems.Sum(x => x.ItemPrice);
 
     public decimal FinalPrice => ProductBasePrice;
 
@@ -197,9 +278,13 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
     public void ClearMealProductViewModel()
     {
         MealProductID = null;
-        OwnerID = 0;
+        OwnerID = null;
         PromoID = null;
         IsCateringPackage = false;
+        IsAvailable = true;
+        PaxCount = 0;
+        IsCustomizable = false;
+        PreferredViandCount = 0;
         ProductName = string.Empty;
         ProductDescription = string.Empty;
         ImageBytes = null;
@@ -247,7 +332,7 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
             Quantity = 1,
             RequestDescription = null,
             UnitPrice = meal.MealPrice,
-            MealReference = meal
+            MealReference = null
         };
 
         vm.PropertyChanged += MealItem_PropertyChanged;
@@ -285,14 +370,33 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
         ValidateProperty(nameof(PromoID));
         ValidateProperty(nameof(ProductName));
         ValidateProperty(nameof(ProductDescription));
+        ValidateProperty(nameof(PaxCount));
 
-        if (MealProductItems.Count == 0)
+        if (IsCustomizable)
         {
-            AddError(nameof(MealProductItems), "At least one meal item is required.");
+            ClearErrors(nameof(MealProductItems));
+
+            if (PreferredViandCount <= 0)
+            {
+                AddError(nameof(PreferredViandCount), "Preferred viand count must be greater than 0 for customizable packages.");
+            }
+            else
+            {
+                ClearErrors(nameof(PreferredViandCount));
+            }
         }
         else
         {
-            ClearErrors(nameof(MealProductItems));
+            ClearErrors(nameof(PreferredViandCount));
+
+            if (MealProductItems.Count == 0)
+            {
+                AddError(nameof(MealProductItems), "At least one meal item is required for a fixed package.");
+            }
+            else
+            {
+                ClearErrors(nameof(MealProductItems));
+            }
         }
 
         OnPropertyChanged(nameof(ValidationSummary));
@@ -305,9 +409,13 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
             throw new ArgumentNullException(nameof(entity));
 
         MealProductID = entity.MealProductID;
-        OwnerID = (int)entity.OwnerID;
+        OwnerID = entity.OwnerID?.ToString();   
         PromoID = entity.PromoID;
         IsCateringPackage = entity.IsCateringPackage;
+        IsCustomizable = entity.IsCustomizable;
+        PreferredViandCount = entity.PreferredViandCount;
+        IsAvailable = entity.IsAvailable;
+        PaxCount = entity.PaxCount;
         ProductName = entity.ProductName ?? string.Empty;
         ProductDescription = entity.ProductDescription;
         ImageBytes = entity.ImageBytes;
@@ -341,6 +449,8 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
         OnPropertyChanged(nameof(FormattedProductBasePrice));
         OnPropertyChanged(nameof(FormattedFinalPrice));
         OnPropertyChanged(nameof(FormattedDiscountAmount));
+        OnPropertyChanged(nameof(PaxDisplay));
+        OnPropertyChanged(nameof(CustomizableDisplay));
     }
 
     public MealProduct ToEntity()
@@ -355,9 +465,13 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
         return new MealProduct
         {
             MealProductID = MealProductID ?? 0,
-            OwnerID = OwnerID,
+            OwnerID = ParseNullableInt(OwnerID),
             PromoID = PromoID,
             IsCateringPackage = IsCateringPackage,
+            IsCustomizable = IsCustomizable,
+            PreferredViandCount = PreferredViandCount,
+            IsAvailable = IsAvailable,
+            PaxCount = PaxCount,
             ProductName = ProductName.Trim(),
             ProductDescription = string.IsNullOrWhiteSpace(ProductDescription)
                 ? null
@@ -392,8 +506,10 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
         switch (propertyName)
         {
             case nameof(OwnerID):
-                if (OwnerID <= 0)
-                    AddError(propertyName, "Owner ID is required.");
+                if (!string.IsNullOrWhiteSpace(OwnerID) && ParseNullableInt(OwnerID) is null)
+                {
+                    AddError(propertyName, "Owner ID must be a valid whole number or left blank.");
+                }
                 break;
 
             case nameof(PromoID):
@@ -416,6 +532,22 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
                 if (!string.IsNullOrWhiteSpace(ProductDescription) && ProductDescription.Trim().Length > 100)
                 {
                     AddError(propertyName, "Product description must not exceed 100 characters.");
+                }
+                break;
+            case nameof(PaxCount):
+                if (PaxCount < 0)
+                {
+                    AddError(propertyName, "Number of pax cannot be negative.");
+                }
+                break;
+            case nameof(IsCustomizable):
+                // no direct validation needed here
+                break;
+
+            case nameof(PreferredViandCount):
+                if (IsCustomizable && PreferredViandCount <= 0)
+                {
+                    AddError(propertyName, "Preferred viand count must be greater than 0.");
                 }
                 break;
         }
@@ -472,5 +604,37 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private async Task UpdateProductImageAsync(byte[]? bytes)
+    {
+        try
+        {
+            if (bytes == null || bytes.Length == 0)
+            {
+                ProductImage = null;
+                return;
+            }
+
+            using var memoryStream = new System.IO.MemoryStream(bytes);
+            var bitmap = new BitmapImage();
+            await bitmap.SetSourceAsync(memoryStream.AsRandomAccessStream());
+            ProductImage = bitmap;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"UpdateProductImageAsync failed: {ex}");
+            ProductImage = null;
+        }
+    }
+
+    private static int? ParseNullableInt(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return null;
+
+        return int.TryParse(input.Trim(), out var parsed)
+            ? parsed
+            : null;
     }
 }

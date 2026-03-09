@@ -139,10 +139,12 @@ namespace PESYONG.Presentation.Views.Admin.Meals
                 {
                     var fullMeal = await _mealRepository.GetMealByIdAsync(selectedVm.MealID.Value);
                     _selectedImageBytes = fullMeal?.ImageBytes;
+                    selectedVm.ImageBytes = fullMeal?.ImageBytes;
                 }
                 else
                 {
                     _selectedImageBytes = null;
+                    selectedVm.ImageBytes = null;
                 }
 
                 selectedVm.StatusMessage = string.Empty;

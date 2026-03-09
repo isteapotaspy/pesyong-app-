@@ -355,7 +355,7 @@ public partial class CheckoutViewModel : ObservableObject
                 {
                     MealId = x.MealId,
                     MealName = x.MealName,
-                    Price = x.Price
+                    MealPrice = x.Price
                 }).ToList()
             }).ToList()
         };

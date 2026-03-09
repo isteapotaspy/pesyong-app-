@@ -383,6 +383,9 @@ namespace PESYONG.Infrastructure.Migrations
                     b.Property<byte[]>("ImageBytes")
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<bool>("IsViandOption")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("LastModifiedByOperatorID")
                         .HasColumnType("int");
 
@@ -429,13 +432,22 @@ namespace PESYONG.Infrastructure.Migrations
                     b.Property<byte[]>("ImageBytes")
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsCateringPackage")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCustomizable")
                         .HasColumnType("bit");
 
                     b.Property<int?>("OwnerID")
                         .HasColumnType("int");
 
                     b.Property<int>("PaxCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PreferredViandCount")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductDescription")

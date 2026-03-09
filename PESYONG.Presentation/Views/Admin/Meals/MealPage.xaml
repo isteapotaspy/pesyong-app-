@@ -189,7 +189,7 @@
                                         <Setter Target="DescriptionBox.(Grid.ColumnSpan)" Value="1"/>
                                         <Setter Target="TagsPanel.(Grid.ColumnSpan)" Value="1"/>
 
-                                        <Setter Target="FormattedPriceText.(Grid.Row)" Value="2"/>
+                                        <Setter Target="FormattedPriceText.(Grid.Row)" Value="1"/>
                                         <Setter Target="FormattedPriceText.(Grid.Column)" Value="0"/>
                                         <Setter Target="FormattedPriceText.Margin" Value="0,4,0,0"/>
                                         <Setter Target="FormattedPriceText.VerticalAlignment" Value="Top"/>
@@ -220,7 +220,7 @@
                                         CornerRadius="8"
                                         Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
                                     <Image x:Name="MealImageControl"
-                                           Source="{Binding MealImage}"
+                                           Source="{Binding MealImage, Mode=OneWay}"
                                            Width="120"
                                            Height="120"
                                            Stretch="Uniform"
@@ -346,6 +346,7 @@
                                          Header="Price"
                                          Text="{Binding MealPrice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource StandardTextBoxStyle}"
+                                         VerticalAlignment="Bottom"
                                          TextChanged="TextBox_TextChanged">
                                     <TextBox.InputScope>
                                         <InputScope>
@@ -357,12 +358,14 @@
                                 </TextBox>
 
                                 <TextBlock x:Name="FormattedPriceText"
-                                           Grid.Row="1"
+                                           Grid.Row="0"
                                            Grid.Column="2"
                                            Text="{Binding FormattedPrice, FallbackValue='PHP 0.00'}"
                                            FontSize="24"
                                            FontWeight="SemiBold"
-                                           Foreground="DarkGreen"/>
+                                           Foreground="DarkGreen"
+                                           VerticalAlignment="Bottom"
+                                           Margin="0,0,0,4"/>
                             </Grid>
 
                             <ComboBox Grid.Row="3"

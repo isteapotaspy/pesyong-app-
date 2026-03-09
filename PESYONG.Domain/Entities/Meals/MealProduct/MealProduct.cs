@@ -23,12 +23,18 @@ public class MealProduct
 
     [Required]
     public bool IsCateringPackage { get; set; }
+    public bool IsAvailable { get; set; } = true;
 
     public byte[]? ImageBytes { get; set; }
     public int PaxCount { get; set; }
 
     [NotMapped]
     public string PaxDisplay => PaxCount > 0 ? $"Good for {PaxCount} pax" : string.Empty;
+
+    public bool IsCustomizable { get; set; } = false;
+
+    // Example: package allows 2 viands to be chosen
+    public int PreferredViandCount { get; set; } = 0;
 
     public ICollection<MealProductItem> MealProductItems { get; set; } = [];
 

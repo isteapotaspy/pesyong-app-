@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace PESYONG.Domain.Entities
 {
+    // CartItem uses CateringCartSelection
     public class CateringCartSelection
     {
         public int MealId { get; set; }

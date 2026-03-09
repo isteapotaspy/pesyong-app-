@@ -15,6 +15,7 @@
         <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
         <converters:PriceFormatConverter x:Key="PriceFormatConverter"/>
         <converters:GreaterThanZeroToVisibilityConverter x:Key="GreaterThanZeroToVisibilityConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         <Style x:Key="CateringCardStyle" TargetType="Border">
             <Setter Property="Background" Value="White"/>
@@ -134,18 +135,14 @@
                                             Background="#FFF0E0"
                                             CornerRadius="12,12,0,0">
                                         <Grid>
-                                            <!-- Temporary package image placeholder -->
-                                            <TextBlock Text="Package Image"
-                                                       VerticalAlignment="Center"
-                                                       HorizontalAlignment="Center"
-                                                       Foreground="#999999"/>
+                                            <Image Source="{Binding ImageSource}"
+                                                   Stretch="UniformToFill"/>
 
-                                            <!-- Cart Badge -->
                                             <Border Style="{StaticResource CartBadgeStyle}"
-                                                    HorizontalAlignment="Right"
-                                                    VerticalAlignment="Top"
-                                                    Margin="8"
-                                                    Visibility="{Binding CartQuantity, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}">
+                                                           HorizontalAlignment="Right"
+                                                           VerticalAlignment="Top"
+                                                           Margin="8"
+                                                           Visibility="{Binding CartQuantity, Converter={StaticResource GreaterThanZeroToVisibilityConverter}}">
                                                 <TextBlock Foreground="White"
                                                            FontWeight="Bold"
                                                            FontSize="10">
@@ -181,10 +178,10 @@
                                                            Foreground="#FF6600"/>
 
                                                 <Grid>
-                                                    <TextBlock Text="🔸 Choose any 8 viands from our menu"
-                                                               Foreground="#FF6600"
-                                                               FontSize="14"
-                                                               Visibility="{Binding MealProductItems.Count, Converter={StaticResource CountToVisibilityConverter}, ConverterParameter=0}"/>
+                                                    <TextBlock Text="{Binding ViandSelectionText}"
+                                                                     Foreground="#FF6600"
+                                                                     FontSize="14"
+                                                                     Visibility="{Binding IsCustomizable, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                                                     <ItemsControl ItemsSource="{Binding MealProductItems}"
                                                                   Visibility="{Binding MealProductItems.Count, Converter={StaticResource CountToVisibilityConverter}}">
@@ -288,11 +285,6 @@
                                                       Tag="{Binding MealID}"/>
 
                                             <StackPanel Grid.Column="1">
-                                                <Image Source="{Binding ImageSourceString}"
-                                                       Width="100"
-                                                       Height="70"
-                                                       Stretch="UniformToFill"
-                                                       Margin="0,0,0,5"/>
                                                 <TextBlock Text="{Binding MealName}"
                                                            FontWeight="Medium"
                                                            TextWrapping="Wrap"/>
