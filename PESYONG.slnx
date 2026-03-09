@@ -4,6 +4,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="PESYONG.Api/PESYONG.Api.csproj" Id="066b32fe-da4f-4fe0-baa5-16cda39b67f8" />
   <Project Path="PESYONG.Application/PESYONG.ApplicationLogic.csproj" />
   <Project Path="PESYONG.Domain/PESYONG.Domain.csproj" />
   <Project Path="PESYONG.Infrastructure/PESYONG.Infrastructure.csproj" />

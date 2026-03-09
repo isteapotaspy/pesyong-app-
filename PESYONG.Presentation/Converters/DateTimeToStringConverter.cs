@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 /// Converts a <see cref="DateTime"/> object into a formatted string 
 /// (e.g., "January 1, 2026") for UI display.
 /// </summary>
-namespace PESYONG.ApplicationLogic.Converters
+namespace PESYONG.Presentation.Converters
 {
     public class DateTimeToStringConverter : Microsoft.UI.Xaml.Data.IValueConverter
     {

@@ -35,7 +35,7 @@ public class OrderRepository
     /// </summary>
     /// <param name="request">The checkout request containing customer and item details.</param>
     /// <returns>The ID of the newly created order.</returns>
-    public async Task<Guid> PlaceOrderAsync(CheckoutRequestDto request)
+    public async Task<OrderPlacementResultDto> PlaceOrderAsync(CheckoutRequestDto request)
     {
         using var context = _contextFactory.CreateDbContext();
 
@@ -156,7 +156,11 @@ public class OrderRepository
         context.Orders.Add(order);
         await context.SaveChangesAsync();
 
-        return order.OrderID;
+        return new OrderPlacementResultDto
+        {
+            OrderId = order.OrderID,
+            CustomerId = customer.CustomerID
+        };
     }
 
     /// <summary>

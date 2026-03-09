@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 /// human-readable display names for the UI.
 /// </summary>
 
-namespace PESYONG.ApplicationLogic.Converters
+namespace PESYONG.Presentation.Converters
 {
     public class CartItemTypeToDisplayConverter : Microsoft.UI.Xaml.Data.IValueConverter
     {

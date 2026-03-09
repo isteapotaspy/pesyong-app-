@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using PESYONG.Presentation.Services;
 
 namespace PESYONG.Presentation.Views.Customer
 {
@@ -22,6 +23,7 @@ namespace PESYONG.Presentation.Views.Customer
         private readonly MealRepository _mealRepository;
         private readonly MealSyncService _mealSyncService;
         private readonly CartService _cartService;
+        private readonly RealtimeService _realtimeService;
 
         private ObservableCollection<ShortOrderViewModel> ShortOrders { get; set; } = new();
 
@@ -31,6 +33,7 @@ namespace PESYONG.Presentation.Views.Customer
 
             _mealRepository = App.Current.Services.GetRequiredService<MealRepository>();
             _mealSyncService = App.Current.Services.GetRequiredService<MealSyncService>();
+            _realtimeService = App.Current.Services.GetRequiredService<RealtimeService>();
             _cartService = CartService.Instance;
 
             Loaded += ShortOrdersPage_Loaded;
@@ -46,8 +49,15 @@ namespace PESYONG.Presentation.Views.Customer
 
         private async void ShortOrdersPage_Loaded(object sender, RoutedEventArgs e)
         {
+            _realtimeService.CatalogChanged += OnCatalogChanged;
             await LoadShortOrdersAsync();
             UpdateCartQuantities();
+        }
+
+        private async Task OnCatalogChanged()
+        {
+            System.Diagnostics.Debug.WriteLine("CatalogChanged received!");
+            await LoadShortOrdersAsync();
         }
 
         private async Task LoadShortOrdersAsync()
@@ -219,6 +229,7 @@ namespace PESYONG.Presentation.Views.Customer
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             _mealSyncService.MealsChanged -= OnMealsChanged;
+            _realtimeService.CatalogChanged -= OnCatalogChanged;
 
             if (_cartService.Cart != null)
             {

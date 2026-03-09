@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,8 +19,15 @@ using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Infrastructure;
 using PESYONG.Presentation.Profiler;
+using PESYONG.Presentation.Services;
 using PESYONG.Presentation.ViewModels;
 using PESYONG.Presentation.ViewModels.ObjectModels;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -50,6 +51,7 @@ public partial class App : Microsoft.UI.Xaml.Application
     public AppUser CurrentUser { get; set; }
 
     private IHost _host;
+    public Guid? CurrentCustomerId { get; set; }
 
 
     /// <summary>
@@ -98,6 +100,9 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddSingleton<MealSyncService>();
         services.AddSingleton<CartStateService>();
 
+        // real time refresh
+        services.AddSingleton<RealtimeService>();
+
         // Customer ViewModels
         services.AddTransient<PackagesViewModel>();
         services.AddTransient<CheckoutViewModel>();
@@ -134,9 +139,20 @@ public partial class App : Microsoft.UI.Xaml.Application
     /// Invoked when the application is launched.
     /// </summary>
     /// <param name="args">Details about the launch request and process.</param>
-    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         _instance = this;
+
+        try
+        {
+            var realtimeService = Services.GetRequiredService<RealtimeService>();
+            await realtimeService.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"RealtimeService failed to start: {ex.Message}");
+        }
+
         MainWindow = new MainWindow();
         MainWindow.Activate();
     }

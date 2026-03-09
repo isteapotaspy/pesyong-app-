@@ -214,7 +214,7 @@ public partial class CheckoutViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task<Guid?> PlaceOrderAsync()
+    private async Task<OrderPlacementResultDto?> PlaceOrderAsync()
     {
         if (!Validate(out _))
             return null;
@@ -255,11 +255,11 @@ public partial class CheckoutViewModel : ObservableObject
             }).ToList()
         };
 
-        var orderId = await _orderRepository.PlaceOrderAsync(request);
-        return orderId;
+        var result = await _orderRepository.PlaceOrderAsync(request);
+        return result;
     }
 
-    public Task<Guid?> SubmitOrderAsync()
+    public Task<OrderPlacementResultDto?> SubmitOrderAsync()
     {
         return PlaceOrderAsync();
     }

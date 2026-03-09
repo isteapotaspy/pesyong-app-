@@ -12,6 +12,7 @@ using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Users.Identity;
+using PESYONG.Presentation.Services;
 using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,7 @@ namespace PESYONG.Presentation.Views.Customer
         private readonly CartService _cartService;
         private readonly MealProductRepository _mealProductRepository;
         private readonly MealRepository _mealRepository;
+        private readonly RealtimeService _realtimeService;
 
         public CateringPackagesPage()
         {
@@ -40,6 +42,7 @@ namespace PESYONG.Presentation.Views.Customer
             _cartService = CartService.Instance;
             _mealProductRepository = App.Current.Services.GetRequiredService<MealProductRepository>();
             _mealRepository = App.Current.Services.GetRequiredService<MealRepository>();
+            _realtimeService = App.Current.Services.GetRequiredService<RealtimeService>();
 
             Loaded += CateringPackagesPage_Loaded;
             Unloaded += CateringPackagesPage_Unloaded;
@@ -52,6 +55,8 @@ namespace PESYONG.Presentation.Views.Customer
 
         private async void CateringPackagesPage_Loaded(object sender, RoutedEventArgs e)
         {
+            _realtimeService.CatalogChanged += OnCatalogChanged;
+
             await LoadPackagesAsync();
             await LoadAvailableViandsAsync();
             UpdateCartQuantities();
@@ -59,10 +64,21 @@ namespace PESYONG.Presentation.Views.Customer
 
         private void CateringPackagesPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            _realtimeService.CatalogChanged -= OnCatalogChanged;
+
             if (_cartService.Cart != null)
             {
                 _cartService.Cart.CollectionChanged -= Cart_CollectionChanged;
             }
+        }
+
+        private async Task OnCatalogChanged()
+        {
+            System.Diagnostics.Debug.WriteLine("CatalogChanged received in CateringPackagesPage!");
+
+            await LoadPackagesAsync();
+            await LoadAvailableViandsAsync();
+            UpdateCartQuantities();
         }
 
         private void Cart_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

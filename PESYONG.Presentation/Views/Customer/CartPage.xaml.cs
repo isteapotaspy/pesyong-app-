@@ -248,15 +248,20 @@ namespace PESYONG.Presentation.Views.Customer
                     return;
                 }
 
-                var orderId = await CheckoutVM.SubmitOrderAsync();
+                var result = await CheckoutVM.SubmitOrderAsync();
 
-                if (orderId == null)
+                if (result == null)
                 {
                     ShowErrorDialog("Failed to place order.");
                     return;
                 }
 
-                var orderNumber = orderId.Value.ToString()[..8].ToUpper();
+                App.Current.CurrentCustomerId = result.CustomerId;
+
+                System.Diagnostics.Debug.WriteLine($"Placed OrderId: {result.OrderId}");
+                System.Diagnostics.Debug.WriteLine($"Saved CurrentCustomerId: {result.CustomerId}");
+
+                var orderNumber = result.OrderId.ToString()[..8].ToUpper();
 
                 var dialog = new ContentDialog
                 {

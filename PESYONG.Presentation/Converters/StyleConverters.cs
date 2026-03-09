@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI;
 
-namespace PESYONG.ApplicationLogic.Converters;
+namespace PESYONG.Presentation.Converters;
 
 
 /// <summary>
