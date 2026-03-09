@@ -55,7 +55,7 @@ public class CateringService
         {
             OrderID = Guid.NewGuid(),
             CustomerID = customerId,
-            DeliveryType = DeliveryStatus.OnCart,
+            DeliveryType = DeliveryType.Delivery,
             DeliveryStatus = DeliveryStatus.Pending
         };
 
@@ -95,7 +95,7 @@ public class CateringService
         {
             OrderID = Guid.NewGuid(),
             CustomerID = customerId,
-            DeliveryType = DeliveryStatus.OnCart,
+            DeliveryType = DeliveryType.Delivery,
             DeliveryStatus = DeliveryStatus.Pending
         };
 

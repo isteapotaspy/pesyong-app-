@@ -59,7 +59,7 @@ public class Order
     public DateTime? ActualDeliveryDate { get; set; }
 
     // Order status details
-    public DeliveryStatus DeliveryType { get; set; } = DeliveryStatus.OnCart;
+    public DeliveryType DeliveryType { get; set; } = DeliveryType.Delivery;
     public DeliveryStatus DeliveryStatus { get; set; } = DeliveryStatus.Pending;
 
     // Order logistics details

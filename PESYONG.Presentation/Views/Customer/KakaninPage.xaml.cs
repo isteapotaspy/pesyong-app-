@@ -178,7 +178,7 @@ namespace PESYONG.Presentation.Views.Customer
             var button = sender as Button;
             if (button?.Tag is int mealId)
             {
-                var item = KakaninItems.FirstOrDefault(x => x.MealID == mealId);
+                var item = KakaninItems.FirstOrDefault(x => x.MealProductID == mealId);
                 item?.IncreaseQuantity();
             }
         }
@@ -188,7 +188,7 @@ namespace PESYONG.Presentation.Views.Customer
             var button = sender as Button;
             if (button?.Tag is int mealId)
             {
-                var item = KakaninItems.FirstOrDefault(x => x.MealID == mealId);
+                var item = KakaninItems.FirstOrDefault(x => x.MealProductID == mealId);
                 item?.DecreaseQuantity();
             }
         }
@@ -198,7 +198,7 @@ namespace PESYONG.Presentation.Views.Customer
             var button = sender as Button;
             if (button?.Tag is int mealId)
             {
-                var item = KakaninItems.FirstOrDefault(x => x.MealID == mealId);
+                var item = KakaninItems.FirstOrDefault(x => x.MealProductID == mealId);
                 item?.AddToCart();
 
                 // Show success message

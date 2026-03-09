@@ -1,4 +1,5 @@
-﻿using PESYONG.Domain.Entities.Orders;
+﻿using Microsoft.UI.Xaml.Controls;
+using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.UI;
+using Microsoft.UI.Xaml.Media;
+using System.Text.RegularExpressions;
 
 namespace PESYONG.Presentation.ViewModels.ObjectModels;
 
@@ -22,8 +26,7 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
     private DateTime? _estimatedDeliveryDate;
     private DateTime? _actualDeliveryDate;
 
-    // Matches your Order entity exactly
-    private DeliveryStatus _deliveryType = DeliveryStatus.OnCart;
+    private DeliveryType _deliveryType = DeliveryType.Delivery;
     private DeliveryStatus _deliveryStatus = DeliveryStatus.Pending;
 
     private string? _address;
@@ -32,6 +35,12 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
     private string? _specialInstructions;
     private string _statusMessage = string.Empty;
     private string _validationSummary = string.Empty;
+
+    private string _customerFirstName = string.Empty;
+    private string _customerLastName = string.Empty;
+    private string _customerPhoneNumber = string.Empty;
+    private string _customerEmail = string.Empty;
+
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -114,17 +123,29 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
         }
     }
 
-    // This matches your entity, even though the name says "Type"
-    public DeliveryStatus DeliveryType
+    public DeliveryType DeliveryType
     {
         get => _deliveryType;
-        set => SetProperty(ref _deliveryType, value);
+        set
+        {
+            if (SetProperty(ref _deliveryType, value))
+            {
+                OnPropertyChanged(nameof(DeliveryTypeDisplay));
+            }
+        }
     }
 
     public DeliveryStatus DeliveryStatus
     {
         get => _deliveryStatus;
-        set => SetProperty(ref _deliveryStatus, value);
+        set
+        {
+            if (SetProperty(ref _deliveryStatus, value))
+            {
+                OnPropertyChanged(nameof(DeliveryStatusDisplay));
+                OnPropertyChanged(nameof(DeliveryStatusBadgeBrush));
+            }
+        }
     }
 
     [Required(ErrorMessage = "Address is required.")]
@@ -196,7 +217,11 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
     }
 
     public string DisplayName =>
-        OrderID == Guid.Empty ? "New Order" : $"Order {OrderID.ToString()[..8]}";
+    OrderID == Guid.Empty
+        ? "New Order"
+        : !string.IsNullOrWhiteSpace(CustomerFullName)
+            ? $"{CustomerFullName} - {OrderID.ToString()[..8]}"
+            : $"Order {OrderID.ToString()[..8]}";
 
     public string OrderIDText
     {
@@ -282,6 +307,48 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
         }
     }
 
+    public string CustomerFirstName
+    {
+        get => _customerFirstName;
+        set
+        {
+            if (SetProperty(ref _customerFirstName, value))
+            {
+                OnPropertyChanged(nameof(CustomerFullName));
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
+    }
+
+    public string CustomerLastName
+    {
+        get => _customerLastName;
+        set
+        {
+            if (SetProperty(ref _customerLastName, value))
+            {
+                OnPropertyChanged(nameof(CustomerFullName));
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
+    }
+
+    public string CustomerPhoneNumber
+    {
+        get => _customerPhoneNumber;
+        set => SetProperty(ref _customerPhoneNumber, value);
+    }
+
+    public string CustomerEmail
+    {
+        get => _customerEmail;
+        set => SetProperty(ref _customerEmail, value);
+    }
+
+    public string CustomerFullName =>
+        string.Join(" ", new[] { CustomerFirstName, CustomerLastName }
+            .Where(x => !string.IsNullOrWhiteSpace(x)));
+
     public string OrderDateDisplay => OrderDate.ToString("g");
 
     public decimal OrderTotalAmount => OrderItems.Sum(x => x.SubTotal);
@@ -348,7 +415,7 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
         OrderDate = entity.OrderDate;
         EstimatedDeliveryDate = entity.EstimatedDeliveryDate;
         ActualDeliveryDate = entity.ActualDeliveryDate;
-        DeliveryType = entity.DeliveryType;
+        DeliveryType = (DeliveryType)entity.DeliveryType;
         DeliveryStatus = entity.DeliveryStatus;
         Address = entity.Address;
         TrackingNumber = entity.TrackingNumber;
@@ -358,6 +425,11 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
         OrderItems = new ObservableCollection<OrderMealProductViewModel>(
             entity.OrderItems?.Select(OrderMealProductViewModel.CreateFromEntity)
             ?? Enumerable.Empty<OrderMealProductViewModel>());
+        
+        CustomerFirstName = entity.Customer?.FirstName ?? string.Empty;
+        CustomerLastName = entity.Customer?.LastName ?? string.Empty;
+        CustomerPhoneNumber = entity.Customer?.PhoneNumber ?? string.Empty;
+        CustomerEmail = entity.Customer?.Email ?? string.Empty;
 
         RefreshTotals();
     }
@@ -391,12 +463,18 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
         OrderDate = DateTime.Now;
         EstimatedDeliveryDate = null;
         ActualDeliveryDate = null;
-        DeliveryType = DeliveryStatus.OnCart;
+        DeliveryType = DeliveryType.Delivery;
         DeliveryStatus = DeliveryStatus.Pending;
         Address = string.Empty;
         TrackingNumber = null;
         CustomerNotes = null;
         SpecialInstructions = null;
+
+        CustomerFirstName = string.Empty;
+        CustomerLastName = string.Empty;
+        CustomerPhoneNumber = string.Empty;
+        CustomerEmail = string.Empty;
+
         StatusMessage = string.Empty;
         ValidationSummary = string.Empty;
         RefreshTotals();
@@ -535,4 +613,41 @@ public class OrderViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
+    public string DeliveryStatusDisplay => FormatEnumName(DeliveryStatus.ToString());
+
+    public string DeliveryTypeDisplay => FormatEnumName(DeliveryType.ToString());
+
+    public SolidColorBrush DeliveryStatusBadgeBrush => DeliveryStatus switch
+    {
+        DeliveryStatus.Delivered => new SolidColorBrush(Colors.ForestGreen),
+        DeliveryStatus.Cancelled => new SolidColorBrush(Colors.IndianRed),
+        DeliveryStatus.Failed => new SolidColorBrush(Colors.IndianRed),
+        DeliveryStatus.Returned => new SolidColorBrush(Colors.IndianRed),
+
+        DeliveryStatus.OutForDelivery => new SolidColorBrush(Colors.DodgerBlue),
+        DeliveryStatus.InTransit => new SolidColorBrush(Colors.DodgerBlue),
+        DeliveryStatus.Arrived => new SolidColorBrush(Colors.DodgerBlue),
+
+        DeliveryStatus.Preparing => new SolidColorBrush(Colors.DarkOrange),
+        DeliveryStatus.ReadyForPickup => new SolidColorBrush(Colors.DarkOrange),
+
+        DeliveryStatus.Scheduled => new SolidColorBrush(Colors.Goldenrod),
+        DeliveryStatus.Confirmed => new SolidColorBrush(Colors.Goldenrod),
+
+        DeliveryStatus.Pending => new SolidColorBrush(Colors.Gray),
+        DeliveryStatus.Attempted => new SolidColorBrush(Colors.SaddleBrown),
+        DeliveryStatus.OnCart => new SolidColorBrush(Colors.DimGray),
+
+        _ => new SolidColorBrush(Colors.Gray)
+    };
+
+    private static string FormatEnumName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        return Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+    }
+
 }

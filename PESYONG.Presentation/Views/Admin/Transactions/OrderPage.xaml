@@ -11,22 +11,61 @@
 
     <Page.Resources>
         <DataTemplate x:Key="OrderListTemplate" x:DataType="objectmodels:OrderViewModel">
-            <Grid Padding="12,8">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <Border Padding="12,10" CornerRadius="8">
+                <Grid RowSpacing="6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0"
-                           Text="{x:Bind DisplayName}"
-                           Style="{ThemeResource BaseTextBlockStyle}" />
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="1"
-                           Margin="0,4,0,0"
-                           Text="{x:Bind FormattedOrderTotalAmount}"
-                           Opacity="0.75"
-                           Style="{ThemeResource BodyTextBlockStyle}" />
-            </Grid>
+                        <TextBlock Grid.Column="0"
+                                   Text="{x:Bind DisplayName}"
+                                   FontWeight="SemiBold"
+                                   Style="{ThemeResource BaseTextBlockStyle}" />
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Spacing="6"
+                                    HorizontalAlignment="Right">
+                            <Border Background="#303030"
+                                    CornerRadius="12"
+                                    Padding="8,3">
+                                <TextBlock Text="{x:Bind DeliveryTypeDisplay}"
+                                           Foreground="White"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"/>
+                            </Border>
+
+                            <Border Background="{x:Bind DeliveryStatusBadgeBrush}"
+                                    CornerRadius="12"
+                                    Padding="8,3">
+                                <TextBlock Text="{x:Bind DeliveryStatusDisplay}"
+                                           Foreground="White"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Grid.Row="1"
+                               Text="{x:Bind FormattedOrderTotalAmount}"
+                               Opacity="0.8"
+                               Style="{ThemeResource BodyTextBlockStyle}" />
+
+                    <TextBlock Grid.Row="2"
+                               Text="{x:Bind Address}"
+                               FontSize="12"
+                               Opacity="0.65"
+                               TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </Border>
         </DataTemplate>
 
         <DataTemplate x:Key="OrderItemTemplate" x:DataType="objectmodels:OrderMealProductViewModel">
@@ -74,7 +113,6 @@
             <ColumnDefinition Width="1.35*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- LEFT -->
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -97,7 +135,6 @@
                     Style="{StaticResource AccentButtonStyle}" />
         </Grid>
 
-        <!-- RIGHT -->
         <Border Grid.Column="2"
                 Padding="20"
                 CornerRadius="8"
@@ -108,6 +145,52 @@
                 <StackPanel Spacing="16">
                     <TextBlock Text="Order Configuration"
                                Style="{StaticResource TitleTextBlockStyle}" />
+
+                    <Border Padding="16"
+                            CornerRadius="8"
+                            Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Customer Details"
+                                       Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                            <Grid ColumnSpacing="12" RowSpacing="12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="0"
+                                         Header="First Name"
+                                         Text="{Binding CustomerFirstName, Mode=OneWay}"
+                                         IsReadOnly="True" />
+
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Header="Last Name"
+                                         Text="{Binding CustomerLastName, Mode=OneWay}"
+                                         IsReadOnly="True" />
+
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="0"
+                                         Header="Phone Number"
+                                         Text="{Binding CustomerPhoneNumber, Mode=OneWay}"
+                                         IsReadOnly="True" />
+
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Header="Email"
+                                         Text="{Binding CustomerEmail, Mode=OneWay}"
+                                         IsReadOnly="True" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
 
                     <Grid ColumnSpacing="12" RowSpacing="12">
                         <Grid.RowDefinitions>
@@ -129,8 +212,8 @@
 
                         <TextBox Grid.Row="0"
                                  Grid.Column="1"
-                                 Header="Recipient ID"
-                                 Text="{Binding RecipientIDText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Header="Customer ID"
+                                 Text="{Binding CustomerIDText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                  TextChanged="FormTextBox_TextChanged" />
 
                         <TextBox Grid.Row="1"
@@ -147,7 +230,7 @@
                         <ComboBox Grid.Row="2"
                                   Grid.Column="0"
                                   Header="Delivery Type"
-                                  ItemsSource="{x:Bind DeliveryStatuses, Mode=OneWay}"
+                                  ItemsSource="{x:Bind DeliveryTypes, Mode=OneWay}"
                                   SelectedItem="{Binding DeliveryType, Mode=TwoWay}"
                                   SelectionChanged="FormComboBox_SelectionChanged" />
 
@@ -204,13 +287,6 @@
                              TextWrapping="Wrap"
                              MinHeight="90"
                              Text="{Binding CustomerNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             TextChanged="FormTextBox_TextChanged" />
-
-                    <TextBox Header="Special Instructions"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             MinHeight="90"
-                             Text="{Binding SpecialInstructions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              TextChanged="FormTextBox_TextChanged" />
 
                     <StackPanel Spacing="8">

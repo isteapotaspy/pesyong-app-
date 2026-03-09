@@ -75,10 +75,10 @@ public class OrderRepository
             CustomerID = customer.CustomerID,
             Address = request.Address,
             CustomerNotes = request.Notes,
-            SpecialInstructions = request.Notes,
+            SpecialInstructions = null,
             OrderDate = DateTime.Now,
             EstimatedDeliveryDate = request.EstimatedDeliveryDate,
-            DeliveryType = DeliveryStatus.Pending,
+            DeliveryType = request.DeliveryType,
             DeliveryStatus = DeliveryStatus.Pending
         };
 
@@ -86,7 +86,7 @@ public class OrderRepository
         {
             MealProduct mealProduct;
 
-            if (item.Type == "catering" &&
+            if (item.Type == "package" &&
                 item.CateringSelections != null &&
                 item.CateringSelections.Count > 0)
             {
@@ -120,77 +120,11 @@ public class OrderRepository
                 context.MealProducts.Add(mealProduct);
                 await context.SaveChangesAsync();
             }
-            else if (item.Type == "shortorder")
-            {
-                var meal = await context.Meals.FindAsync(item.ProductID);
-                if (meal == null || !meal.MealID.HasValue)
-                {
-                    throw new InvalidOperationException(
-                        $"Meal with ID {item.ProductID} was not found.");
-                }
-
-                mealProduct = new MealProduct
-                {
-                    OwnerID = null,
-                    ProductName = meal.MealName,
-                    IsCateringPackage = false,
-                    MealProductItems = new List<MealProductItem>
-                    {
-                        new MealProductItem
-                        {
-                            MealID = meal.MealID.Value,
-                            Meal = meal,
-                            Quantity = 1
-                        }
-                    }
-                };
-
-                context.MealProducts.Add(mealProduct);
-                await context.SaveChangesAsync();
-            }
-            else if (item.Type == "package")
-            {
-                var existingMealProduct = await context.MealProducts.FindAsync(item.ProductID);
-                if (existingMealProduct == null)
-                {
-                    throw new InvalidOperationException(
-                        $"Package with MealProductID {item.ProductID} was not found.");
-                }
-
-                mealProduct = existingMealProduct;
-            }
-            else if (item.Type == "kakanin")
-            {
-                var meal = await context.Meals.FindAsync(item.ProductID);
-                if (meal == null || !meal.MealID.HasValue)
-                {
-                    throw new InvalidOperationException(
-                        $"Kakanin item with ID {item.ProductID} was not found.");
-                }
-
-                mealProduct = new MealProduct
-                {
-                    OwnerID = null,
-                    ProductName = meal.MealName,
-                    IsCateringPackage = false,
-                    MealProductItems = new List<MealProductItem>
-                    {
-                        new MealProductItem
-                        {
-                            MealID = meal.MealID.Value,
-                            Meal = meal,
-                            Quantity = 1
-                        }
-                    }
-                };
-
-                context.MealProducts.Add(mealProduct);
-                await context.SaveChangesAsync();
-            }
             else
             {
-                throw new InvalidOperationException(
-                    $"Unsupported cart item type: {item.Type}");
+                mealProduct = await context.MealProducts.FindAsync(item.ProductID)
+                    ?? throw new InvalidOperationException(
+                        $"MealProduct with ID {item.ProductID} was not found.");
             }
 
             order.OrderItems.Add(new OrderMealProduct
@@ -198,7 +132,7 @@ public class OrderRepository
                 OrderID = order.OrderID,
                 MealProductID = mealProduct.MealProductID,
                 MealProductOrderQty = item.Quantity,
-                ItemPrice = mealProduct.FinalPrice
+                ItemPrice = item.ItemPrice
             });
         }
 
@@ -221,6 +155,7 @@ public class OrderRepository
             .Include(o => o.Customer)
             .Include(o => o.Receipt)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .FirstOrDefaultAsync(o => o.OrderID == id);
     }
 
@@ -235,6 +170,7 @@ public class OrderRepository
         return await context.Orders
             .Include(o => o.Customer)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
@@ -252,6 +188,7 @@ public class OrderRepository
             .Where(o => o.CustomerID == customerId)
             .Include(o => o.Customer)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
@@ -269,6 +206,7 @@ public class OrderRepository
             .Where(o => o.DeliveryStatus == status)
             .Include(o => o.Customer)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
@@ -282,9 +220,10 @@ public class OrderRepository
         using var context = _contextFactory.CreateDbContext();
 
         return await context.Orders
-            .Where(o => o.DeliveryType == DeliveryStatus.OnCart)
+            .Where(o => o.DeliveryStatus == DeliveryStatus.OnCart)
             .Include(o => o.Customer)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }

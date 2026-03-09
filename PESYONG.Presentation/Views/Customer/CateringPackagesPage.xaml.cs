@@ -332,6 +332,11 @@ namespace PESYONG.Presentation.Views.Customer
                 string itemName = selectedViands != null && selectedViands.Any()
                     ? $"{package.ProductName} (Custom)"
                     : package.ProductName;
+                var resolvedImageBytes = package.Package.ImageBytes
+                ?? package.Package.MealProductItems?.FirstOrDefault()?.Meal?.ImageBytes;
+
+                System.Diagnostics.Debug.WriteLine(
+                $"Package '{package.ProductName}' image bytes length: {resolvedImageBytes?.Length ?? 0}");
 
                 var cartItem = new CartItem
                 {
@@ -339,6 +344,7 @@ namespace PESYONG.Presentation.Views.Customer
                     Name = itemName,
                     Price = (double)totalPrice,
                     Quantity = 1,
+                    ImageBytes = resolvedImageBytes,
                     Type = "package",
                     ProductId = package.MealProductID,
                     Pax = package.PaxCount > 0 ? package.PaxCount : package.MealProductItems?.Count ?? 0,

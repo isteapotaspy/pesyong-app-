@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PESYONG.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,8 @@ namespace PESYONG.ApplicationLogic.DTOs
 
         public DateTime? EstimatedDeliveryDate { get; set; }
         public DateTime? DeliveryDateTime { get; set; }
+
+        public DeliveryType DeliveryType { get; set; } = DeliveryType.Delivery;
 
         public string? Notes { get; set; }
         public string PaymentMethod { get; set; } = string.Empty;

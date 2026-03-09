@@ -2,7 +2,7 @@
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.IO;
-using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace PESYONG.Presentation.Converters;
 
@@ -15,19 +15,16 @@ public class ByteArrayToImageSourceConverter : IValueConverter
             if (value is not byte[] bytes || bytes.Length == 0)
                 return null;
 
-            var image = new BitmapImage();
+            var bitmap = new BitmapImage();
 
-            using var stream = new MemoryStream(bytes);
-            using var randomAccessStream = new InMemoryRandomAccessStream();
+            using var memoryStream = new MemoryStream(bytes);
+            bitmap.SetSource(memoryStream.AsRandomAccessStream());
 
-            stream.CopyTo(randomAccessStream.AsStreamForWrite());
-            randomAccessStream.Seek(0);
-
-            image.SetSource(randomAccessStream);
-            return image;
+            return bitmap;
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Image converter error: {ex.Message}");
             return null;
         }
     }

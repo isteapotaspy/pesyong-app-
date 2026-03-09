@@ -137,7 +137,7 @@ namespace PESYONG.Presentation.Views.Customer
 
             foreach (var item in ShortOrders)
             {
-                item.CartQuantity = GetCartQuantityForMeal(item.MealID);
+                item.CartQuantity = GetCartQuantityForMeal(item.MealProductID);
             }
         }
 
@@ -150,7 +150,7 @@ namespace PESYONG.Presentation.Views.Customer
                 return;
 
             int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
 
             if (item != null)
             {
@@ -167,7 +167,7 @@ namespace PESYONG.Presentation.Views.Customer
                 return;
 
             int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
 
             if (item != null)
             {
@@ -184,7 +184,7 @@ namespace PESYONG.Presentation.Views.Customer
                 return;
 
             int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
 
             if (item != null && item.IsAvailable)
             {
@@ -197,7 +197,7 @@ namespace PESYONG.Presentation.Views.Customer
                     Price = (double)item.MealPrice,
                     Quantity = quantity,
                     Type = "shortorder",
-                    ProductId = mealId,
+                    ProductId = item.MealProductID,
                     ImageBytes = item.ImageBytes
                 };
 
@@ -208,7 +208,7 @@ namespace PESYONG.Presentation.Views.Customer
                 ShowSuccessDialog($"{quantity} {item.MealName} added to cart!");
 
                 item.SelectedQuantity = 1;
-                item.CartQuantity = GetCartQuantityForMeal(item.MealID);
+                item.CartQuantity = GetCartQuantityForMeal(item.MealProductID);
             }
             else if (item != null && !item.IsAvailable)
             {

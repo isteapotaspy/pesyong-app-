@@ -20,6 +20,7 @@ public sealed partial class OrderPage : Page
 
     public ObservableCollection<OrderViewModel> OrderListViewModels { get; } = new();
 
+    public Array DeliveryTypes { get; } = Enum.GetValues(typeof(DeliveryType));
     public Array DeliveryStatuses { get; } = Enum.GetValues(typeof(DeliveryStatus));
 
     public OrderPage()

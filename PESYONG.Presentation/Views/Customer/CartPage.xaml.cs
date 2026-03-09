@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
+using PESYONG.Domain.Enums;
 using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.ObjectModel;
@@ -23,6 +24,7 @@ namespace PESYONG.Presentation.Views.Customer
         private ObservableCollection<CartItem> Cart => _cartService.Cart;
         private DeliveryInfo? Delivery => _cartService.Delivery;
 
+        public Array DeliveryTypes { get; } = Enum.GetValues(typeof(DeliveryType));
         public CheckoutViewModel CheckoutVM { get; }
 
         private enum CheckoutStep { Cart, Delivery, Payment }

@@ -18,7 +18,7 @@ namespace PESYONG.Presentation.ViewModels;
 /// </summary>
 public class ShortOrderViewModel : INotifyPropertyChanged
 {
-    private int _mealId;
+    private int _mealProductID;
     private string _mealName = string.Empty;
     private decimal _mealPrice;
     private int _selectedQuantity = 1;
@@ -44,7 +44,7 @@ public class ShortOrderViewModel : INotifyPropertyChanged
     /// <param name="cartQuantity">The quantity of this meal already present in the cart.</param>
     public ShortOrderViewModel(Meal meal, int cartQuantity = 0)
     {
-        _mealId = meal.MealID ?? 0;
+        _mealProductID = meal.MealID ?? 0;
         _mealName = meal.MealName;
         _mealPrice = meal.MealPrice;
         _imageBytes = meal.ImageBytes;
@@ -68,14 +68,14 @@ public class ShortOrderViewModel : INotifyPropertyChanged
     /// <summary>
     /// Gets or sets the meal ID.
     /// </summary>
-    public int MealID
+    public int MealProductID
     {
-        get => _mealId;
+        get => _mealProductID;
         set
         {
-            if (_mealId != value)
+            if (_mealProductID != value)
             {
-                _mealId = value;
+                _mealProductID = value;
                 OnPropertyChanged();
             }
         }

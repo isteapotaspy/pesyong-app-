@@ -1,6 +1,7 @@
 ﻿using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
 using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Domain.Entities.Meals.MealProduct;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -20,7 +21,7 @@ namespace PESYONG.Presentation.ViewModels
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public int MealID => _meal.MealID ?? 0;
+        public int MealProductID => _meal.MealID ?? 0;
         public string MealName => _meal.MealName;
         public string? Description => _meal.Description;
         public decimal MealPrice => _meal.MealPrice;
@@ -89,7 +90,7 @@ namespace PESYONG.Presentation.ViewModels
             }
 
             CartQuantity = _cartService.Cart
-                .Where(x => x.ProductId == MealID && x.Type == "kakanin")
+                .Where(x => x.ProductId == MealProductID && x.Type == "kakanin")
                 .Sum(x => x.Quantity);
         }
 
@@ -112,7 +113,7 @@ namespace PESYONG.Presentation.ViewModels
         public void AddToCart()
         {
             var existingItem = _cartService.Cart
-                .FirstOrDefault(x => x.ProductId == MealID && x.Type == "kakanin");
+                .FirstOrDefault(x => x.ProductId == MealProductID && x.Type == "kakanin");
 
             if (existingItem != null)
             {
@@ -122,13 +123,13 @@ namespace PESYONG.Presentation.ViewModels
             {
                 var cartItem = new CartItem
                 {
-                    Id = $"kakanin_{MealID}",
+                    Id = $"kakanin_{MealProductID}",
                     Name = MealName,
                     Price = (double)MealPrice,
                     Quantity = SelectedQuantity,
                     ImageBytes = ImageBytes,
                     Type = "kakanin",
-                    ProductId = MealID
+                    ProductId = MealProductID
                 };
 
                 _cartService.AddToCart(cartItem);
