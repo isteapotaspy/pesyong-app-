@@ -343,7 +343,7 @@
                                         <!-- Add to Cart Button -->
                                         <Button Grid.Row="6"
                                                 Style="{StaticResource AddToCartButtonStyle}"
-                                                Tag="{Binding MealID}"
+                                                Tag="{Binding MealProductID}"
                                                 Click="AddToCart_Click"
                                                 VerticalAlignment="Bottom"
                                                 HorizontalAlignment="Stretch"

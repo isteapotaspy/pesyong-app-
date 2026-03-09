@@ -82,55 +82,72 @@ public class OrderRepository
             DeliveryStatus = DeliveryStatus.Pending
         };
 
-        foreach (var item in request.Items)
+        var groupedNormalItems = request.Items
+            .Where(x => !(x.Type == "package" &&
+                          x.CateringSelections != null &&
+                          x.CateringSelections.Count > 0))
+            .GroupBy(x => new { x.ProductID, x.Type, x.ItemPrice })
+            .ToList();
+
+        var customPackageItems = request.Items
+            .Where(x => x.Type == "package" &&
+                        x.CateringSelections != null &&
+                        x.CateringSelections.Count > 0)
+            .ToList();
+
+        foreach (var group in groupedNormalItems)
         {
-            MealProduct mealProduct;
+            var firstItem = group.First();
 
-            if (item.Type == "package" &&
-                item.CateringSelections != null &&
-                item.CateringSelections.Count > 0)
-            {
-                var mealProductItems = new List<MealProductItem>();
-
-                foreach (var selection in item.CateringSelections)
-                {
-                    var meal = await context.Meals.FindAsync(selection.MealId);
-                    if (meal == null || !meal.MealID.HasValue)
-                    {
-                        throw new InvalidOperationException(
-                            $"Meal with ID {selection.MealId} was not found.");
-                    }
-
-                    mealProductItems.Add(new MealProductItem
-                    {
-                        MealID = meal.MealID.Value,
-                        Meal = meal,
-                        Quantity = 1
-                    });
-                }
-
-                mealProduct = new MealProduct
-                {
-                    OwnerID = null,
-                    ProductName = $"Custom Package - {DateTime.Now:MM/dd/yyyy}",
-                    IsCateringPackage = true,
-                    MealProductItems = mealProductItems
-                };
-
-                context.MealProducts.Add(mealProduct);
-                await context.SaveChangesAsync();
-            }
-            else
-            {
-                mealProduct = await context.MealProducts.FindAsync(item.ProductID)
-                    ?? throw new InvalidOperationException(
-                        $"MealProduct with ID {item.ProductID} was not found.");
-            }
+            var mealProduct = await context.MealProducts.FindAsync(firstItem.ProductID)
+                ?? throw new InvalidOperationException(
+                    $"MealProduct with ID {firstItem.ProductID} was not found.");
 
             order.OrderItems.Add(new OrderMealProduct
             {
                 OrderID = order.OrderID,
                 MealProductID = mealProduct.MealProductID,
+                MealProductOrderQty = group.Sum(x => x.Quantity),
+                ItemPrice = firstItem.ItemPrice
+            });
+        }
+
+        foreach (var item in customPackageItems)
+        {
+            var mealProductItems = new List<MealProductItem>();
+
+            foreach (var selection in item.CateringSelections!)
+            {
+                var meal = await context.Meals.FindAsync(selection.MealId);
+                if (meal == null || !meal.MealID.HasValue)
+                {
+                    throw new InvalidOperationException(
+                        $"Meal with ID {selection.MealId} was not found.");
+                }
+
+                mealProductItems.Add(new MealProductItem
+                {
+                    MealID = meal.MealID.Value,
+                    Meal = meal,
+                    Quantity = 1
+                });
+            }
+
+            var customMealProduct = new MealProduct
+            {
+                OwnerID = null,
+                ProductName = $"Custom Package - {DateTime.Now:MM/dd/yyyy}",
+                IsCateringPackage = true,
+                MealProductItems = mealProductItems
+            };
+
+            context.MealProducts.Add(customMealProduct);
+            await context.SaveChangesAsync();
+
+            order.OrderItems.Add(new OrderMealProduct
+            {
+                OrderID = order.OrderID,
+                MealProductID = customMealProduct.MealProductID,
                 MealProductOrderQty = item.Quantity,
                 ItemPrice = item.ItemPrice
             });

@@ -17,7 +17,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.Views.Customer
@@ -215,7 +214,6 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-
         private void ViandCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             try
@@ -278,7 +276,6 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-
         private void UpdateSelectedCount()
         {
             try
@@ -332,11 +329,9 @@ namespace PESYONG.Presentation.Views.Customer
                 string itemName = selectedViands != null && selectedViands.Any()
                     ? $"{package.ProductName} (Custom)"
                     : package.ProductName;
-                var resolvedImageBytes = package.Package.ImageBytes
-                ?? package.Package.MealProductItems?.FirstOrDefault()?.Meal?.ImageBytes;
 
-                System.Diagnostics.Debug.WriteLine(
-                $"Package '{package.ProductName}' image bytes length: {resolvedImageBytes?.Length ?? 0}");
+                var resolvedImageBytes = package.Package.ImageBytes
+                    ?? package.Package.MealProductItems?.FirstOrDefault()?.Meal?.ImageBytes;
 
                 var cartItem = new CartItem
                 {

@@ -17,10 +17,6 @@ using System.Threading.Tasks;
 
 namespace PESYONG.Presentation.Views.Customer
 {
-    /// <summary>
-    /// Page for displaying and ordering individual viands/short orders.
-    /// Users can adjust quantities and add items to cart.
-    /// </summary>
     public sealed partial class ShortOrdersPage : Page
     {
         private readonly MealRepository _mealRepository;
@@ -54,9 +50,6 @@ namespace PESYONG.Presentation.Views.Customer
             UpdateCartQuantities();
         }
 
-        /// <summary>
-        /// Loads meals from the real SQL-backed repository.
-        /// </summary>
         private async Task LoadShortOrdersAsync()
         {
             try
@@ -77,17 +70,14 @@ namespace PESYONG.Presentation.Views.Customer
 
                 foreach (var meal in availableMeals)
                 {
-                    var vm = new ShortOrderViewModel(
-                        meal,
-                        GetCartQuantityForMeal(meal.MealID!.Value)
-                    );
+                    var vm = new ShortOrderViewModel(meal, 0);
+                    vm.CartQuantity = GetCartQuantityForMealProduct(vm.MealProductID);
 
                     vm.PropertyChanged += ShortOrder_PropertyChanged;
                     ShortOrders.Add(vm);
                 }
 
                 ShortOrdersItemsControl.ItemsSource = ShortOrders;
-
                 UpdateCartQuantities();
             }
             catch (Exception ex)
@@ -110,26 +100,19 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (e.PropertyName == nameof(ShortOrderViewModel.SelectedQuantity))
             {
-                // Reserved for future UI updates if needed
             }
         }
 
-        /// <summary>
-        /// Gets the current cart quantity for a specific meal.
-        /// </summary>
-        private int GetCartQuantityForMeal(int mealId)
+        private int GetCartQuantityForMealProduct(int mealProductId)
         {
             if (_cartService?.Cart == null)
                 return 0;
 
             return _cartService.Cart
-                .Where(c => c.ProductId == mealId && c.Type == "shortorder")
+                .Where(c => c.ProductId == mealProductId && c.Type == "shortorder")
                 .Sum(c => c.Quantity);
         }
 
-        /// <summary>
-        /// Updates the cart quantity badges for all items.
-        /// </summary>
         private void UpdateCartQuantities()
         {
             if (ShortOrders == null || _cartService?.Cart == null)
@@ -137,20 +120,17 @@ namespace PESYONG.Presentation.Views.Customer
 
             foreach (var item in ShortOrders)
             {
-                item.CartQuantity = GetCartQuantityForMeal(item.MealProductID);
+                item.CartQuantity = GetCartQuantityForMealProduct(item.MealProductID);
             }
         }
 
-        /// <summary>
-        /// Handles decrease quantity button click.
-        /// </summary>
         private void DecreaseQuantity_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button || button.Tag == null)
                 return;
 
-            int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
+            int mealProductId = Convert.ToInt32(button.Tag);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealProductId);
 
             if (item != null)
             {
@@ -158,16 +138,13 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Handles increase quantity button click.
-        /// </summary>
         private void IncreaseQuantity_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button || button.Tag == null)
                 return;
 
-            int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
+            int mealProductId = Convert.ToInt32(button.Tag);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealProductId);
 
             if (item != null)
             {
@@ -175,16 +152,13 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Handles add to cart button click.
-        /// </summary>
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button || button.Tag == null)
                 return;
 
-            int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
+            int mealProductId = Convert.ToInt32(button.Tag);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealProductId);
 
             if (item != null && item.IsAvailable)
             {
@@ -192,7 +166,7 @@ namespace PESYONG.Presentation.Views.Customer
 
                 var cartItem = new CartItem
                 {
-                    Id = $"shortorder_{mealId}_{Guid.NewGuid()}",
+                    Id = $"shortorder_{mealProductId}_{Guid.NewGuid()}",
                     Name = item.MealName,
                     Price = (double)item.MealPrice,
                     Quantity = quantity,
@@ -208,7 +182,7 @@ namespace PESYONG.Presentation.Views.Customer
                 ShowSuccessDialog($"{quantity} {item.MealName} added to cart!");
 
                 item.SelectedQuantity = 1;
-                item.CartQuantity = GetCartQuantityForMeal(item.MealProductID);
+                item.CartQuantity = GetCartQuantityForMealProduct(item.MealProductID);
             }
             else if (item != null && !item.IsAvailable)
             {
@@ -216,9 +190,6 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
 
-        /// <summary>
-        /// Shows a success dialog.
-        /// </summary>
         private async void ShowSuccessDialog(string message)
         {
             var dialog = new ContentDialog
@@ -232,9 +203,6 @@ namespace PESYONG.Presentation.Views.Customer
             await dialog.ShowAsync();
         }
 
-        /// <summary>
-        /// Shows an error dialog.
-        /// </summary>
         private async void ShowErrorDialog(string message)
         {
             var dialog = new ContentDialog
@@ -248,9 +216,6 @@ namespace PESYONG.Presentation.Views.Customer
             await dialog.ShowAsync();
         }
 
-        /// <summary>
-        /// Handles page unloading to clean up event handlers.
-        /// </summary>
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
             _mealSyncService.MealsChanged -= OnMealsChanged;
@@ -273,7 +238,7 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 153, 51)); // #FF9933
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 153, 51));
                 border.BorderThickness = new Thickness(2);
 
                 if (border.RenderTransform is ScaleTransform scale)
@@ -288,7 +253,7 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 229, 204)); // #FFE5CC
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 229, 204));
                 border.BorderThickness = new Thickness(1);
 
                 if (border.RenderTransform is ScaleTransform scale)
