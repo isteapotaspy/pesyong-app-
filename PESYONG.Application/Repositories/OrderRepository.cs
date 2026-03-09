@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PESYONG.ApplicationLogic.DTOs;
+using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Domain.Entities.Users;
@@ -348,5 +349,15 @@ public class OrderRepository
             context.Orders.Remove(order);
             await context.SaveChangesAsync();
         }
+    }
+
+    public async Task<Order> CreateOrderAsyncReturnSelf(Order order)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        context.Orders.Add(order);
+        await context.SaveChangesAsync();
+
+        return order ;
     }
 }

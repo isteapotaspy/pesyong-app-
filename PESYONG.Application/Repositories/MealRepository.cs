@@ -11,27 +11,15 @@ namespace PESYONG.ApplicationLogic.Repositories;
 
 public class MealRepository
 {
+    private readonly IDbContextFactory<AppDbContext> _contextFactory;
     /// <summary>
-    /// Provides data access operations for meals, including creation,
-    /// retrieval, querying, updating, and deletion.
+    /// Initializes a new instance of the <see cref="MealRepository"/> class.
     /// </summary>
-    public class MealRepository
-    {
-        _contextFactory = contextFactory;
-    }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MealRepository"/> class.
-        /// </summary>
-        /// <param name="contextFactory">The database context factory used to create application database contexts.</param>
-        public MealRepository(IDbContextFactory<AppDbContext> contextFactory)
+    /// <param name="contextFactory">The database context factory used to create application database contexts.</param>
+    public MealRepository(IDbContextFactory<AppDbContext> contextFactory)
         {
             _contextFactory = contextFactory;
         }
-
-        Debug.WriteLine($"\n\nThe meal has ID of {meal.MealID} and is named {meal.MealName}\n\n");
-        return meal;
-    }
 
     /// <summary>
     /// Grabs a meal by its ID. Returns null if not found.
@@ -111,5 +99,29 @@ public class MealRepository
             context.Meals.Remove(meal);
             await context.SaveChangesAsync();
         }
+    }
+
+    /// <summary>
+    /// Creates a new meal in the database.
+    /// </summary>
+    public async Task CreateMealAsync(Meal meal)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        context.Meals.Add(meal);
+        await context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Creates a new meal in the database and returns the saved entity.
+    /// </summary>
+    public async Task<Meal> CreateMealAsyncReturnSelf(Meal meal)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        context.Meals.Add(meal);
+        await context.SaveChangesAsync();
+
+        return meal;
     }
 }

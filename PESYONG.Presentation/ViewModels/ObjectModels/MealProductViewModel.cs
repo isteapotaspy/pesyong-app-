@@ -305,7 +305,7 @@ public sealed class MealProductViewModel : INotifyPropertyChanged, INotifyDataEr
             throw new ArgumentNullException(nameof(entity));
 
         MealProductID = entity.MealProductID;
-        OwnerID = entity.OwnerID;
+        OwnerID = (int)entity.OwnerID;
         PromoID = entity.PromoID;
         IsCateringPackage = entity.IsCateringPackage;
         ProductName = entity.ProductName ?? string.Empty;

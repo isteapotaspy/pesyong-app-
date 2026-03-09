@@ -26,6 +26,7 @@ using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Infrastructure;
 using PESYONG.Presentation.Profiler;
 using PESYONG.Presentation.ViewModels;
+using PESYONG.Presentation.ViewModels.ObjectModels;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;

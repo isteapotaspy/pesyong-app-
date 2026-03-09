@@ -109,11 +109,7 @@ namespace PESYONG.Presentation.Views.Admin.Meals
 
                 MealListViewModels.Clear();
 
-            foreach (var meal in allMeals.OrderBy(m => m.MealID))
-            {
-                var mealViewModel = MealViewModel.CreateFromEntity(meal);
-                MealListViewModels.Add(mealViewModel);
-            }
+                var allMeals = await _mealRepository.GetAllMealsAsync();
 
                 foreach (var meal in allMeals.OrderBy(m => m.MealID))
                 {

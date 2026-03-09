@@ -426,10 +426,16 @@ namespace PESYONG.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MealProductID"));
 
+                    b.Property<byte[]>("ImageBytes")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<bool>("IsCateringPackage")
                         .HasColumnType("bit");
 
                     b.Property<int?>("OwnerID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaxCount")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductDescription")
