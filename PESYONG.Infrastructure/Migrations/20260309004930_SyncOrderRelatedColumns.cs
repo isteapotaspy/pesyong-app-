@@ -1,12 +1,11 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace PESYONG.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedCustomer : Migration
+    public partial class SyncOrderRelatedColumns : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,99 +35,42 @@ namespace PESYONG.Infrastructure.Migrations
                 table: "DeliveryUpdates");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_MealProduct_AppUser_OwnerID",
-                table: "MealProduct");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MealProduct_Promos_PromoID",
-                table: "MealProduct");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MealProductItem_MealProduct_MealProductID",
-                table: "MealProductItem");
+                name: "FK_MealProducts_AppUser_OwnerID",
+                table: "MealProducts");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Meals_AppUser_OperatorID",
                 table: "Meals");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_OrderMealProducts_MealProduct_MealProductID",
-                table: "OrderMealProducts");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_Orders_AppUser_AppUserId",
                 table: "Orders");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Orders_AppUser_RecipientID",
-                table: "Orders");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_MealProduct",
-                table: "MealProduct");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_AppUser",
                 table: "AppUser");
 
             migrationBuilder.RenameTable(
-                name: "MealProduct",
-                newName: "MealProducts");
-
-            migrationBuilder.RenameTable(
                 name: "AppUser",
                 newName: "AppUsers");
 
-            migrationBuilder.RenameIndex(
-                name: "IX_MealProduct_PromoID",
+            migrationBuilder.AddColumn<byte[]>(
+                name: "ImageBytes",
                 table: "MealProducts",
-                newName: "IX_MealProducts_PromoID");
+                type: "varbinary(max)",
+                nullable: true);
 
-            migrationBuilder.RenameIndex(
-                name: "IX_MealProduct_OwnerID",
+            migrationBuilder.AddColumn<int>(
+                name: "PaxCount",
                 table: "MealProducts",
-                newName: "IX_MealProducts_OwnerID");
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsCateringPackage",
-                table: "MealProducts",
-                type: "bit",
+                type: "int",
                 nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Password",
-                table: "AppUsers",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_MealProducts",
-                table: "MealProducts",
-                column: "MealProductID");
+                defaultValue: 0);
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_AppUsers",
                 table: "AppUsers",
                 column: "Id");
-
-            migrationBuilder.CreateTable(
-                name: "Customers",
-                columns: table => new
-                {
-                    CustomerID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Customers", x => x.CustomerID);
-                });
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AcknowledgementReceipts_AppUsers_AppUserId",
@@ -176,27 +118,11 @@ namespace PESYONG.Infrastructure.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_MealProductItem_MealProducts_MealProductID",
-                table: "MealProductItem",
-                column: "MealProductID",
-                principalTable: "MealProducts",
-                principalColumn: "MealProductID",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
                 name: "FK_MealProducts_AppUsers_OwnerID",
                 table: "MealProducts",
                 column: "OwnerID",
                 principalTable: "AppUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_MealProducts_Promos_PromoID",
-                table: "MealProducts",
-                column: "PromoID",
-                principalTable: "Promos",
-                principalColumn: "PromoID");
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Meals_AppUsers_OperatorID",
@@ -206,27 +132,11 @@ namespace PESYONG.Infrastructure.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_OrderMealProducts_MealProducts_MealProductID",
-                table: "OrderMealProducts",
-                column: "MealProductID",
-                principalTable: "MealProducts",
-                principalColumn: "MealProductID",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
                 name: "FK_Orders_AppUsers_AppUserId",
                 table: "Orders",
                 column: "AppUserId",
                 principalTable: "AppUsers",
                 principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Orders_AppUsers_RecipientID",
-                table: "Orders",
-                column: "RecipientID",
-                principalTable: "AppUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
@@ -257,15 +167,7 @@ namespace PESYONG.Infrastructure.Migrations
                 table: "DeliveryUpdates");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_MealProductItem_MealProducts_MealProductID",
-                table: "MealProductItem");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_MealProducts_AppUsers_OwnerID",
-                table: "MealProducts");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MealProducts_Promos_PromoID",
                 table: "MealProducts");
 
             migrationBuilder.DropForeignKey(
@@ -273,58 +175,24 @@ namespace PESYONG.Infrastructure.Migrations
                 table: "Meals");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_OrderMealProducts_MealProducts_MealProductID",
-                table: "OrderMealProducts");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_Orders_AppUsers_AppUserId",
                 table: "Orders");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Orders_AppUsers_RecipientID",
-                table: "Orders");
-
-            migrationBuilder.DropTable(
-                name: "Customers");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_MealProducts",
-                table: "MealProducts");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_AppUsers",
                 table: "AppUsers");
 
             migrationBuilder.DropColumn(
-                name: "IsCateringPackage",
+                name: "ImageBytes",
                 table: "MealProducts");
 
             migrationBuilder.DropColumn(
-                name: "Password",
-                table: "AppUsers");
-
-            migrationBuilder.RenameTable(
-                name: "MealProducts",
-                newName: "MealProduct");
+                name: "PaxCount",
+                table: "MealProducts");
 
             migrationBuilder.RenameTable(
                 name: "AppUsers",
                 newName: "AppUser");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_MealProducts_PromoID",
-                table: "MealProduct",
-                newName: "IX_MealProduct_PromoID");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_MealProducts_OwnerID",
-                table: "MealProduct",
-                newName: "IX_MealProduct_OwnerID");
-
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_MealProduct",
-                table: "MealProduct",
-                column: "MealProductID");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_AppUser",
@@ -377,27 +245,11 @@ namespace PESYONG.Infrastructure.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_MealProduct_AppUser_OwnerID",
-                table: "MealProduct",
+                name: "FK_MealProducts_AppUser_OwnerID",
+                table: "MealProducts",
                 column: "OwnerID",
                 principalTable: "AppUser",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_MealProduct_Promos_PromoID",
-                table: "MealProduct",
-                column: "PromoID",
-                principalTable: "Promos",
-                principalColumn: "PromoID");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_MealProductItem_MealProduct_MealProductID",
-                table: "MealProductItem",
-                column: "MealProductID",
-                principalTable: "MealProduct",
-                principalColumn: "MealProductID",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Meals_AppUser_OperatorID",
@@ -407,27 +259,11 @@ namespace PESYONG.Infrastructure.Migrations
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_OrderMealProducts_MealProduct_MealProductID",
-                table: "OrderMealProducts",
-                column: "MealProductID",
-                principalTable: "MealProduct",
-                principalColumn: "MealProductID",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
                 name: "FK_Orders_AppUser_AppUserId",
                 table: "Orders",
                 column: "AppUserId",
                 principalTable: "AppUser",
                 principalColumn: "Id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Orders_AppUser_RecipientID",
-                table: "Orders",
-                column: "RecipientID",
-                principalTable: "AppUser",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
         }
     }
 }

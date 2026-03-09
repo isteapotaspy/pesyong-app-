@@ -203,4 +203,11 @@ public class DeliveryRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task<Delivery> CreateDeliveryAsyncReturnSelf(Delivery delivery)
+    {
+        _context.Deliveries.Add(delivery);
+        await _context.SaveChangesAsync();
+        return delivery;
+    }
 }

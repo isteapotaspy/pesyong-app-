@@ -20,6 +20,18 @@ public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public OrderMealProductViewModel()
+    {
+    }
+
+    public OrderMealProductViewModel(OrderMealProduct entity)
+    {
+        if (entity == null)
+            return;
+
+        LoadFromEntity(entity);
+    }
+
     public Guid OrderID
     {
         get => _orderID;
@@ -38,6 +50,7 @@ public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
         set => SetProperty(ref _mealProductName, value);
     }
 
+    [Range(typeof(decimal), "0.01", "999999999", ErrorMessage = "Item price must be greater than zero.")]
     public decimal ItemPrice
     {
         get => _itemPrice;
@@ -52,29 +65,8 @@ public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
         }
     }
 
-    public OrderMealProductViewModel(OrderMealProduct entity)
-    {
-        if (entity != null)
-        {
-            OrderID = entity.OrderID;
-            MealProductID = entity.MealProductID;
-            ItemPrice = entity.ItemPrice;
-            MealProductOrderQty = entity.MealProductOrderQty;
-
-            // Instead of using constructor, create and assign properties manually
-            if (entity.MealProduct != null)
-            {
-                MealProduct = new MealProductViewModel
-                {
-                    MealProductID = entity.MealProduct.MealProductID,
-                    ProductName = entity.MealProduct.ProductName ?? string.Empty,
-                    //Price = entity.MealProduct.Price
-                };
-            }
-        }
-    }
-
-    public OrderMealProductViewModel()
+    [Range(1, 1000, ErrorMessage = "Quantity must be between 1 and 1000.")]
+    public int MealProductOrderQty
     {
         get => _mealProductOrderQty;
         set
@@ -89,9 +81,9 @@ public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
 
     public decimal SubTotal => MealProductOrderQty * ItemPrice;
 
-    public string FormattedItemPrice => ItemPrice.ToString("C");
+    public string FormattedItemPrice => $"PHP {ItemPrice:N2}";
 
-    public string FormattedSubTotal => SubTotal.ToString("C");
+    public string FormattedSubTotal => $"PHP {SubTotal:N2}";
 
     public string ValidationMessage
     {
@@ -117,7 +109,9 @@ public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
                 var value = property.GetValue(this);
                 var valid = Validator.TryValidateProperty(value, context, results);
 
-                return valid ? string.Empty : results.FirstOrDefault()?.ErrorMessage ?? string.Empty;
+                return valid
+                    ? string.Empty
+                    : results.FirstOrDefault()?.ErrorMessage ?? string.Empty;
             }
             catch
             {
@@ -126,16 +120,20 @@ public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
         }
     }
 
+    public void LoadFromEntity(OrderMealProduct entity)
+    {
+        OrderID = entity.OrderID;
+        MealProductID = entity.MealProductID;
+        MealProductName = entity.MealProduct?.ProductName ?? $"Meal Product #{entity.MealProductID}";
+        ItemPrice = entity.ItemPrice;
+        MealProductOrderQty = entity.MealProductOrderQty;
+    }
+
     public static OrderMealProductViewModel CreateFromEntity(OrderMealProduct entity)
     {
-        return new OrderMealProductViewModel
-        {
-            OrderID = entity.OrderID,
-            MealProductID = entity.MealProductID,
-            MealProductName = entity.MealProduct?.ProductName ?? $"Meal Product #{entity.MealProductID}",
-            ItemPrice = entity.ItemPrice,
-            MealProductOrderQty = entity.MealProductOrderQty
-        };
+        var vm = new OrderMealProductViewModel();
+        vm.LoadFromEntity(entity);
+        return vm;
     }
 
     public OrderMealProduct ToEntity()
@@ -157,8 +155,10 @@ public class OrderMealProductViewModel : INotifyPropertyChanged, IDataErrorInfo
             var context = new ValidationContext(this);
             var isValid = Validator.TryValidateObject(this, context, results, true);
 
-            ValidationMessage = string.Join(Environment.NewLine,
-                results.Select(x => x.ErrorMessage).Where(x => !string.IsNullOrWhiteSpace(x)));
+            ValidationMessage = string.Join(
+                Environment.NewLine,
+                results.Select(x => x.ErrorMessage)
+                       .Where(x => !string.IsNullOrWhiteSpace(x)));
 
             return isValid;
         }

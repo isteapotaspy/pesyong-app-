@@ -12,8 +12,8 @@ using PESYONG.Infrastructure;
 namespace PESYONG.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260308155636_AddedCustomer")]
-    partial class AddedCustomer
+    [Migration("20260309004930_SyncOrderRelatedColumns")]
+    partial class SyncOrderRelatedColumns
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -429,10 +429,16 @@ namespace PESYONG.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MealProductID"));
 
+                    b.Property<byte[]>("ImageBytes")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<bool>("IsCateringPackage")
                         .HasColumnType("bit");
 
-                    b.Property<int>("OwnerID")
+                    b.Property<int?>("OwnerID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaxCount")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductDescription")
@@ -473,6 +479,9 @@ namespace PESYONG.Infrastructure.Migrations
                     b.Property<int?>("AppUserId")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("CustomerID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CustomerNotes")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -492,9 +501,6 @@ namespace PESYONG.Infrastructure.Migrations
                     b.Property<int?>("ReceiptID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RecipientID")
-                        .HasColumnType("int");
-
                     b.Property<string>("SpecialInstructions")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
@@ -507,7 +513,7 @@ namespace PESYONG.Infrastructure.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.HasIndex("RecipientID");
+                    b.HasIndex("CustomerID");
 
                     b.ToTable("Orders");
                 });
@@ -540,7 +546,6 @@ namespace PESYONG.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
@@ -548,7 +553,6 @@ namespace PESYONG.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -564,6 +568,11 @@ namespace PESYONG.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("CustomerID");
 
@@ -747,9 +756,7 @@ namespace PESYONG.Infrastructure.Migrations
                 {
                     b.HasOne("PESYONG.Domain.Entities.Users.Identity.AppUser", "Owner")
                         .WithMany("UserMealProducts")
-                        .HasForeignKey("OwnerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OwnerID");
 
                     b.HasOne("PESYONG.Domain.Entities.Financial.Promos.Promo", "Promo")
                         .WithMany()
@@ -807,12 +814,12 @@ namespace PESYONG.Infrastructure.Migrations
                         .WithMany("UserOrders")
                         .HasForeignKey("AppUserId");
 
-                    b.HasOne("PESYONG.Domain.Entities.Users.Identity.AppUser", "Recipient")
-                        .WithMany()
-                        .HasForeignKey("RecipientID")
+                    b.HasOne("PESYONG.Domain.Entities.Users.Customer", "Customer")
+                        .WithMany("Orders")
+                        .HasForeignKey("CustomerID")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Recipient");
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("PESYONG.Domain.Entities.Orders.OrderMealProduct", b =>
@@ -844,6 +851,11 @@ namespace PESYONG.Infrastructure.Migrations
                     b.Navigation("OrderItems");
 
                     b.Navigation("Receipt");
+                });
+
+            modelBuilder.Entity("PESYONG.Domain.Entities.Users.Customer", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("PESYONG.Domain.Entities.Users.Identity.AppUser", b =>

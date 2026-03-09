@@ -23,6 +23,8 @@ public class MealProduct
 
     [Required]
     public bool IsCateringPackage { get; set; }
+
+    public byte[]? ImageBytes { get; set; }
     public int PaxCount { get; set; }
 
     [NotMapped]
@@ -39,7 +41,6 @@ public class MealProduct
     [StringLength(100)]
     public string? ProductDescription { get; set; }
 
-    public byte[]? ImageBytes { get; set; }
 
     // Computed properties for pricing
     [NotMapped]
