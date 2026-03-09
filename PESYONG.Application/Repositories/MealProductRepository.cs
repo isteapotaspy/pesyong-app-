@@ -2,143 +2,136 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Infrastructure;
 
 namespace PESYONG.ApplicationLogic.Repositories;
 
-
 public class MealProductRepository
 {
-    private readonly AppDbContext _context;
+    private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-    public MealProductRepository(AppDbContext context)
+    public MealProductRepository(IDbContextFactory<AppDbContext> contextFactory)
     {
-        _context = context;
+        _contextFactory = contextFactory;
     }
 
-
-    /// <summary>
-    /// Creates a meal in the database.
-    /// </summary>
-    /// <param name="mealProduct"></param>
-    /// <returns></returns>
     public async Task CreateMealProductAsync(MealProduct mealProduct)
     {
-        // Add exception handling for colliding meal ID
-        _context.MealProducts.Add(mealProduct);
-        Debug.Write($"\n\n The meal product has ID of {mealProduct.MealProductID} " +
-            $"and is named {mealProduct.ProductName} \n\n");
-        await _context.SaveChangesAsync();
+        await using var context = await _contextFactory.CreateDbContextAsync();
 
+        context.Set<MealProduct>().Add(mealProduct);
+        Debug.WriteLine($"\n\nCreating meal product: {mealProduct.ProductName}\n\n");
+        await context.SaveChangesAsync();
     }
 
-    /// <summary>
-    /// This creates a meal product and returns itself after being recorded in the db.
-    /// </summary>
-    /// <param name="mealProduct"></param>
-    /// <returns></returns>
     public async Task<MealProduct> CreateMealProductAsyncReturnSelf(MealProduct mealProduct)
     {
-        _context.MealProducts.Add(mealProduct);
-        await _context.SaveChangesAsync();
-        Debug.Write($"\n\n The meal product has ID of {mealProduct.MealProductID} " +
-            $"and is named {mealProduct.ProductName} \n\n");
-        // Check if this is valid
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        context.Set<MealProduct>().Add(mealProduct);
+        await context.SaveChangesAsync();
+
+        Debug.WriteLine($"\n\nCreated meal product ID {mealProduct.MealProductID}: {mealProduct.ProductName}\n\n");
         return mealProduct;
     }
 
-    /// <summary>
-    /// Grabs a singular MealProduct by its ID
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    public async Task<MealProduct> GetMealByIdAsync(Guid id)
+    public async Task<MealProduct?> GetMealProductByIdAsync(int id)
     {
         try
         {
-            // Try without including navigation properties first
-            return await _context.MealProducts
-                .AsNoTracking() // Avoid change tracking issues
-                .FirstOrDefaultAsync(m => m.MealProductID == id);
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            return await context.Set<MealProduct>()
+                .AsNoTracking()
+                .Include(x => x.Owner)
+                .Include(x => x.Promo)
+                .Include(x => x.MealProductItems)
+                    .ThenInclude(x => x.Meal)
+                .FirstOrDefaultAsync(x => x.MealProductID == id);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"\n\nGetMealProductByIdAsync error: {ex.Message}");
+            Debug.WriteLine($"GetMealProductByIdAsync error: {ex}");
             return null;
         }
     }
 
-    /// <summary>
-    /// This returns all meal products in the database
-    /// </summary>
-    /// <returns></returns>
     public async Task<List<MealProduct>> GetAllMealProductsAsync()
     {
-        var mealProducts = await _context.MealProducts.ToListAsync();
-
-        if (mealProducts == null || !mealProducts.Any())
+        try
         {
-            Debug.WriteLine("No meals found in database");
-            return new List<MealProduct>(); // Return empty list instead of null
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var items = await context.Set<MealProduct>()
+                .AsNoTracking()
+                .Include(x => x.Owner)
+                .Include(x => x.Promo)
+                .Include(x => x.MealProductItems)
+                    .ThenInclude(x => x.Meal)
+                .ToListAsync();
+
+            if (items == null || !items.Any())
+            {
+                Debug.WriteLine("No meal products found in database.");
+                return new List<MealProduct>();
+            }
+
+            Debug.WriteLine($"Retrieved {items.Count} meal products from database.");
+            return items;
         }
-
-        Debug.WriteLine($"Retrieved {mealProducts.Count} meals from database");
-        return mealProducts;
-    }
-
-    // Know the IQueryable pattern. This is a more potent implemention
-    // as opposed to blind searching by a single ID or all the items.
-    // It allows you to feed it commands regarding to how it grabs and filters
-    // data from the database. You can get all data from this, or none at all. 
-    // If it returns empty array [], no items match the query parameters.
-    // If it reutrns null, that's an error.
-
-    /// EXAMPLE:
-    /// var complexQuery = _context.Meals
-    ///         .Where(m => m.StockQuantity > 0)
-    ///         .Where(m => m.MealPrice < 50)
-    ///         .OrderBy(m => m.MMealName);
-    /// var results = await _mealRepository.GetMealsAsync(complexQuery);
-    /// 
-
-    /// <summary>
-    /// Allows for complex query to occur.
-    /// </summary>
-    /// <param name="query"></param>
-    public async Task<List<MealProduct>> GetMealProductsAsync(IQueryable<MealProduct> query)
-    {
-        return await query.ToListAsync();
-    }
-
-    /// <summary>
-    /// This updates a meal product.
-    /// </summary>
-    /// <param name="mealProduct"></param>
-    /// <returns></returns>
-    public async Task UpdateMealAsync(MealProduct mealProduct)
-    {
-        _context.MealProducts.Update(mealProduct);
-        await _context.SaveChangesAsync();
-    }
-
-    /// <summary>
-    /// Deletes a meal product in the database.
-    /// </summary>
-    /// <param name="mealProductID"></param>
-    /// <returns></returns>
-    public async Task DeleteMealAsync(Guid mealProductID)
-    {
-        var mealProduct = await _context.MealProducts.FindAsync(mealProductID);
-        if (mealProduct != null)
+        catch (Exception ex)
         {
-            _context.MealProducts.Remove(mealProduct);
-            await _context.SaveChangesAsync();
+            Debug.WriteLine($"GetAllMealProductsAsync error: {ex}");
+            return new List<MealProduct>();
         }
     }
 
+    public async Task<List<MealProduct>> GetMealProductsAsync(
+        Func<IQueryable<MealProduct>, IQueryable<MealProduct>> queryBuilder)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        IQueryable<MealProduct> query = context.Set<MealProduct>()
+            .Include(x => x.Owner)
+            .Include(x => x.Promo)
+            .Include(x => x.MealProductItems)
+                .ThenInclude(x => x.Meal);
+
+        query = queryBuilder(query);
+
+        return await query.AsNoTracking().ToListAsync();
+    }
+
+    public async Task UpdateMealProductAsync(MealProduct mealProduct)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        context.Set<MealProduct>().Update(mealProduct);
+        await context.SaveChangesAsync();
+
+        Debug.WriteLine($"Updated meal product ID {mealProduct.MealProductID}");
+    }
+
+    public async Task DeleteMealProductAsync(int mealProductId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var entity = await context.Set<MealProduct>()
+            .Include(x => x.MealProductItems)
+            .FirstOrDefaultAsync(x => x.MealProductID == mealProductId);
+
+        if (entity == null)
+        {
+            Debug.WriteLine($"Delete skipped. Meal product ID {mealProductId} not found.");
+            return;
+        }
+
+        context.Set<MealProduct>().Remove(entity);
+        await context.SaveChangesAsync();
+
+        Debug.WriteLine($"Deleted meal product ID {mealProductId}");
+    }
 }

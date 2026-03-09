@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:PESYONG.ApplicationLogic.Converters"
+    xmlns:converters="using:PESYONG.Presentation.Converters"
     xmlns:models="using:PESYONG.Domain.Entities"
     mc:Ignorable="d"
     Background="#FFFDF5">
@@ -12,6 +13,7 @@
     <Page.Resources>
         <local:PriceFormatConverter x:Key="PriceFormatConverter"/>
         <local:CartItemTypeToDisplayConverter x:Key="CartItemTypeToDisplayConverter"/>
+        <converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
 
         <Style x:Key="CartItemCardStyle" TargetType="Border">
             <Setter Property="Background" Value="White"/>
@@ -173,6 +175,58 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="DeliveryLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF6600"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="DeliveryInputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="#1F2937"/>
+            <Setter Property="PlaceholderForeground" Value="#A67C52"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFCC99"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <Style x:Key="DeliveryRadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#444444"/>
+        </Style>
+
+        <Style x:Key="DeliveryDatePickerStyle" TargetType="CalendarDatePicker">
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="Background" Value="#FFFDFB"/>
+            <Setter Property="BorderBrush" Value="#FFCC99"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,6"/>
+        </Style>
+
+        <Style x:Key="DeliveryTimePickerStyle" TargetType="TimePicker">
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="Background" Value="#FFFDFB"/>
+            <Setter Property="BorderBrush" Value="#FFCC99"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="6,4"/>
+        </Style>
+
+        <Style x:Key="DeliveryComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="Background" Value="#FFFDFB"/>
+            <Setter Property="BorderBrush" Value="#FFCC99"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10,6"/>
+        </Style>
+
+        <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#A67C52"/>
+        <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#A67C52"/>
+        <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#A67C52"/>
+
+        <SolidColorBrush x:Key="DatePickerPlaceholderForeground" Color="#A67C52"/>
+        <SolidColorBrush x:Key="DatePickerPlaceholderForegroundPointerOver" Color="#A67C52"/>
+        <SolidColorBrush x:Key="TimePickerPlaceholderForeground" Color="#A67C52"/>
     </Page.Resources>
 
     <Grid>
@@ -181,37 +235,33 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Border Grid.Row="0" 
-                Background="#FF6600" 
-                CornerRadius="12" 
-                Padding="20,15" 
+        <Border Grid.Row="0"
+                Background="#FF6600"
+                CornerRadius="12"
+                Padding="20,15"
                 Margin="20,20,20,0">
             <StackPanel>
-                <TextBlock x:Name="HeaderTitle" Text="My Cart" 
-                          FontSize="36" 
-                          FontWeight="Bold" 
-                          Foreground="White"/>
-                <TextBlock x:Name="HeaderSubtitle" 
-                          FontSize="16" 
-                          Foreground="#FFE5CC"/>
+                <TextBlock x:Name="HeaderTitle" Text="My Cart"
+                           FontSize="36"
+                           FontWeight="Bold"
+                           Foreground="White"/>
+                <TextBlock x:Name="HeaderSubtitle"
+                           FontSize="16"
+                           Foreground="#FFE5CC"/>
             </StackPanel>
         </Border>
 
-        <!-- Main Content Area -->
         <Grid Grid.Row="1" Margin="20">
-            <!-- Cart View -->
-            <ScrollViewer x:Name="CartView" 
-                         VerticalScrollBarVisibility="Auto"
-                         Visibility="Visible">
+            <ScrollViewer x:Name="CartView"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Visible">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Empty Cart State -->
-                    <Border x:Name="EmptyCartPanel" 
+                    <Border x:Name="EmptyCartPanel"
                             Grid.ColumnSpan="2"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
@@ -222,18 +272,18 @@
                             Padding="40"
                             Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
-                            <FontIcon Glyph="&#xE8C7;" 
-                                     FontSize="72" 
-                                     Foreground="#FFB266"/>
-                            <TextBlock Text="Your cart is empty" 
-                                      FontSize="24" 
-                                      FontWeight="Bold" 
-                                      Foreground="#FF6600"
-                                      HorizontalAlignment="Center"/>
-                            <TextBlock Text="Start adding delicious items to your cart!" 
-                                      FontSize="16" 
-                                      Foreground="#666666"
-                                      HorizontalAlignment="Center"/>
+                            <FontIcon Glyph="&#xE8C7;"
+                                      FontSize="72"
+                                      Foreground="#FFB266"/>
+                            <TextBlock Text="Your cart is empty"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       Foreground="#FF6600"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock Text="Start adding delicious items to your cart!"
+                                       FontSize="16"
+                                       Foreground="#666666"
+                                       HorizontalAlignment="Center"/>
                             <Button Style="{StaticResource PrimaryButtonStyle}"
                                     Content="Browse Packages"
                                     HorizontalAlignment="Center"
@@ -241,14 +291,12 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Cart Items Grid -->
                     <Grid x:Name="CartItemsPanel" Grid.Column="0" Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Cart Items List -->
                         <ItemsControl x:Name="CartItemsList" Grid.Row="0">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -260,18 +308,16 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <!-- Image -->
-                                            <Border Grid.Column="0" 
-                                                    Width="80" 
-                                                    Height="80" 
+                                            <Border Grid.Column="0"
+                                                    Width="80"
+                                                    Height="80"
                                                     CornerRadius="8"
-                                                    Margin="0,0,12,0">
-                                                <Border.Background>
-                                                    <ImageBrush ImageSource="{Binding Image}" Stretch="UniformToFill"/>
-                                                </Border.Background>
+                                                    Margin="0,0,12,0"
+                                                    Background="#FFF0E0">
+                                                <Image Source="{Binding ImageBytes, Converter={StaticResource ByteArrayToImageSourceConverter}}"
+                                                       Stretch="UniformToFill"/>
                                             </Border>
 
-                                            <!-- Item Details -->
                                             <Grid Grid.Column="1" VerticalAlignment="Center">
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
@@ -279,20 +325,19 @@
                                                     <RowDefinition Height="Auto"/>
                                                 </Grid.RowDefinitions>
 
-                                                <TextBlock Grid.Row="0" 
-                                                          Text="{Binding Name}" 
-                                                          FontSize="16" 
-                                                          FontWeight="Bold" 
-                                                          Foreground="#FF6600"
-                                                          TextWrapping="Wrap"/>
+                                                <TextBlock Grid.Row="0"
+                                                           Text="{Binding Name}"
+                                                           FontSize="16"
+                                                           FontWeight="Bold"
+                                                           Foreground="#FF6600"
+                                                           TextWrapping="Wrap"/>
 
-                                                <TextBlock Grid.Row="1" 
-                                                          Text="{Binding Type, Converter={StaticResource CartItemTypeToDisplayConverter}}"
-                                                          FontSize="12" 
-                                                          Foreground="#666666"
-                                                          Margin="0,2,0,4"/>
+                                                <TextBlock Grid.Row="1"
+                                                           Text="{Binding Type, Converter={StaticResource CartItemTypeToDisplayConverter}}"
+                                                           FontSize="12"
+                                                           Foreground="#666666"
+                                                           Margin="0,2,0,4"/>
 
-                                                <!-- Quantity Controls -->
                                                 <Grid Grid.Row="2">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto"/>
@@ -301,16 +346,16 @@
                                                         <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <Button Grid.Column="0" 
+                                                    <Button Grid.Column="0"
                                                             Style="{StaticResource QuantityButtonStyle}"
                                                             Tag="{Binding Id}"
                                                             Click="DecreaseQuantity_Click">
-                                                        <FontIcon Glyph="&#xF8AB;" 
-                                                                 FontSize="12" 
-                                                                 Foreground="#FF6600"/>
+                                                        <FontIcon Glyph="&#xF8AB;"
+                                                                  FontSize="12"
+                                                                  Foreground="#FF6600"/>
                                                     </Button>
 
-                                                    <TextBlock Grid.Column="1" 
+                                                    <TextBlock Grid.Column="1"
                                                                Text="{Binding Quantity}"
                                                                Width="40"
                                                                TextAlignment="Center"
@@ -319,35 +364,34 @@
                                                                FontSize="14"
                                                                VerticalAlignment="Center"/>
 
-                                                    <Button Grid.Column="2" 
+                                                    <Button Grid.Column="2"
                                                             Style="{StaticResource QuantityButtonStyle}"
                                                             Tag="{Binding Id}"
                                                             Click="IncreaseQuantity_Click">
-                                                        <FontIcon Glyph="&#xF8AA;" 
-                                                                 FontSize="12" 
-                                                                 Foreground="#FF6600"/>
+                                                        <FontIcon Glyph="&#xF8AA;"
+                                                                  FontSize="12"
+                                                                  Foreground="#FF6600"/>
                                                     </Button>
                                                 </Grid>
                                             </Grid>
 
-                                            <!-- Price and Remove -->
-                                            <StackPanel Grid.Column="2" 
+                                            <StackPanel Grid.Column="2"
                                                         HorizontalAlignment="Right"
                                                         VerticalAlignment="Center"
                                                         Spacing="8">
-                                                <TextBlock Text="{Binding TotalPrice, Converter={StaticResource PriceFormatConverter}}" 
-                                                          FontSize="18" 
-                                                          FontWeight="Bold" 
-                                                          Foreground="#FF6600"
-                                                          HorizontalAlignment="Right"/>
+                                                <TextBlock Text="{Binding TotalPrice, Converter={StaticResource PriceFormatConverter}}"
+                                                           FontSize="18"
+                                                           FontWeight="Bold"
+                                                           Foreground="#FF6600"
+                                                           HorizontalAlignment="Right"/>
 
                                                 <Button Style="{StaticResource RemoveButtonStyle}"
                                                         Tag="{Binding Id}"
                                                         Click="RemoveFromCart_Click"
                                                         HorizontalAlignment="Right">
-                                                    <FontIcon Glyph="&#xE74D;" 
-                                                             FontSize="16" 
-                                                             Foreground="#FF4444"/>
+                                                    <FontIcon Glyph="&#xE74D;"
+                                                              FontSize="16"
+                                                              Foreground="#FF4444"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -357,9 +401,8 @@
                         </ItemsControl>
                     </Grid>
 
-                    <!-- Order Summary Sidebar -->
-                    <Grid x:Name="OrderSummaryPanel" 
-                          Grid.Column="1" 
+                    <Grid x:Name="OrderSummaryPanel"
+                          Grid.Column="1"
                           Width="300"
                           Margin="20,0,0,0"
                           Visibility="Collapsed">
@@ -369,10 +412,10 @@
                                 CornerRadius="12"
                                 Padding="20">
                             <StackPanel Spacing="20">
-                                <TextBlock Text="Order Summary" 
-                                          FontSize="20" 
-                                          FontWeight="Bold" 
-                                          Foreground="#FF6600"/>
+                                <TextBlock Text="Order Summary"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           Foreground="#FF6600"/>
 
                                 <StackPanel Spacing="12">
                                     <Grid>
@@ -380,12 +423,12 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" 
-                                                   Text="Subtotal" 
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Subtotal"
                                                    Foreground="#666666"/>
-                                        <TextBlock Grid.Column="1" 
+                                        <TextBlock Grid.Column="1"
                                                    x:Name="SubtotalText"
-                                                   FontWeight="SemiBold" 
+                                                   FontWeight="SemiBold"
                                                    Foreground="#FF6600"/>
                                     </Grid>
 
@@ -394,18 +437,18 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" 
-                                                   Text="Delivery Fee" 
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Delivery Fee"
                                                    Foreground="#666666"/>
-                                        <TextBlock Grid.Column="1" 
+                                        <TextBlock Grid.Column="1"
                                                    x:Name="DeliveryFeeText"
                                                    Text="Calculated at checkout"
                                                    Foreground="#666666"
                                                    FontSize="12"/>
                                     </Grid>
 
-                                    <Border Height="2" 
-                                            Background="#FFB266" 
+                                    <Border Height="2"
+                                            Background="#FFB266"
                                             Opacity="0.3"/>
 
                                     <Grid>
@@ -413,15 +456,15 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" 
-                                                   Text="Total" 
-                                                   FontSize="18" 
-                                                   FontWeight="Bold" 
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Total"
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
                                                    Foreground="#FF6600"/>
-                                        <TextBlock Grid.Column="1" 
+                                        <TextBlock Grid.Column="1"
                                                    x:Name="TotalText"
-                                                   FontSize="18" 
-                                                   FontWeight="Bold" 
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
                                                    Foreground="#FF6600"/>
                                     </Grid>
                                 </StackPanel>
@@ -436,10 +479,9 @@
                 </Grid>
             </ScrollViewer>
 
-            <!-- Delivery Form View -->
-            <ScrollViewer x:Name="DeliveryView" 
-                         VerticalScrollBarVisibility="Auto"
-                         Visibility="Collapsed">
+            <ScrollViewer x:Name="DeliveryView"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Collapsed">
                 <Grid MaxWidth="600" HorizontalAlignment="Center">
                     <Border Background="#FFF5E5"
                             BorderBrush="#FFB266"
@@ -447,88 +489,156 @@
                             CornerRadius="12"
                             Padding="30">
                         <StackPanel Spacing="24">
-                            <TextBlock Text="Delivery Details" 
-                                      FontSize="28" 
-                                      FontWeight="Bold" 
-                                      Foreground="#FF6600"/>
-                            <TextBlock Text="Where should we deliver your order?" 
-                                      Foreground="#666666"/>
+                            <TextBlock Text="Delivery Details"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="#FF6600"/>
 
-                            <!-- Address -->
+                            <TextBlock Text="Where should we deliver your order?"
+                                       Foreground="#666666"/>
+
+                            <StackPanel Spacing="16">
+                                <TextBlock Text="Personal Details"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Foreground="#FF6600"/>
+
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Spacing="8">
+                                        <TextBlock Text="First Name *"
+                                                   Style="{StaticResource DeliveryLabelStyle}"/>
+                                        <TextBox x:Name="FirstNameTextBox"
+                                                 Style="{StaticResource DeliveryInputTextBoxStyle}"
+                                                 PlaceholderText="Enter first name"
+                                                 Text="{Binding CheckoutVM.FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="8">
+                                        <TextBlock Text="Last Name *"
+                                                   Style="{StaticResource DeliveryLabelStyle}"/>
+                                        <TextBox x:Name="LastNameTextBox"
+                                                 Style="{StaticResource DeliveryInputTextBoxStyle}"
+                                                 PlaceholderText="Enter last name"
+                                                 Text="{Binding CheckoutVM.LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Phone Number *"
+                                               Style="{StaticResource DeliveryLabelStyle}"/>
+                                    <TextBox x:Name="PhoneNumberTextBox"
+                                             Style="{StaticResource DeliveryInputTextBoxStyle}"
+                                             PlaceholderText="Enter phone number"
+                                             Text="{Binding CheckoutVM.PhoneNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="Email Address (Optional)"
+                                               Style="{StaticResource DeliveryLabelStyle}"/>
+                                    <TextBox x:Name="EmailTextBox"
+                                             Style="{StaticResource DeliveryInputTextBoxStyle}"
+                                             PlaceholderText="Enter email address"
+                                             Text="{Binding CheckoutVM.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </StackPanel>
+
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Delivery Address *" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
-                                <TextBox x:Name="AddressTextBox" 
+                                <TextBlock Text="Delivery Address *"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <TextBox x:Name="AddressTextBox"
+                                         Style="{StaticResource DeliveryInputTextBoxStyle}"
                                          PlaceholderText="e.g., 123 Main St, Barangay, City"
                                          TextWrapping="Wrap"
                                          AcceptsReturn="True"
-                                         MinHeight="60"/>
+                                         MinHeight="60"
+                                         Text="{Binding CheckoutVM.ShippingAddress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
-                            <!-- Location Type -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Location Type *" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
+                                <TextBlock Text="Location Type *"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
                                 <RadioButtons x:Name="LocationRadioButtons"
-                                              SelectedIndex="0"
+                                              SelectedIndex="{Binding CheckoutVM.SelectedLocationIndex, Mode=TwoWay}"
                                               SelectionChanged="LocationRadioButtons_SelectionChanged">
-                                    <RadioButton Content="Within Poblacion (₱15 flat rate)"/>
-                                    <RadioButton Content="Outside Poblacion (₱25+ based on distance)"/>
+                                    <RadioButton Style="{StaticResource DeliveryRadioButtonStyle}"
+                                                 Content="Within Poblacion (₱15 flat rate)"/>
+                                    <RadioButton Style="{StaticResource DeliveryRadioButtonStyle}"
+                                                 Content="Outside Poblacion (₱25+ based on distance)"/>
                                 </RadioButtons>
                             </StackPanel>
 
-                            <!-- Distance (shown only for outside) -->
-                            <StackPanel x:Name="DistancePanel" 
+                            <StackPanel x:Name="DistancePanel"
                                         Visibility="Collapsed"
                                         Spacing="8">
-                                <TextBlock Text="Distance from Poblacion (km) *" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
-                                <TextBox x:Name="DistanceTextBox" 
+                                <TextBlock Text="Distance from Poblacion (km) *"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <TextBox x:Name="DistanceTextBox"
+                                         Style="{StaticResource DeliveryInputTextBoxStyle}"
                                          PlaceholderText="e.g., 5"
-                                         InputScope="Number"/>
-                                <TextBlock x:Name="EstimatedFeeText" 
-                                          Foreground="#FF6600"
-                                          FontSize="12"/>
+                                         InputScope="Number"
+                                         TextChanged="DistanceTextBox_TextChanged"
+                                         Text="{Binding CheckoutVM.DistanceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock x:Name="EstimatedFeeText"
+                                           Foreground="#FF6600"
+                                           FontSize="12"/>
                             </StackPanel>
 
-                            <!-- Delivery Date -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Delivery Date and Time" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
-                                <CalendarDatePicker x:Name="DeliveryDatePicker" 
-                                                    PlaceholderText="Select date"/>
-                                <TimePicker x:Name="DeliveryTimePicker"/>
+                                <TextBlock Text="Delivery Type *"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <ComboBox x:Name="DeliveryTypeComboBox"
+                                          Style="{StaticResource DeliveryComboBoxStyle}"
+                                          ItemsSource="{x:Bind DeliveryTypes, Mode=OneWay}"
+                                          SelectedItem="{Binding CheckoutVM.DeliveryType, Mode=TwoWay}" />
                             </StackPanel>
 
-                            <!-- Special Instructions -->
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Special Instructions (Optional)" 
-                                          Foreground="#FF6600"
-                                          FontWeight="SemiBold"/>
-                                <TextBox x:Name="NotesTextBox" 
+                                <StackPanel.Resources>
+                                    <SolidColorBrush x:Key="DatePickerPlaceholderForeground" Color="#A67C52"/>
+                                    <SolidColorBrush x:Key="DatePickerPlaceholderForegroundPointerOver" Color="#A67C52"/>
+                                </StackPanel.Resources>
+
+                                <TextBlock Text="Delivery Date and Time"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <CalendarDatePicker x:Name="DeliveryDatePicker"
+                                                    Style="{StaticResource DeliveryDatePickerStyle}"
+                                                    PlaceholderText="Select date"
+                                                    RequestedTheme="Light"
+                                                    Date="{Binding CheckoutVM.DeliveryDate, Mode=TwoWay}"/>
+                                <TimePicker x:Name="DeliveryTimePicker"
+                                            Style="{StaticResource DeliveryTimePickerStyle}"
+                                            Time="{Binding CheckoutVM.DeliveryTime, Mode=TwoWay}"/>
+                            </StackPanel>
+
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Special Instructions (Optional)"
+                                           Style="{StaticResource DeliveryLabelStyle}"/>
+                                <TextBox x:Name="NotesTextBox"
+                                         Style="{StaticResource DeliveryInputTextBoxStyle}"
                                          PlaceholderText="e.g., No spicy, For birthday celebration, etc."
                                          TextWrapping="Wrap"
                                          AcceptsReturn="True"
-                                         MinHeight="80"/>
+                                         MinHeight="80"
+                                         Text="{Binding CheckoutVM.Notes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </StackPanel>
 
-                            <!-- Navigation Buttons -->
                             <Grid ColumnSpacing="10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Button Grid.Column="0" 
+                                <Button Grid.Column="0"
                                         Style="{StaticResource SecondaryButtonStyle}"
                                         Content="Back to Cart"
                                         Click="BackToCart_Click"/>
 
-                                <Button Grid.Column="1" 
+                                <Button Grid.Column="1"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Content="Continue to Payment"
                                         Click="ContinueToPayment_Click"/>
@@ -538,10 +648,9 @@
                 </Grid>
             </ScrollViewer>
 
-            <!-- Payment View -->
-            <ScrollViewer x:Name="PaymentView" 
-                         VerticalScrollBarVisibility="Auto"
-                         Visibility="Collapsed">
+            <ScrollViewer x:Name="PaymentView"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Collapsed">
                 <Grid MaxWidth="600" HorizontalAlignment="Center">
                     <Border Background="#FFF5E5"
                             BorderBrush="#FFB266"
@@ -549,43 +658,44 @@
                             CornerRadius="12"
                             Padding="30">
                         <StackPanel Spacing="24">
-                            <TextBlock Text="Payment Method" 
-                                      FontSize="28" 
-                                      FontWeight="Bold" 
-                                      Foreground="#FF6600"/>
-                            <TextBlock Text="Choose how you'd like to pay" 
-                                      Foreground="#666666"/>
+                            <TextBlock Text="Payment Method"
+                                       FontSize="28"
+                                       FontWeight="Bold"
+                                       Foreground="#FF6600"/>
+                            <TextBlock Text="Choose how you'd like to pay"
+                                       Foreground="#666666"/>
 
-                            <!-- Payment Methods -->
                             <RadioButtons x:Name="PaymentRadioButtons"
-                                          SelectedIndex="0"
-                                          Header="Payment Method">
-                                <RadioButton Content="Cash on Delivery"/>
-                                <RadioButton Content="GCash / E-Wallet"/>
-                                <RadioButton Content="Reservation / Down Payment (50%)"/>
+                                          SelectedIndex="{Binding CheckoutVM.SelectedPaymentIndex, Mode=TwoWay}"
+                                          Header="Payment Method"
+                                          Foreground="#444444">
+                                <RadioButton Content="Cash on Delivery" Foreground="#444444"/>
+                                <RadioButton Content="GCash / E-Wallet" Foreground="#444444"/>
+                                <RadioButton Content="Reservation / Down Payment (50%)" Foreground="#444444"/>
                             </RadioButtons>
 
-                            <!-- Order Summary -->
                             <Border Background="White"
                                     CornerRadius="8"
                                     Padding="20">
                                 <StackPanel Spacing="12">
-                                    <TextBlock Text="Order Summary" 
-                                              FontSize="16" 
-                                              FontWeight="Bold" 
-                                              Foreground="#FF6600"/>
+                                    <TextBlock Text="Order Summary"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               Foreground="#FF6600"/>
 
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" 
-                                                   Text="Subtotal"/>
-                                        <TextBlock Grid.Column="1" 
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Subtotal"
+                                                   Foreground="#444444"/>
+                                        <TextBlock Grid.Column="1"
                                                    x:Name="PaymentSubtotalText"
-                                                   FontWeight="SemiBold" 
-                                                   Foreground="#FF6600"/>
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#FF6600"
+                                                   Text="{Binding CheckoutVM.SubtotalDisplay}"/>
                                     </Grid>
 
                                     <Grid>
@@ -593,16 +703,18 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" 
-                                                   Text="Delivery Fee"/>
-                                        <TextBlock Grid.Column="1" 
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Delivery Fee"
+                                                   Foreground="#444444"/>
+                                        <TextBlock Grid.Column="1"
                                                    x:Name="PaymentDeliveryFeeText"
-                                                   FontWeight="SemiBold" 
-                                                   Foreground="#FF6600"/>
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#FF6600"
+                                                   Text="{Binding CheckoutVM.DeliveryFeeDisplay}"/>
                                     </Grid>
 
-                                    <Border Height="1" 
-                                            Background="#FFB266" 
+                                    <Border Height="1"
+                                            Background="#FFB266"
                                             Opacity="0.3"/>
 
                                     <Grid>
@@ -610,33 +722,33 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" 
-                                                   Text="Total" 
-                                                   FontSize="18" 
-                                                   FontWeight="Bold" 
+                                        <TextBlock Grid.Column="0"
+                                                   Text="Total"
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
                                                    Foreground="#FF6600"/>
-                                        <TextBlock Grid.Column="1" 
+                                        <TextBlock Grid.Column="1"
                                                    x:Name="PaymentTotalText"
-                                                   FontSize="18" 
-                                                   FontWeight="Bold" 
-                                                   Foreground="#FF6600"/>
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
+                                                   Foreground="#FF6600"
+                                                   Text="{Binding CheckoutVM.TotalDisplay}"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
 
-                            <!-- Navigation Buttons -->
                             <Grid ColumnSpacing="10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Button Grid.Column="0" 
+                                <Button Grid.Column="0"
                                         Style="{StaticResource SecondaryButtonStyle}"
                                         Content="Back"
                                         Click="BackToDelivery_Click"/>
 
-                                <Button Grid.Column="1" 
+                                <Button Grid.Column="1"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Content="Place Order"
                                         Click="PlaceOrder_Click"/>

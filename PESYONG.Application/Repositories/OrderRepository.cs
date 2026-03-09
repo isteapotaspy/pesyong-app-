@@ -1,5 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PESYONG.ApplicationLogic.DTOs;
+using PESYONG.Domain.Entities.Meals.MealItem;
+using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
+using PESYONG.Domain.Entities.Users;
 using PESYONG.Domain.Enums;
 using PESYONG.Infrastructure;
 using System;
@@ -9,147 +13,290 @@ using System.Threading.Tasks;
 
 namespace PESYONG.ApplicationLogic.Repositories;
 
+/// <summary>
+/// Provides data access operations for orders, including order placement,
+/// retrieval, filtering, updates, receipt assignment, and deletion.
+/// </summary>
 public class OrderRepository
 {
-    private readonly AppDbContext _context;
+    private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
-    public OrderRepository(AppDbContext context)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OrderRepository"/> class.
+    /// </summary>
+    /// <param name="contextFactory">The database context factory used to create application database contexts.</param>
+    public OrderRepository(IDbContextFactory<AppDbContext> contextFactory)
     {
-        _context = context;
+        _contextFactory = contextFactory;
     }
 
-    public async Task CreateOrderAsync(Order order)
+    /// <summary>
+    /// Places a new order using the provided checkout request data.
+    /// </summary>
+    /// <param name="request">The checkout request containing customer and item details.</param>
+    /// <returns>The ID of the newly created order.</returns>
+    public async Task<Guid> PlaceOrderAsync(CheckoutRequestDto request)
     {
-        _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
+        using var context = _contextFactory.CreateDbContext();
+
+        var customer = await context.Customers
+            .FirstOrDefaultAsync(c =>
+                c.PhoneNumber == request.PhoneNumber ||
+                (!string.IsNullOrWhiteSpace(request.Email) && c.Email == request.Email));
+
+        if (customer == null)
+        {
+            customer = new Customer
+            {
+                CustomerID = Guid.NewGuid(),
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber,
+                Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email,
+                Address = request.Address,
+                CreatedDate = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            context.Customers.Add(customer);
+        }
+        else
+        {
+            customer.FirstName = request.FirstName;
+            customer.LastName = request.LastName;
+            customer.PhoneNumber = request.PhoneNumber;
+            customer.Email = string.IsNullOrWhiteSpace(request.Email) ? customer.Email : request.Email;
+            customer.Address = request.Address;
+        }
+
+        var order = new Order
+        {
+            OrderID = Guid.NewGuid(),
+            CustomerID = customer.CustomerID,
+            Address = request.Address,
+            CustomerNotes = request.Notes,
+            SpecialInstructions = null,
+            OrderDate = DateTime.Now,
+            EstimatedDeliveryDate = request.EstimatedDeliveryDate,
+            DeliveryType = request.DeliveryType,
+            DeliveryStatus = DeliveryStatus.Pending
+        };
+
+        foreach (var item in request.Items)
+        {
+            MealProduct mealProduct;
+
+            if (item.Type == "package" &&
+                item.CateringSelections != null &&
+                item.CateringSelections.Count > 0)
+            {
+                var mealProductItems = new List<MealProductItem>();
+
+                foreach (var selection in item.CateringSelections)
+                {
+                    var meal = await context.Meals.FindAsync(selection.MealId);
+                    if (meal == null || !meal.MealID.HasValue)
+                    {
+                        throw new InvalidOperationException(
+                            $"Meal with ID {selection.MealId} was not found.");
+                    }
+
+                    mealProductItems.Add(new MealProductItem
+                    {
+                        MealID = meal.MealID.Value,
+                        Meal = meal,
+                        Quantity = 1
+                    });
+                }
+
+                mealProduct = new MealProduct
+                {
+                    OwnerID = null,
+                    ProductName = $"Custom Package - {DateTime.Now:MM/dd/yyyy}",
+                    IsCateringPackage = true,
+                    MealProductItems = mealProductItems
+                };
+
+                context.MealProducts.Add(mealProduct);
+                await context.SaveChangesAsync();
+            }
+            else
+            {
+                mealProduct = await context.MealProducts.FindAsync(item.ProductID)
+                    ?? throw new InvalidOperationException(
+                        $"MealProduct with ID {item.ProductID} was not found.");
+            }
+
+            order.OrderItems.Add(new OrderMealProduct
+            {
+                OrderID = order.OrderID,
+                MealProductID = mealProduct.MealProductID,
+                MealProductOrderQty = item.Quantity,
+                ItemPrice = item.ItemPrice
+            });
+        }
+
+        context.Orders.Add(order);
+        await context.SaveChangesAsync();
+
+        return order.OrderID;
     }
 
-    public async Task<Order> GetOrderByIdAsync(Guid id)
+    /// <summary>
+    /// Retrieves an order by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the order to retrieve.</param>
+    /// <returns>The matching order if found; otherwise, <c>null</c>.</returns>
+    public async Task<Order?> GetOrderByIdAsync(Guid id)
     {
-        return await _context.Orders
-            .Include(o => o.Recipient)
+        using var context = _contextFactory.CreateDbContext();
+
+        return await context.Orders
+            .Include(o => o.Customer)
             .Include(o => o.Receipt)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .FirstOrDefaultAsync(o => o.OrderID == id);
     }
 
+    /// <summary>
+    /// Retrieves all orders ordered by most recent order date.
+    /// </summary>
+    /// <returns>A list of all orders.</returns>
     public async Task<List<Order>> GetAllOrdersAsync()
     {
-        return await _context.Orders
-            .Include(o => o.Recipient)
+        using var context = _contextFactory.CreateDbContext();
+
+        return await context.Orders
+            .Include(o => o.Customer)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
 
-    public async Task<List<Order>> GetOrdersByRecipientAsync(int recipientId)
+    /// <summary>
+    /// Retrieves all orders for a specific customer.
+    /// </summary>
+    /// <param name="customerId">The ID of the customer.</param>
+    /// <returns>A list of orders belonging to the customer.</returns>
+    public async Task<List<Order>> GetOrdersByCustomerAsync(Guid customerId)
     {
-        return await _context.Orders
-            .Where(o => o.RecipientID == recipientId)
+        using var context = _contextFactory.CreateDbContext();
+
+        return await context.Orders
+            .Where(o => o.CustomerID == customerId)
+            .Include(o => o.Customer)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Retrieves all orders with a specific delivery status.
+    /// </summary>
+    /// <param name="status">The delivery status to filter by.</param>
+    /// <returns>A list of matching orders.</returns>
     public async Task<List<Order>> GetOrdersByStatusAsync(DeliveryStatus status)
     {
-        return await _context.Orders
+        using var context = _contextFactory.CreateDbContext();
+
+        return await context.Orders
             .Where(o => o.DeliveryStatus == status)
-            .Include(o => o.Recipient)
+            .Include(o => o.Customer)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Retrieves all orders currently marked as on-cart.
+    /// </summary>
+    /// <returns>A list of cart orders.</returns>
     public async Task<List<Order>> GetCartOrdersAsync()
     {
-        return await _context.Orders
-            .Where(o => o.DeliveryType == DeliveryStatus.OnCart)
+        using var context = _contextFactory.CreateDbContext();
+
+        return await context.Orders
+            .Where(o => o.DeliveryStatus == DeliveryStatus.OnCart)
+            .Include(o => o.Customer)
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MealProduct)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Updates an existing order.
+    /// </summary>
+    /// <param name="order">The order object containing updated values.</param>
     public async Task UpdateOrderAsync(Order order)
     {
-        _context.Orders.Update(order);
-        await _context.SaveChangesAsync();
+        using var context = _contextFactory.CreateDbContext();
+
+        context.Orders.Update(order);
+        await context.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Updates the delivery status of an order.
+    /// </summary>
+    /// <param name="orderId">The ID of the order to update.</param>
+    /// <param name="newStatus">The new delivery status.</param>
     public async Task UpdateOrderStatusAsync(Guid orderId, DeliveryStatus newStatus)
     {
-        var order = await _context.Orders.FindAsync(orderId);
+        using var context = _contextFactory.CreateDbContext();
+
+        var order = await context.Orders.FindAsync(orderId);
         if (order != null)
         {
             order.DeliveryStatus = newStatus;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
     }
 
+    /// <summary>
+    /// Assigns a receipt to an order.
+    /// </summary>
+    /// <param name="orderId">The ID of the order to update.</param>
+    /// <param name="receiptId">The ID of the receipt to assign.</param>
     public async Task AssignReceiptAsync(Guid orderId, int receiptId)
     {
-        var order = await _context.Orders.FindAsync(orderId);
+        using var context = _contextFactory.CreateDbContext();
+
+        var order = await context.Orders.FindAsync(orderId);
         if (order != null)
         {
             order.ReceiptID = receiptId;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
     }
 
+    /// <summary>
+    /// Deletes an order by its ID.
+    /// </summary>
+    /// <param name="orderId">The ID of the order to delete.</param>
     public async Task DeleteOrderAsync(Guid orderId)
     {
-        var order = await _context.Orders.FindAsync(orderId);
+        using var context = _contextFactory.CreateDbContext();
+
+        var order = await context.Orders.FindAsync(orderId);
         if (order != null)
         {
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-        }
-    }
-}
-
-public class OrderMealProductRepository
-{
-    private readonly AppDbContext _context;
-
-    public OrderMealProductRepository(AppDbContext context)
-    {
-        _context = context;
-    }
-
-    public async Task AddOrderItemAsync(OrderMealProduct orderItem)
-    {
-        _context.OrderMealProducts.Add(orderItem);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task<List<OrderMealProduct>> GetOrderItemsByOrderAsync(Guid orderId)
-    {
-        return await _context.OrderMealProducts
-            .Where(oi => oi.OrderID == orderId)
-            .ToListAsync();
-    }
-
-    public async Task UpdateOrderItemQuantityAsync(Guid orderId, int mealProductId, int newQuantity)
-    {
-        var orderItem = await _context.OrderMealProducts
-            .FirstOrDefaultAsync(oi => oi.OrderID == orderId && oi.MealProductID == mealProductId);
-
-        if (orderItem != null)
-        {
-            orderItem.MealProductOrderQty = newQuantity;
-            await _context.SaveChangesAsync();
+            context.Orders.Remove(order);
+            await context.SaveChangesAsync();
         }
     }
 
-    public async Task RemoveOrderItemAsync(Guid orderId, int mealProductId)
+    public async Task<Order> CreateOrderAsyncReturnSelf(Order order)
     {
-        var orderItem = await _context.OrderMealProducts
-            .FirstOrDefaultAsync(oi => oi.OrderID == orderId && oi.MealProductID == mealProductId);
+        await using var context = await _contextFactory.CreateDbContextAsync();
 
-        if (orderItem != null)
-        {
-            _context.OrderMealProducts.Remove(orderItem);
-            await _context.SaveChangesAsync();
-        }
+        context.Orders.Add(order);
+        await context.SaveChangesAsync();
+
+        return order ;
     }
 }

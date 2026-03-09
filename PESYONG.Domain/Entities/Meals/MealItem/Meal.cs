@@ -29,9 +29,9 @@ public class Meal
     public int? MealID { get; set; }
 
     // The recipientid will be replaced by OperatorID.
-    public int OperatorID { get; set; }
+    public int? OperatorID { get; set; }
     [ForeignKey(nameof(OperatorID))]
-    public AppUser? Operator;
+    public AppUser? Operator { get; set; }
 
     //removed mealtagjunction
     public ICollection<string> MealTags { get; set; } = new List<string>();
@@ -75,14 +75,9 @@ public class Meal
     [Required]
     public DateTime CreationDate { get; set; } = DateTime.UtcNow;
 
-
-
-
-
-
     // UpdatedBy -> Admin/Operator (mapping to AdminUser)
-    [Required]
-    public int LastModifiedByOperatorID { get; set; }
+    //[Required]
+    public int? LastModifiedByOperatorID { get; set; }
 
     //[ForeignKey(nameof(LastModifiedByOperatorID))]
     //public virtual AppUser? ModifiedByOperator { get; set; }
@@ -90,9 +85,9 @@ public class Meal
     [Required]
     public DateTime LastModifiedDate { get; set; } = DateTime.UtcNow;
 
-    // Optional attributes (for now)
-    // This needs more validation
-    public string ImageSourceString { get; set; } = string.Empty;
+    public byte[]? ImageBytes { get; set; }
+
+    public bool IsViandOption { get; set; } = false;
 
     public bool IsValid()
     {
@@ -101,7 +96,7 @@ public class Meal
 
         return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
     }
-    public IEnumerable<string> GetValidationErrors()
+    public IEnumerable<string?> GetValidationErrors()
     {
         var validationContext = new ValidationContext(this);
         var validationResults = new List<ValidationResult>();

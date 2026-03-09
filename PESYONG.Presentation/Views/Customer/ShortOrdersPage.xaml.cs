@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -7,7 +8,6 @@ using Microsoft.UI.Xaml.Media.Animation;
 using PESYONG.ApplicationLogic.Repositories;
 using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities;
-using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Presentation.ViewModels;
 using System;
 using System.Collections.ObjectModel;
@@ -37,8 +37,8 @@ namespace PESYONG.Presentation.Views.Customer
             _mealSyncService = App.Current.Services.GetRequiredService<MealSyncService>();
             _cartService = CartService.Instance;
 
-            this.Loaded += ShortOrdersPage_Loaded;
-            this.Unloaded += Page_Unloaded;
+            Loaded += ShortOrdersPage_Loaded;
+            Unloaded += Page_Unloaded;
 
             if (_cartService.Cart != null)
             {
@@ -63,8 +63,6 @@ namespace PESYONG.Presentation.Views.Customer
             {
                 var meals = await _mealRepository.GetAllMealsAsync();
 
-                // if you want only short orders, add filters here later
-                // for now this loads all meals
                 var availableMeals = meals
                     .Where(m => m.MealID.HasValue)
                     .OrderBy(m => m.MealName)
@@ -112,7 +110,7 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (e.PropertyName == nameof(ShortOrderViewModel.SelectedQuantity))
             {
-                // optional extra UI behavior later
+                // Reserved for future UI updates if needed
             }
         }
 
@@ -124,8 +122,9 @@ namespace PESYONG.Presentation.Views.Customer
             if (_cartService?.Cart == null)
                 return 0;
 
-            var cartItem = _cartService.Cart.FirstOrDefault(c => c.ProductId == mealId);
-            return cartItem?.Quantity ?? 0;
+            return _cartService.Cart
+                .Where(c => c.ProductId == mealId && c.Type == "shortorder")
+                .Sum(c => c.Quantity);
         }
 
         /// <summary>
@@ -138,7 +137,7 @@ namespace PESYONG.Presentation.Views.Customer
 
             foreach (var item in ShortOrders)
             {
-                item.CartQuantity = GetCartQuantityForMeal(item.MealID);
+                item.CartQuantity = GetCartQuantityForMeal(item.MealProductID);
             }
         }
 
@@ -151,7 +150,7 @@ namespace PESYONG.Presentation.Views.Customer
                 return;
 
             int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
 
             if (item != null)
             {
@@ -168,7 +167,7 @@ namespace PESYONG.Presentation.Views.Customer
                 return;
 
             int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
 
             if (item != null)
             {
@@ -185,7 +184,7 @@ namespace PESYONG.Presentation.Views.Customer
                 return;
 
             int mealId = Convert.ToInt32(button.Tag);
-            var item = ShortOrders.FirstOrDefault(x => x.MealID == mealId);
+            var item = ShortOrders.FirstOrDefault(x => x.MealProductID == mealId);
 
             if (item != null && item.IsAvailable)
             {
@@ -193,20 +192,23 @@ namespace PESYONG.Presentation.Views.Customer
 
                 var cartItem = new CartItem
                 {
-                    Id = $"shortorder_{mealId}",
+                    Id = $"shortorder_{mealId}_{Guid.NewGuid()}",
                     Name = item.MealName,
                     Price = (double)item.MealPrice,
                     Quantity = quantity,
                     Type = "shortorder",
-                    ProductId = mealId
+                    ProductId = item.MealProductID,
+                    ImageBytes = item.ImageBytes
                 };
 
                 _cartService.AddToCart(cartItem);
 
+                UpdateCartQuantities();
+
                 ShowSuccessDialog($"{quantity} {item.MealName} added to cart!");
 
                 item.SelectedQuantity = 1;
-                item.CartQuantity = GetCartQuantityForMeal(item.MealID);
+                item.CartQuantity = GetCartQuantityForMeal(item.MealProductID);
             }
             else if (item != null && !item.IsAvailable)
             {
@@ -271,14 +273,13 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                var st = border.RenderTransform as ScaleTransform;
-                if (st != null)
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 153, 51)); // #FF9933
+                border.BorderThickness = new Thickness(2);
+
+                if (border.RenderTransform is ScaleTransform scale)
                 {
-                    AnimateScale(st, 1.04);
-                }
-                else
-                {
-                    border.RenderTransform = new ScaleTransform { ScaleX = 1.04, ScaleY = 1.04 };
+                    scale.ScaleX = 1.02;
+                    scale.ScaleY = 1.02;
                 }
             }
         }
@@ -287,14 +288,13 @@ namespace PESYONG.Presentation.Views.Customer
         {
             if (sender is Border border)
             {
-                var st = border.RenderTransform as ScaleTransform;
-                if (st != null)
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 229, 204)); // #FFE5CC
+                border.BorderThickness = new Thickness(1);
+
+                if (border.RenderTransform is ScaleTransform scale)
                 {
-                    AnimateScale(st, 1.0);
-                }
-                else
-                {
-                    border.RenderTransform = new ScaleTransform { ScaleX = 1.0, ScaleY = 1.0 };
+                    scale.ScaleX = 1.0;
+                    scale.ScaleY = 1.0;
                 }
             }
         }

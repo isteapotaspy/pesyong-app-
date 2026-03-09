@@ -7,20 +7,55 @@
         <StackPanel Spacing="20" MaxWidth="500" HorizontalAlignment="Left">
             <TextBlock Text="Finalize Order" Style="{StaticResource TitleTextBlockStyle}"/>
 
-            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    Padding="20"
+                    CornerRadius="8"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
                 <StackPanel Spacing="10">
-                    <TextBox Header="Shipping Address" Text="{x:Bind ViewModel.ShippingAddress, Mode=TwoWay}"/>
-                    <TextBox Header="Notes" Text="{x:Bind ViewModel.Notes, Mode=TwoWay}" Height="100" AcceptsReturn="True"/>
+                    <TextBox Header="Shipping Address"
+                             Text="{x:Bind ViewModel.ShippingAddress, Mode=TwoWay}"/>
+
+                    <TextBox Header="Notes"
+                             Text="{x:Bind ViewModel.Notes, Mode=TwoWay}"
+                             Height="100"
+                             AcceptsReturn="True"/>
                 </StackPanel>
             </Border>
 
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <TextBlock Text="Total:" Style="{StaticResource BodyTextBlockStyle}" VerticalAlignment="Bottom"/>
-                <TextBlock Text="{x:Bind ViewModel.CurrentOrder.OrderTotalAmount, Mode=OneWay}" 
-                           FontSize="36" FontWeight="Bold" Foreground="OrangeRed"/>
-            </StackPanel>
+            <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    Padding="20"
+                    CornerRadius="8"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Order Summary"
+                               FontSize="20"
+                               FontWeight="SemiBold"/>
 
-            <Button Content="Place Order" Command="{x:Bind ViewModel.PlaceOrderCommand}" HorizontalAlignment="Stretch"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Subtotal:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock Text="{x:Bind ViewModel.SubtotalDisplay, Mode=OneWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Delivery Fee:" Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock Text="{x:Bind ViewModel.DeliveryFeeDisplay, Mode=OneWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Total:" Style="{StaticResource BodyTextBlockStyle}" VerticalAlignment="Bottom"/>
+                        <TextBlock Text="{x:Bind ViewModel.TotalDisplay, Mode=OneWay}"
+                                   FontSize="36"
+                                   FontWeight="Bold"
+                                   Foreground="OrangeRed"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Button Content="Place Order"
+                    Command="{x:Bind ViewModel.PlaceOrderCommand}"
+                    HorizontalAlignment="Stretch"/>
         </StackPanel>
     </Grid>
 </Page>

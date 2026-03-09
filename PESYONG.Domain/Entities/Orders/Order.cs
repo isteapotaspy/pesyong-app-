@@ -1,4 +1,5 @@
 ﻿using PESYONG.Domain.Entities.Financial.AcknowledgementReceipts;
+using PESYONG.Domain.Entities.Users;
 using PESYONG.Domain.Entities.Users.Identity;
 using PESYONG.Domain.Enums;
 using System;
@@ -27,11 +28,11 @@ public class Order
 
     [ForeignKey(nameof(AcknowledgementReceipt))]
     public int? ReceiptID { get; set; }
-    public int? RecipientID { get; set; }
+    public Guid? CustomerID { get; set; }
 
     // Navigation Properties
-    [ForeignKey(nameof(RecipientID))]
-    public virtual AppUser? Recipient { get; set; }
+    [ForeignKey(nameof(CustomerID))]
+    public virtual Customer? Customer { get; set; }
 
     [ForeignKey(nameof(ReceiptID))]
     public virtual AcknowledgementReceipt? Receipt { get; set; }
@@ -42,6 +43,7 @@ public class Order
     {
         get { return OrderItems?.Sum(item => item.ItemPrice * item.MealProductOrderQty) ?? 0; }
     }
+
 
     // Order dated details
     public DateTime OrderDate { get; set; } = DateTime.Now;
@@ -57,7 +59,7 @@ public class Order
     public DateTime? ActualDeliveryDate { get; set; }
 
     // Order status details
-    public DeliveryStatus DeliveryType { get; set; } = DeliveryStatus.OnCart;
+    public DeliveryType DeliveryType { get; set; } = DeliveryType.Delivery;
     public DeliveryStatus DeliveryStatus { get; set; } = DeliveryStatus.Pending;
 
     // Order logistics details
@@ -76,4 +78,19 @@ public class Order
     [StringLength(300, ErrorMessage = "Special instructions cannot exceed 300 characters")]
     [DataType(DataType.MultilineText)]
     public string? SpecialInstructions { get; set; }
+
+    public bool IsValid()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+
+        return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
+    }
+    public IEnumerable<string?> GetValidationErrors()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+        Validator.TryValidateObject(this, validationContext, validationResults, true);
+        return validationResults.Select(vr => vr.ErrorMessage);
+    }
 }

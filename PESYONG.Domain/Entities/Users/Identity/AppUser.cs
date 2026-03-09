@@ -27,9 +27,24 @@ public class AppUser : IdentityUser<int>
     public string LastName { get; set; } = string.Empty;
 
     [Required]
-    public string Password { get; set; }
+    public string Password { get; set; } = string.Empty;
     public AuthorizationType AuthorizationType { get; set; }
     public virtual ICollection<MealProduct> UserMealProducts { get; set; } = [];
     public virtual ICollection<Order> UserOrders { get; set; } = [];
     public virtual ICollection<AcknowledgementReceipt> UserReceipts { get; set; } = [];
+
+    public bool IsValid()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+
+        return Validator.TryValidateObject(this, validationContext, validationResults, validateAllProperties: true);
+    }
+    public IEnumerable<string> GetValidationErrors()
+    {
+        var validationContext = new ValidationContext(this);
+        var validationResults = new List<ValidationResult>();
+        Validator.TryValidateObject(this, validationContext, validationResults, true);
+        return validationResults.Select(vr => vr.ErrorMessage);
+    }
 }

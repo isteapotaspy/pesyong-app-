@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using PESYONG.ApplicationLogic.Services;
 using PESYONG.Domain.Entities.Orders;
 using PESYONG.Presentation.ViewModels;
 
@@ -23,14 +24,14 @@ public sealed partial class CheckoutPage : Page
     {
         base.OnNavigatedTo(e);
 
-        // This is where the 'Order' object from PackagesPage arrives
-        if (e.Parameter is Order order)
+        var cart = CartService.Instance.Cart;
+
+        if (cart != null && cart.Count > 0)
         {
-            ViewModel.Initialize(order);
+            ViewModel.Initialize(cart);
         }
         else
         {
-            // Safety: If no data was passed, go back to prevent null errors
             if (this.Frame != null && this.Frame.CanGoBack)
             {
                 this.Frame.GoBack();

@@ -8,6 +8,8 @@ using PESYONG.Domain.Entities.Logistics;
 using PESYONG.Domain.Entities.Meals.MealItem;
 using PESYONG.Domain.Entities.Meals.MealProduct;
 using PESYONG.Domain.Entities.Orders;
+using PESYONG.Domain.Entities.Users;
+using PESYONG.Domain.Entities.Users.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,17 +18,24 @@ namespace PESYONG.Infrastructure
 {
     public class AppDbContext : DbContext
     {
+        public AppDbContext()
+        {
+        }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Meal> Meals => Set<Meal>();
+        public DbSet<MealProduct> MealProducts => Set<MealProduct>();   
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
-        public DbSet<AcknowledgementReceipt> AcknowledgementReceipts => Set<AcknowledgementReceipt>();
         public DbSet<Promo> Promos => Set<Promo>();
+        public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<Delivery> Deliveries => Set<Delivery>();
         public DbSet<DeliveryUpdate> DeliveryUpdates => Set<DeliveryUpdate>();
         public DbSet<OrderMealProduct> OrderMealProducts => Set<OrderMealProduct>();
+        public DbSet<AcknowledgementReceipt> AcknowledgementReceipts => Set<AcknowledgementReceipt>();
+        public DbSet<AppUser> AppUsers => Set<AppUser>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,6 +67,11 @@ namespace PESYONG.Infrastructure
                               c =>
                                   (ICollection<string>)(c == null ? new List<string>() : c.ToList())
                           ));
+
+                entity.HasOne(e => e.Operator)
+                      .WithMany()
+                      .HasForeignKey(e => e.OperatorID)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             // -----------------------------
@@ -67,9 +81,9 @@ namespace PESYONG.Infrastructure
             {
                 entity.HasKey(e => e.OrderID);
 
-                entity.HasOne(e => e.Recipient)
-                      .WithMany()
-                      .HasForeignKey(e => e.RecipientID)
+                entity.HasOne(e => e.Customer)
+                      .WithMany(c => c.Orders)
+                      .HasForeignKey(e => e.CustomerID)
                       .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasOne(e => e.Receipt)

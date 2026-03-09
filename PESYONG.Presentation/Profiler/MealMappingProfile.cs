@@ -29,24 +29,24 @@ public class MealMappingProfile : Profile
             .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => src.CreationDate))
             .ForMember(dest => dest.LastModifiedByOperatorID, opt => opt.MapFrom(src => src.LastModifiedByOperatorID))
             .ForMember(dest => dest.LastModifiedDate, opt => opt.MapFrom(src => src.LastModifiedDate))
-            .ForMember(dest => dest.ImageSourceString, opt => opt.MapFrom(src => src.ImageSourceString))
+            .ForMember(dest => dest.ImageBytes, opt => opt.MapFrom(src => src.ImageBytes))
             // Ignore properties that shouldn't come from entity
-            .ForMember(dest => dest.SelectedTags, opt => opt.Ignore())
+            //.ForMember(dest => dest.SelectedTags, opt => opt.Ignore())
             .ForMember(dest => dest.AvailableTags, opt => opt.Ignore())
             .ForMember(dest => dest.ImageBytes, opt => opt.Ignore())
-            .ForMember(dest => dest.HasValidationErrors, opt => opt.Ignore())
-            .ForMember(dest => dest.ValidationErrors, opt => opt.Ignore())
-            .ForMember(dest => dest.SaveCommand, opt => opt.Ignore())
-            .ForMember(dest => dest.LoadCommand, opt => opt.Ignore())
-            .ForMember(dest => dest.DeleteCommand, opt => opt.Ignore())
-            .ForMember(dest => dest.AddTagCommand, opt => opt.Ignore())
-            .ForMember(dest => dest.RemoveTagCommand, opt => opt.Ignore())
-            .ForMember(dest => dest.UploadImageCommand, opt => opt.Ignore());
+            .ForMember(dest => dest.HasValidationErrors, opt => opt.Ignore());
+            //.ForMember(dest => dest.ValidationErrors, opt => opt.Ignore())
+            //.ForMember(dest => dest.SaveCommand, opt => opt.Ignore())
+            //.ForMember(dest => dest.LoadCommand, opt => opt.Ignore())
+            //.ForMember(dest => dest.DeleteCommand, opt => opt.Ignore())
+            //.ForMember(dest => dest.AddTagCommand, opt => opt.Ignore())
+            //.ForMember(dest => dest.RemoveTagCommand, opt => opt.Ignore())
+            //.ForMember(dest => dest.UploadImageCommand, opt => opt.Ignore());
 
         // MealViewModel → Meal
         CreateMap<MealViewModel, Meal>()
             .ForMember(dest => dest.MealID, opt => opt.MapFrom(src => src.MealID))
-            .ForMember(dest => dest.OperatorID, opt => opt.MapFrom(src => src.OperatorID ?? 0)) // Handle nullable
+            //.ForMember(dest => dest.OperatorID, opt => opt.MapFrom(src => (int)src.OperatorID ?? 0)) 
             .ForMember(dest => dest.MealTags, opt => opt.MapFrom(src =>
                 src.MealTags.ToList()))  // Convert ObservableCollection to List
             .ForMember(dest => dest.MealName, opt => opt.MapFrom(src => src.MealName))
@@ -59,7 +59,7 @@ public class MealMappingProfile : Profile
             .ForMember(dest => dest.CreationDate, opt => opt.MapFrom(src => src.CreationDate))
             .ForMember(dest => dest.LastModifiedByOperatorID, opt => opt.MapFrom(src => src.LastModifiedByOperatorID))
             .ForMember(dest => dest.LastModifiedDate, opt => opt.MapFrom(src => src.LastModifiedDate))
-            .ForMember(dest => dest.ImageSourceString, opt => opt.MapFrom(src => src.ImageSourceString))
+            .ForMember(dest => dest.ImageBytes, opt => opt.MapFrom(src => src.ImageBytes))
             // Ignore navigation properties and methods
             //.ForMember(dest => dest.Operator, opt => opt.Ignore())
             //.ForMember(dest => dest.ModifiedByOperator, opt => opt.Ignore())

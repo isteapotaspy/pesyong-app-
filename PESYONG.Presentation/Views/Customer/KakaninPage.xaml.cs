@@ -1,3 +1,4 @@
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -13,6 +14,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace PESYONG.Presentation.Views.Customer
 {
@@ -30,106 +35,141 @@ namespace PESYONG.Presentation.Views.Customer
         {
             this.InitializeComponent();
             _cartService = CartService.Instance; // get this from DI
-            LoadKakanin();
+            this.Loaded += async (_, _) => LoadKakaninAsync();
         }
 
-        private void LoadKakanin()
+        private async Task LoadKakaninAsync()
         {
-            //this would come from your database via a service
-            // Filtering meals that are tagged as "Kakanin" or have specific MealTagType
-            var meals = new List<Meal>
+            try
             {
-                new Meal
-                {
-                    MealID = 1,
-                    MealName = "Puto",
-                    MealPrice = 60,
-                    Description = "Soft and fluffy steamed rice cake",
-                    ImageSourceString = "ms-appx:///Assets/Images/puto.jpg",
-                    StockQuantity = 50,
-                    MinOrderQuantity = 6, // Sold by dozens
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 2,
-                    MealName = "Kutsinta",
-                    MealPrice = 50,
-                    Description = "Brown rice cake with coconut topping",
-                    ImageSourceString = "ms-appx:///Assets/Images/kutsinta.jpg",
-                    StockQuantity = 45,
-                    MinOrderQuantity = 6,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 3,
-                    MealName = "Bibingka",
-                    MealPrice = 80,
-                    Description = "Traditional baked rice cake",
-                    ImageSourceString = "ms-appx:///Assets/Images/bibingka.jpg",
-                    StockQuantity = 30,
-                    MinOrderQuantity = 1,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 4,
-                    MealName = "Suman",
-                    MealPrice = 70,
-                    Description = "Sticky rice wrapped in banana leaves",
-                    ImageSourceString = "ms-appx:///Assets/Images/suman.jpg",
-                    StockQuantity = 40,
-                    MinOrderQuantity = 6,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 5,
-                    MealName = "Sapin-Sapin",
-                    MealPrice = 90,
-                    Description = "Multi-layered sweet rice cake",
-                    ImageSourceString = "ms-appx:///Assets/Images/sapin-sapin.jpg",
-                    StockQuantity = 25,
-                    MinOrderQuantity = 1,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                },
-                new Meal
-                {
-                    MealID = 6,
-                    MealName = "Biko",
-                    MealPrice = 75,
-                    Description = "Sweet sticky rice with coconut caramel",
-                    ImageSourceString = "ms-appx:///Assets/Images/biko.jpg",
-                    StockQuantity = 35,
-                    MinOrderQuantity = 1,
-                    MealTags = new List<String> { "Makakalibanga", "Makapapurigit" }
-                }
-            };
+                var meals = new List<Meal>
+        {
+            new Meal
+            {
+                MealID = 1,
+                MealName = "Puto",
+                MealPrice = 60,
+                Description = "Soft and fluffy steamed rice cake",
+                ImageBytes = await LoadImageBytesAsync("Assets/Images/puto.jpg"),
+                StockQuantity = 50,
+                MinOrderQuantity = 6,
+                MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
+            },
+            new Meal
+            {
+                MealID = 2,
+                MealName = "Kutsinta",
+                MealPrice = 50,
+                Description = "Brown rice cake with coconut topping",
+                ImageBytes = await LoadImageBytesAsync("Assets/Images/kutsinta.jpg"),
+                StockQuantity = 45,
+                MinOrderQuantity = 6,
+                MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
+            },
+            new Meal
+            {
+                MealID = 3,
+                MealName = "Bibingka",
+                MealPrice = 80,
+                Description = "Traditional baked rice cake",
+                ImageBytes = await LoadImageBytesAsync("Assets/Images/bibingka.jpg"),
+                StockQuantity = 30,
+                MinOrderQuantity = 1,
+                MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
+            },
+            new Meal
+            {
+                MealID = 4,
+                MealName = "Suman",
+                MealPrice = 70,
+                Description = "Sticky rice wrapped in banana leaves",
+                ImageBytes = await LoadImageBytesAsync("Assets/Images/suman.jpg"),
+                StockQuantity = 40,
+                MinOrderQuantity = 6,
+                MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
+            },
+            new Meal
+            {
+                MealID = 5,
+                MealName = "Sapin-Sapin",
+                MealPrice = 90,
+                Description = "Multi-layered sweet rice cake",
+                ImageBytes = await LoadImageBytesAsync("Assets/Images/sapin-sapin.jpg"),
+                StockQuantity = 25,
+                MinOrderQuantity = 1,
+                MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
+            },
+            new Meal
+            {
+                MealID = 6,
+                MealName = "Biko",
+                MealPrice = 75,
+                Description = "Sweet sticky rice with coconut caramel",
+                ImageBytes = await LoadImageBytesAsync("Assets/Images/biko.jpg"),
+                StockQuantity = 35,
+                MinOrderQuantity = 1,
+                MealTags = new List<string> { "Makakalibanga", "Makapapurigit" }
+            }
+        };
 
-            // Convert to ViewModels
-            var viewModels = meals.Select(m => new KakaninViewModel(m, _cartService));
-            KakaninItems = new ObservableCollection<KakaninViewModel>(viewModels);
-            KakaninItemsControl.ItemsSource = KakaninItems;
+                var viewModels = meals.Select(m => new KakaninViewModel(m, _cartService));
+                KakaninItems = new ObservableCollection<KakaninViewModel>(viewModels);
+                KakaninItemsControl.ItemsSource = KakaninItems;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in LoadKakaninAsync: {ex.Message}");
+            }
+        }
+
+        private async Task<byte[]?> LoadImageBytesAsync(string relativePath)
+        {
+            try
+            {
+                StorageFile file = await StorageFile.GetFileFromApplicationUriAsync(
+                    new Uri($"ms-appx:///{relativePath}"));
+
+                using IRandomAccessStream stream = await file.OpenReadAsync();
+                byte[] bytes = new byte[stream.Size];
+                await stream.ReadAsync(bytes.AsBuffer(), (uint)stream.Size, InputStreamOptions.None);
+
+                return bytes;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to load image bytes: {ex.Message}");
+                return null;
+            }
         }
 
         private void CardBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
-            var border = sender as Border;
-            if (border != null)
+            if (sender is Border border)
             {
-                // Scale up slightly on hover
-                border.RenderTransform = new ScaleTransform { ScaleX = 1.02, ScaleY = 1.02 };
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 153, 51)); // #FF9933
+                border.BorderThickness = new Thickness(2);
+
+                if (border.RenderTransform is ScaleTransform scale)
+                {
+                    scale.ScaleX = 1.02;
+                    scale.ScaleY = 1.02;
+                }
             }
         }
 
+
         private void CardBorder_PointerExited(object sender, PointerRoutedEventArgs e)
         {
-            var border = sender as Border;
-            if (border != null)
+            if (sender is Border border)
             {
-                // Reset to original size
-                border.RenderTransform = new ScaleTransform { ScaleX = 1.0, ScaleY = 1.0 };
+                border.BorderBrush = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 229, 204)); // #FFE5CC
+                border.BorderThickness = new Thickness(1);
+
+                if (border.RenderTransform is ScaleTransform scale)
+                {
+                    scale.ScaleX = 1.0;
+                    scale.ScaleY = 1.0;
+                }
             }
         }
 
@@ -138,7 +178,7 @@ namespace PESYONG.Presentation.Views.Customer
             var button = sender as Button;
             if (button?.Tag is int mealId)
             {
-                var item = KakaninItems.FirstOrDefault(x => x.MealID == mealId);
+                var item = KakaninItems.FirstOrDefault(x => x.MealProductID == mealId);
                 item?.IncreaseQuantity();
             }
         }
@@ -148,7 +188,7 @@ namespace PESYONG.Presentation.Views.Customer
             var button = sender as Button;
             if (button?.Tag is int mealId)
             {
-                var item = KakaninItems.FirstOrDefault(x => x.MealID == mealId);
+                var item = KakaninItems.FirstOrDefault(x => x.MealProductID == mealId);
                 item?.DecreaseQuantity();
             }
         }
@@ -158,7 +198,7 @@ namespace PESYONG.Presentation.Views.Customer
             var button = sender as Button;
             if (button?.Tag is int mealId)
             {
-                var item = KakaninItems.FirstOrDefault(x => x.MealID == mealId);
+                var item = KakaninItems.FirstOrDefault(x => x.MealProductID == mealId);
                 item?.AddToCart();
 
                 // Show success message
@@ -173,5 +213,7 @@ namespace PESYONG.Presentation.Views.Customer
             }
         }
     }
+
+
 
 }
