@@ -24,6 +24,8 @@ public class AcknowledgementReceipt
     [ForeignKey("CustomerID")]
     public virtual AppUser? Customer { get; private set; }
 
+
+
     [ForeignKey("PromoID")]
     public virtual Promo? Promo { get; set; }
 
@@ -50,7 +52,6 @@ public class AcknowledgementReceipt
     [NotMapped]
     public decimal TaxAmount { get; set; }
 
-    [NotMapped]
     public decimal ShippingCost { get; set; }
 
     [NotMapped]

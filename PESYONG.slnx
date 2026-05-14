@@ -8,6 +8,7 @@
   <Project Path="PESYONG.Application/PESYONG.ApplicationLogic.csproj" />
   <Project Path="PESYONG.Domain/PESYONG.Domain.csproj" />
   <Project Path="PESYONG.Infrastructure/PESYONG.Infrastructure.csproj" />
+  <Project Path="PESYONG.Presentation.Admin/PESYONG.Presentation.Admin.csproj" Id="2ce619dc-b380-47ba-84a4-f452495caa19" />
   <Project Path="PESYONG.Presentation/PESYONG.Presentation.csproj" Id="49ecab0e-66ab-4f35-9cac-200bde669077">
     <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />

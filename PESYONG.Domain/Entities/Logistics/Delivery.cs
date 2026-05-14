@@ -53,6 +53,9 @@ public class Delivery : ILogisticsItem
     [StringLength(50)]
     public string? TrackingNumber { get; set; }
 
+
+
+    /// probably don't use these lol
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     [Range(0, 999999.99)]

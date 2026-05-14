@@ -10,6 +10,7 @@ namespace PESYONG.Domain.Entities.Meals.MealProduct;
 
 public class MealProduct
 {
+
     [Key]
     public int MealProductID { get; set; }
 
@@ -40,9 +41,8 @@ public class MealProduct
 
     public virtual Promo? Promo { get; set; }
 
-    [Required]
     [StringLength(100)]
-    public string ProductName { get; set; } = string.Empty;
+    public string? ProductName { get; set; } = string.Empty;
 
     [StringLength(100)]
     public string? ProductDescription { get; set; }

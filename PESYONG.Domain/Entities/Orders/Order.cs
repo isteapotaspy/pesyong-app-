@@ -29,10 +29,14 @@ public class Order
     [ForeignKey(nameof(AcknowledgementReceipt))]
     public int? ReceiptID { get; set; }
     public Guid? CustomerID { get; set; }
+    public Guid? OperatorID { get; set; }
 
     // Navigation Properties
     [ForeignKey(nameof(CustomerID))]
     public virtual Customer? Customer { get; set; }
+    
+    [ForeignKey(nameof(OperatorID))]
+    public virtual AppUser? Operator { get; set; }
 
     [ForeignKey(nameof(ReceiptID))]
     public virtual AcknowledgementReceipt? Receipt { get; set; }
